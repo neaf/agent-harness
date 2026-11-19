@@ -5,7 +5,7 @@ description: Keep investigation and project notes as markdown files in `.ai-note
 
 # AI notes
 
-Markdown notes per area of work. They are the shared memory between sessions and subagents. One orchestrator session keeps the overview, talks to the user and owns the notes. Subagents get the heavy work with a clean context and read the notes for background.
+Markdown notes per area of work. They are the shared memory between sessions and subagents. The agent reads, creates and updates them on its own: the user never has to run a command or ask for an update. One orchestrator session keeps the overview, talks to the user and owns the notes. Subagents get the heavy work with a clean context and read the notes for background.
 
 ## Start of every session
 
