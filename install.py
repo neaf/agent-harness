@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """Projects the harness into the global config of Claude Code and opencode.
 
 Skills are symlinked. Agents are generated from agents/*.md with the model
@@ -57,6 +57,7 @@ def main():
     ap.add_argument("--check", action="store_true", help="report drift, write nothing")
     ap.add_argument("--claude", type=int, choices=(0, 1))
     ap.add_argument("--opencode", type=int, choices=(0, 1))
+    ap.add_argument("--yes", action="store_true", help="replace existing files and folders without asking")
     a = ap.parse_args()
     use = {
         CLAUDE: a.claude if a.claude is not None else int(CLAUDE.exists() or bool(shutil.which("claude"))),
@@ -64,36 +65,41 @@ def main():
     }
     models = json.loads((ROOT / "targets" / "models.json").read_text())
     files, links = targets(models)
-    drift = 0
+    plan = []
     for dest, content in files.items():
         base = CLAUDE if CLAUDE in dest.parents else OPENCODE
-        if not use[base]:
-            continue
-        if dest.exists() and dest.read_text() == content:
-            continue
-        drift += 1
-        print(("differs " if a.check else "write   ") + str(dest))
-        if not a.check:
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_text(content)
+        if use[base] and not (dest.exists() and dest.read_text() == content):
+            plan.append(("write", dest, content))
     for dest, src in links.items():
         base = CLAUDE if CLAUDE in dest.parents else OPENCODE
-        if not use[base]:
-            continue
-        if dest.is_symlink() and dest.resolve() == src.resolve():
-            continue
-        drift += 1
-        print(("differs " if a.check else "link    ") + f"{dest} -> {src}")
-        if not a.check:
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            if dest.is_symlink():
-                dest.unlink()
-            elif dest.exists():
-                print(f"skip: {dest} exists and is not a symlink", file=sys.stderr)
-                continue
-            dest.symlink_to(src)
-    print(f"{drift} change(s)" + (" needed" if a.check else " applied"))
-    return 1 if a.check and drift else 0
+        if use[base] and not (dest.is_symlink() and dest.resolve() == src.resolve()):
+            plan.append(("link", dest, src))
+    replaced = [dest for _, dest, _ in plan if dest.exists() or dest.is_symlink()]
+    for kind, dest, payload in plan:
+        verb = "replace" if dest in replaced else "create"
+        print(f"{verb:8}{dest}" + (f" -> {payload}" if kind == "link" else ""))
+    if a.check:
+        print(f"{len(plan)} change(s) needed")
+        return 1 if plan else 0
+    if replaced and not a.yes:
+        if not sys.stdin.isatty():
+            print(f"{len(replaced)} existing item(s) would be replaced. Rerun with --yes to confirm.", file=sys.stderr)
+            return 2
+        if input(f"Replace {len(replaced)} existing item(s)? [y/N] ").strip().lower() not in ("y", "yes"):
+            print("Nothing changed.")
+            return 1
+    for kind, dest, payload in plan:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if dest.is_dir() and not dest.is_symlink():
+            shutil.rmtree(dest)
+        elif kind == "link" and (dest.exists() or dest.is_symlink()):
+            dest.unlink()
+        if kind == "write":
+            dest.write_text(payload)
+        else:
+            dest.symlink_to(payload)
+    print(f"{len(plan)} change(s) applied")
+    return 0
 
 
 sys.exit(main())
