@@ -22,7 +22,7 @@ Turns an exploratory codebase (reverse engineering notes, PoCs, workarounds, sta
 - Each phase runs in a fresh `rearch-phase` subagent (model set at install, default: the main session's model).
 - The main session orchestrates: it talks to the user, runs gates and manual checks, commits and updates STATE.
 - Claude Code spawns them with the Agent tool (`subagent_type: rearch-auditor`). opencode spawns them with the task tool (agent `rearch-auditor`).
-- Missing agent definitions: in Claude Code use `general-purpose` with `model: sonnet` or `model: opus`, and paste the matching `agents/*.body.md` as the prompt preamble. In opencode use the `general` subagent with the same preamble. Tell the user to run `install.sh`.
+- Missing agent definitions: in Claude Code use `general-purpose` with `model: sonnet` or `model: opus`, and paste the matching body from the harness `agents/rearch-*.md` as the prompt preamble. In opencode use the `general` subagent with the same preamble. Tell the user to run the harness `install.py`.
 - Every subagent prompt carries the line: "No mannered prose. Answer first, short sentences, numbers and names, end on the result."
 
 ## Stage 0: Setup
