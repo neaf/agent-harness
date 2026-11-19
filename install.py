@@ -85,7 +85,11 @@ def main():
         if not sys.stdin.isatty():
             print(f"{len(replaced)} existing item(s) would be replaced. Rerun with --yes to confirm.", file=sys.stderr)
             return 2
-        if input(f"Replace {len(replaced)} existing item(s)? [y/N] ").strip().lower() not in ("y", "yes"):
+        try:
+            answer = input(f"Replace {len(replaced)} existing item(s)? [y/N] ")
+        except EOFError:
+            answer = ""
+        if answer.strip().lower() not in ("y", "yes"):
             print("Nothing changed.")
             return 1
     for kind, dest, payload in plan:
