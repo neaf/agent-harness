@@ -23,7 +23,7 @@ Each pull request must be reviewable by someone who never read the plan: a revie
 
 One task is one pull request. Each task block in the technical solution holds:
 
-- **Title** with the milestone prefix in planned merge order: `[<project code> M<n>-<k>] <what it does>`.
+- **Title** with the milestone prefix in planned merge order: `[<project code> M<n>-<k>] <what it does>`, a short project code used on every pull request. The pull requests are opened in that order, so the host's list, newest first, shows each milestone as one unbroken sequence.
 - **Base:** the default branch, or the task it is stacked on. Stacks stay short, and an unstacked task is preferred when it can merge alone.
 - **Files:** the paths to create and the paths to change, at the pinned SHA. For a lower task in a stack, the files it must not touch.
 - **Rule, applied everywhere:** when a rule spans several places ("every endpoint that loads the record checks the new scope"), list each place by name. A rule stated once and applied in part shipped a leak.
@@ -34,7 +34,8 @@ One task is one pull request. Each task block in the technical solution holds:
 - **Context for an outside reviewer:** two or three sentences on why this change exists and what stays unchanged, written for someone who has not read the plan. It becomes the opening of the pull request description.
 - **Reviewer-facing rationale:** every decision a reviewer or a review bot will challenge ("no plan entry", "no new permission action"), with the one-line reason and the source. Without it, the review thread waits for the author.
 - **QA:** one to three steps a reviewer follows on a review app.
-- **Depends on:** the tasks that merge first.
+- **Depends on:** the tasks that merge first. They become the `blocked-by` relations of the tracker tickets.
+- **Tracker ticket:** one per task, its description holding this block, so an agent can start from the ticket alone.
 
 ## Project-wide sections
 
@@ -43,5 +44,5 @@ Write these once, in the technical solution:
 - **Colliding work:** the open pull requests of others that touch the same files, and the decision on merge order or coordination.
 - **Environment:** the commands an implementer runs after switching branches (code generation, test database migrations), the lint and type-check commands, and fixed-date rules for tests (no current date near a year boundary, no random flags).
 - **Seeds and QA data:** how a review app gets the personas and the data each QA check needs, idempotent on a second run.
-- **Merge policy:** bottom-up for stacks, and how the branches follow the default branch (merge or rebase, as the project does).
-- **Human-only gates:** the steps an agent stops at and hands to a person: re-running CI, posting review replies, triaging security alerts, merging, enabling the flag for real customers.
+- **Merge policy:** bottom-up for stacks. Branches follow the default branch by merging it into the bottom of each stack, then up; never rebase or force-push.
+- **Human-only gates:** the steps an agent stops at and hands to a person: re-running CI, posting review replies (including replies to review bots), triaging security alerts, merging, enabling the flag for real customers.

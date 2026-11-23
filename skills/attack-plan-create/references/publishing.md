@@ -4,7 +4,7 @@ The drafts in the work folder are the source. Publishing copies them to where re
 
 ## Markdown in the repository (default)
 
-- Copy `draft/attack-plan.md`, `draft/technical-solution.md` and `draft/evidence.md` to `docs/explorations/<slug>/`, or to the folder the author named. Replace links between drafts with relative links.
+- Copy `draft/attack-plan.md`, `draft/technical-solution.md` and `draft/evidence.md` to `docs/attack-plans/<slug>/`, or to the folder the author named. Replace links between drafts with relative links.
 - For the product review, publish `attack-plan.md` alone, with the note in place of the technical part.
 - Use plain Markdown: a `> **Scope**` block for the scope callout, tables with a header row, ```` ```mermaid ```` blocks for diagrams. Milestone colors become a `Milestone` column.
 - Reviewers comment on a pull request or in the file. Read those comments in Stage 8.

@@ -1,9 +1,9 @@
 ---
-name: tech-exploration
-description: Writes a tech exploration (attack plan) from product docs, designs, earlier explorations and pull requests, one section at a time, each attacked by fresh subagents, grilled with the author and reviewed before the next. Product solution first, then technical solution, milestones and tasks precise enough for an agent to open the pull requests. Use when starting, resuming or auditing a tech exploration, attack plan or design doc before building a feature.
+name: attack-plan-create
+description: Writes an attack plan (tech exploration) from product docs, designs, earlier explorations and pull requests, one section at a time, each attacked by fresh subagents, grilled with the author and reviewed before the next. Product solution first, then technical solution, milestones and tasks precise enough for an agent to open the pull requests. Use when starting, resuming or auditing an attack plan, tech exploration or design doc before building a feature.
 ---
 
-# Tech exploration
+# Attack plan
 
 Builds the document set a team agrees on before code: a plain product solution, the open questions, a technical solution written as a sequence of steps, milestones and tasks precise enough for an agent to turn into pull requests, the risks, and an evidence page.
 
@@ -15,7 +15,7 @@ The author sets the pace. When they ask to go faster, skip a review, or draft th
 
 ## Start of every session
 
-1. The work folder is `.tech-explo/<slug>/` in the target repository (`<slug>` is the project name in kebab case). It is committed by default. To keep it private, add `.tech-explo/` to `.git/info/exclude`. Read `references/state.md` for the files it holds.
+1. The work folder is `.attack-plan/<slug>/` in the target repository (`<slug>` is the project name in kebab case). It is committed by default. To keep it private, add `.attack-plan/` to `.git/info/exclude`. Read `references/state.md` for the files it holds.
 2. `STATE.md` exists: run `/usr/bin/python3 -I <skill>/scripts/gate.py verify <work folder>` and `… gate.py status <work folder>`, then resume at STATE's "Next" line. When a section changed after its approval or turned stale, tell the author in one line and offer to review it. Run Stage 8 first when the last session is more than a day old.
 3. No work folder: start at Stage 0.
 4. Before each stage, tell the author in 3 to 6 lines what runs: the sections, the subagents, the sources, the files written.
@@ -23,11 +23,11 @@ The author sets the pace. When they ask to go faster, skip a review, or draft th
 
 ## Subagents
 
-- `explo-reader` (fast model): reads one source family, audits claims, walks the task plan.
-- `explo-critic` (strong model): challenges a section, breaks a design under one lens, reads the plan cold as a reviewer.
-- `explo-designer` (strong model): proposes the technical steps.
+- `attack-plan-reader` (fast model): reads one source family, audits claims, walks the task plan.
+- `attack-plan-critic` (strong model): challenges a section, breaks a design under one lens, reads the plan cold as a reviewer.
+- `attack-plan-designer` (strong model): proposes the technical steps.
 
-Claude Code spawns them with the Agent tool (`subagent_type: explo-critic`), opencode with the task tool. Each prompt is the role brief from `references/briefs.md`, filled in. Missing agent definitions: use the general subagent with the agent file's body as the preamble, and tell the author to run the harness `install.py`. Without subagents, run each brief yourself and say so in STATE. Never hand a subagent your conclusion to confirm: reviewers get the drafts and the code.
+Claude Code spawns them with the Agent tool (`subagent_type: attack-plan-critic`), opencode with the task tool. Each prompt is the role brief from `references/briefs.md`, filled in. Missing agent definitions: use the general subagent with the agent file's body as the preamble, and tell the author to run the harness `install.py`. Without subagents, run each brief yourself and say so in STATE. Never hand a subagent your conclusion to confirm: reviewers get the drafts and the code.
 
 ## The section loop
 
@@ -35,7 +35,7 @@ Every section goes through these steps, in order. The stages below list the sect
 
 1. **Open.** `gate.py open <work folder> <stage> <section id> --file draft/<file>.md --heading "<heading>"`. A `REFUSED` reply names the earlier sections still in progress: finish them, or ask the author whether to review them now or mark them not reviewed.
 2. **Draft** only this section, from the ledger and the approved sections.
-3. **Challenge.** Launch a fresh `explo-critic` with the brief for this kind of section. It returns findings, each blocking or minor, with evidence.
+3. **Challenge.** Launch a fresh `attack-plan-critic` with the brief for this kind of section. It returns findings, each blocking or minor, with evidence.
 4. **Grill.** Settle each finding a fact can settle. Turn each remaining finding, each ❓ and each assumption of this section into a question, and ask them one at a time (`references/questions.md`), each with its recommendation and safe default. Write each answer into the section. When answers change the section, challenge it again with a new critic. Stop when a round has no blocking finding. After three rounds with blocking findings left, show them to the author and ask how to go on.
 5. **Record the grilling.** `gate.py grilled <work folder> <section id> --rounds <n> --open-findings 0`.
 6. **Review.** Show the author the section in full, as it will read, with the decisions it states and the questions it leaves open. Ask: "Approve this section, or what should change?" Apply every change and show it again.
@@ -53,20 +53,20 @@ Ask in this order, one question at a time, each with its default:
 
 1. **The need:** the product doc, the issue, the thread. With none, ask "What do you want to change, and for whom?".
 2. **Hard constraints, before any design:** what must not change (shared frameworks, code owned by others, data model rules, API style), deadlines, release windows. A constraint found after the design forces a rewrite. Default: "no change to shared framework code, no schema change without a reason".
-3. **Inputs on hand:** design exports (full image paths), earlier explorations, pull requests open or merged for this project, reference pull requests of a similar feature, other work in flight on the same code.
+3. **Inputs on hand:** design exports (full image paths), earlier attack plans or explorations, pull requests open or merged for this project, reference pull requests of a similar feature, other work in flight on the same code.
 4. **Audience:** who reviews the product solution and who reviews the technical one, by name or role.
-5. **Output:** Markdown pages in the repository (default, `docs/explorations/<slug>/`), or Notion when its tools are connected.
+5. **Output:** Markdown pages in the repository (default, `docs/attack-plans/<slug>/`), or Notion when its tools are connected.
 6. **Pace:** section by section (recommended), or draft ahead and review afterwards. Follow any change of mind later.
 
 Write `STATE.md`. Run the loop on its Hard constraints section (`--file STATE.md --heading "Hard constraints"`): the challenge step asks the author, once more, what else must not change.
 
 ## Stage 1 — Read the sources (stage `sources`, section `scope`)
 
-Launch `explo-reader` subagents in one batch, one per source family, with the Reader brief:
+Launch `attack-plan-reader` subagents in one batch, one per source family, with the Reader brief:
 
 - **Product:** each product doc in full: rules, scope tiers, the doc's own open questions, who owns which decision.
 - **Designs:** one reader per 3 to 4 images. Each image is a screen plus its spec callouts: every callout becomes a rule candidate (display logic, limits, sort order, empty state, link targets, hover), and every screen state is listed. Localized variants are compared for differences in content.
-- **Earlier explorations:** what was decided, what was ruled out and why, what is stale.
+- **Earlier attack plans and explorations:** what was decided, what was ruled out and why, what is stale.
 - **Pull requests:** for each one of this project, its state, its base, what it ships, what its review threads settled. For reference pull requests, the pattern to reuse. Then the open pull requests of others on the files the project will touch.
 - **Code today:** the areas the need names, read on the remote default branch after `git fetch` (`git grep <term> origin/<default>`, `git show origin/<default>:<path>`), never the local checkout. Record the SHA in STATE, and the owner of each touched path (`CODEOWNERS` or history). This read gives Today, never a design.
 - **Chat and tickets,** when connected: decisions and answers with their dates and links.
@@ -92,7 +92,7 @@ A product section has no code term: no table, model, class, endpoint or query.
 
 1. Write the scope callout and the summary (Today, Goal, Already decided, Still open). The technical and milestone sections hold only their heading.
 2. Run `check_draft.py <work folder>/draft --product`. Fix every `FAIL`.
-3. Launch an `explo-critic` with the Product reviewer brief, then grill the author on its findings, one at a time.
+3. Launch an `attack-plan-critic` with the Product reviewer brief, then grill the author on its findings, one at a time.
 4. Publish the product part alone (`references/publishing.md`), with a note in place of the technical part: "Technical solution: starts once product has reviewed this page."
 5. Ask the author: "Is this ready for product review?" On a yes, approve and suggest sharing it with the reviewers named in Stage 0. When the author wants to start the technical part before that, skip the gate and go on.
 
@@ -102,12 +102,12 @@ Product feedback that arrives later goes through Stage 8: a changed product rule
 
 Sections, in this order. Each goes through the loop:
 
-1. `overview`: launch `explo-designer` with the approved product solution, the code digests and the constraints. It proposes 3 to 7 steps in `draft/design-proposal.md` and the ruled-out alternatives in `draft/alternatives.md`. Draft only the overview from it.
+1. `overview`: launch `attack-plan-designer` with the approved product solution, the code digests and the constraints. It proposes 3 to 7 steps in `draft/design-proposal.md` and the ruled-out alternatives in `draft/alternatives.md`. Draft only the overview from it.
 2. One section per step (`step-<n>`), in `draft/technical-solution.md`.
 3. `data-and-rollout`: schema, migrations, flag, rollout order, kill switch.
 4. `verification`: the test matrix, fixtures, persona QA, monitoring.
 
-The challenge step runs `explo-critic` Breakers in one batch, one per lens that applies to the section (`references/briefs.md`). Every change to access rules gets an explicit "does this open access to anyone?" answer with evidence. A decided trade-off is written as a fact in the section, never as a question.
+The challenge step runs `attack-plan-critic` Breakers in one batch, one per lens that applies to the section (`references/briefs.md`). Every change to access rules gets an explicit "does this open access to anyone?" answer with evidence. A decided trade-off is written as a fact in the section, never as a question.
 
 ## Stage 5 — Milestones and tasks (stage `milestones`)
 
@@ -116,12 +116,12 @@ Read `references/executable-plan.md` first.
 1. `milestones`: map the technical steps onto the approved delivery slices, one line per milestone with its goal, the order and the dependencies. Add an M0 only for shared preparation that two or more slices need and users do not see. When the design needs a slice reordered, split or merged, that is a product change: reopen `delivery` and run its loop with the author. Adding M0, or tasks inside a slice, reopens nothing.
 2. One section per milestone (`tasks-m<n>`): its task detail in the technical solution and its rows in the task tables.
 
-Split the tasks so each pull request can be reviewed alone by the team that owns its code (`references/executable-plan.md`, "Split for review in isolation"). The challenge step for a milestone runs, in one batch, `explo-reader` with the Plan walker brief and one `explo-critic` Outside reviewer per owning team the milestone touches.
+Split the tasks so each pull request can be reviewed alone by the team that owns its code (`references/executable-plan.md`, "Split for review in isolation"). The challenge step for a milestone runs, in one batch, `attack-plan-reader` with the Plan walker brief and one `attack-plan-critic` Outside reviewer per owning team the milestone touches.
 
 ## Stage 6 — Audit (stage `audit`, section `audit`)
 
 1. Build `audit/claims.md` (every factual claim in the drafts, numbered) and `audit/scope.md` (every scope item and product rule, with its tasks).
-2. Launch `explo-reader` Claim auditors in one batch, about 15 claims each, one Scope auditor, and one `explo-critic` Cold reader.
+2. Launch `attack-plan-reader` Claim auditors in one batch, about 15 claims each, one Scope auditor, and one `attack-plan-critic` Cold reader.
 3. A wrong claim in an approved section reopens that section: fix it through the loop.
 4. Write the risks (only what cannot be settled now) and the unverifiable claims, each with the check that would settle it, in the evidence page.
 5. Run `check_draft.py <work folder>/draft` and `gate.py verify <work folder>`. Fix every `FAIL`. For each section `verify` reports, offer the author a review.
@@ -130,6 +130,8 @@ Split the tasks so each pull request can be reviewed alone by the team that owns
 ## Stage 7 — Publish (stage `publish`, section `publish`)
 
 Publish the full set (`references/publishing.md`): the attack plan, then the technical solution and evidence pages, linked to each other. Keep the reviewers' edits and comments. Record the locations in STATE and run the loop on `publish` once the author has read the pages.
+
+Then offer the next steps, without doing either unasked: creating the tracker tickets, one per task with its task block and `blocked-by` relations (Linear, Jira or GitHub Issues, when its tools are connected), and building a milestone with the `attack-plan-milestone-execute` skill.
 
 ## Stage 8 — Refresh
 
@@ -145,7 +147,7 @@ Run on resume, after a review, or when asked.
 Stop when the author asks, when a tool keeps failing, when no one can answer the current section, or when the context is past about 70%. Update STATE, then print:
 
 ```
-Use the tech-exploration skill. Continue from .tech-explo/<slug>/STATE.md.
+Use the attack-plan-create skill. Continue from .attack-plan/<slug>/STATE.md.
 Next: <stage, section id, loop step>.
 ```
 

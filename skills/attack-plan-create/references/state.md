@@ -1,7 +1,7 @@
 # Work folder formats
 
 ```
-.tech-explo/<slug>/
+.attack-plan/<slug>/
   STATE.md                 stage, inputs, constraints, scope, SHA, page URLs, next step
   gates.json               one gate per section, written only by scripts/gate.py
   ledger.md                facts, gaps, contradictions, questions and answers
@@ -19,7 +19,7 @@
 ## STATE.md
 
 ```markdown
-# <Project> tech exploration
+# <Project> attack plan
 
 Need: <one line>
 Stage: 3 (technical solution), breaker round 2
@@ -29,7 +29,7 @@ Pages: attack plan <url>, technical solution <url>, evidence <url>
 ## Inputs
 - Product doc: <url>
 - Designs: <paths>
-- Earlier explorations: <urls>
+- Earlier attack plans or explorations: <urls>
 - PRs of this project: <numbers>; reference PRs: <numbers>
 
 ## Hard constraints

@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Records where each section of a tech exploration stands.
+"""Records where each section of an attack plan stands.
 
 Usage:
   gate.py open <work folder> <stage> <section> [--file F] [--heading H]

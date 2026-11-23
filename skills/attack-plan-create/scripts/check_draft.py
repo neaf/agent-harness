@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Checks the drafts of a tech exploration against the writing rules.
+"""Checks the drafts of an attack plan against the writing rules.
 
 Usage: check_draft.py <draft folder> [--product]
 Prints PASS, WARN or FAIL lines. Exits 1 on a FAIL.
