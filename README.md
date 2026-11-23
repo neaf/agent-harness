@@ -15,6 +15,7 @@ One source for the skills, subagents and global instructions used by Claude Code
 | [ai-notes](skills/ai-notes/SKILL.md) | Keeps markdown notes per area in `.ai-notes/`, committed by default (`.git/info/exclude` to keep them private in a repo), so one orchestrator session can hand work to fresh subagents and later sessions. |
 | [rearchitect](skills/rearchitect/SKILL.md) | Refactors a working but patched-together project in committed phases. Parallel audits, consolidated requirements, a new architecture, then one fresh subagent per phase. |
 | [tech-exploration](skills/tech-exploration/SKILL.md) | Writes a tech exploration (attack plan) one section at a time: product solution first, then technical solution, milestones and tasks an agent can turn into pull requests. Fresh subagents attack each section, the author answers one question at a time and reviews each section. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/tech-exploration/tests`. |
+| [feedback-watch](skills/feedback-watch/SKILL.md) | Watches a session's work in the background: CI, review and unresolved threads on GitHub pull requests, or local checks rerun on file changes, one line per real change. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/feedback-watch/tests`. |
 
 ## Install
 

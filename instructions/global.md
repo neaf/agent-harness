@@ -1,6 +1,6 @@
 # Global working rules
 
-- Prefer semantic tools (Serena MCP, when available) over sed, regex or Python-script edits for code navigation, renames and refactoring. Projects are Kotlin (Android), Swift (native Apple) and Java.
+- Prefer semantic tools (Serena MCP, when available) over text replacement, sed, regex or Python-script edits for code navigation, renames and refactoring.
 - Before reporting a code change as done, run the project's compile/test command and report the result.
 - Never print, commit, or paste secrets, tokens, or credential files.
 - Match the existing code style. Do not reformat files you did not otherwise need to change.
@@ -9,6 +9,7 @@
 - Do not run tests or commands after every small edit, and do not let them print long output. Trust the code, verify at larger milestones, and fix what fails. Filter output to the pass or fail line and the failing numbers.
 - Write tools so their default output is minimal: one summary line or a short table, with details behind a flag.
 - When work spans several sessions, subagents or PRs, keep notes in `.ai-notes/<area>/` (see the `ai-notes` skill). Read `.ai-notes/README.md` at the start of a session if it exists.
+- After you push to a pull request, open one, or start a long local fix-and-test loop, arm a background watcher with the `feedback-watch` skill and react to its lines instead of checking CI, reviews or tests by hand. Keep one watcher per set of PRs and re-arm it when it expires.
 - "Do it in a fork" or "with a clean context" means a fresh subagent with a self-contained prompt, not a copy of the conversation.
 - Compute is free, tokens are not. Always prefer spending machine time over spending tokens. When the logic of a system can be read from its binary or source, spend whatever machine time decompilation, emulation and batch extractors need to get the definitive source. Do not substitute many experiments, test runs, probe renders or long deliberation for that read. A measurement is a fallback for what the source leaves open. A measurement is fine when it is one scripted batch that runs for an hour and answers the question, in place of many small hand-driven runs.
 - Do not re-run the full test suite after every step. One run per step burns tokens on output Claude has already seen pass. Run it at milestones, pipe through a filter for the pass/fail line and failure count, and trust green code in between.
