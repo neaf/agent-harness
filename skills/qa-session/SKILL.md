@@ -83,7 +83,8 @@ The full shape is in `references/page-template.md`. The rules a reviewer checks 
 - Every value the tester needs is resolved on the page before the session: real URLs, real ids, real emails.
 - Surprises go in "Known limits, not bugs", before the walk-through.
 - Product questions are written for a product person new to the project: the question as a heading, short context, option A (marked as what the test environment currently does, with the scenario where it shows) and option B, each with its consequence.
-- No internal reference ids, no bare "today", the UI's own labels, no history from earlier sessions. Each session starts with an empty Findings table.
+- Every on-screen word is the exact label that scenario's user sees, in their language, traced to the code that renders it for them. No paraphrased column names; when a screen differs by persona, each scenario uses its persona's labels.
+- No internal reference ids, no bare "today", no history from earlier sessions. Each session starts with an empty Findings table.
 
 `check_page.py` checks the mechanical part of these rules (ids, placeholders, emoji, scenario shape, the Findings section). It decides nothing about facts.
 

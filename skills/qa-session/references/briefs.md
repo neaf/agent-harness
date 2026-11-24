@@ -26,7 +26,7 @@ Rules:
 - One linear story, persona after persona. Each scenario: a title that advances the story, "As <user>:", one sentence on what changed since the previous scenario, checkboxes with one observable fact each, then only the note lines that apply.
 - Every expected result comes from the code under test and the seed, verified in the source before you write it. Never from memory, from a previous page, or from what seems plausible. Label what you could not verify; never write it as a step.
 - Every value the tester needs is resolved on the page: real URLs, real ids printed by the setup, real emails. No placeholders.
-- Use the UI's own labels for menus, filters, buttons and columns, as they appear in the code's translations or copy.
+- Every word that names something on screen (menu item, page title, column, filter, button, empty-state text, error page) is the exact string that scenario's user sees: resolve it from the component that renders it for that user, through its translation key, in that user's language. Never paraphrase a column ("budget used" is not "Budget consumed (%)"). The same screen can differ by persona: check the label for each user who sees it, and write the persona's version.
 - No internal reference ids (spec rule numbers, decision ids, question ids). Name the case instead.
 - Say "on production" or "in this test environment" explicitly. Never a bare "today" or "now".
 - Put each surprise the team could hit in "Known limits, not bugs", before the walk-through.
@@ -55,6 +55,7 @@ Pass 1, facts. For every checkbox, expected value, printed seed line, URL, user 
 - wrong: say what the source shows, with file and line;
 - unverifiable: say which check in the test environment would settle it.
 Also check that each user on the page is created by the seed with the role the scenario needs, and that each printed seed value follows from the seed code.
+Also check every on-screen word on the page (menu items, titles, columns, filters, buttons, empty-state and error texts): trace it to the component that renders it for that scenario's user and to its translation in that user's language. A paraphrase, a label from another page, or a label another persona sees is wrong.
 
 Pass 2, cold read. Walk the page in order, as a tester with only the page open and busy hands. For each step, ask what they do next and what they should see. Report only a place where the page fails them: a step that uses something introduced later, a term never defined, a control the UI does not have, a value still to look up, a check with two facts, a missing "what changed" sentence, a surprise not said before it happens. Do not propose extra text unless a step cannot be performed without it.
 
