@@ -18,6 +18,7 @@ One source for the skills, subagents and global instructions used by Claude Code
 | [attack-plan-milestone-execute](skills/attack-plan-milestone-execute/SKILL.md) | Builds one milestone of an attack plan as stacked draft PRs, one fresh subagent per PR: checks the input, audits the tickets against the code, follows CI and reviews until green, keeps the stacks in sync. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/attack-plan-milestone-execute/tests`. |
 | [feedback-watch](skills/feedback-watch/SKILL.md) | Watches a session's work in the background: CI, review and unresolved threads on GitHub pull requests, or local checks rerun on file changes, one line per real change. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/feedback-watch/tests`. |
 | [writing-craft](skills/writing-craft/SKILL.md) | Craft rules for text a human reads and acts on: the form that mirrors the reader's task, the exact word, layout, and revision from the reader's failure point. |
+| [qa-session](skills/qa-session/SKILL.md) | Builds, reworks and checks the script for a live QA session on a test environment: fresh subagents re-derive it from the sources, a verifier checks every expected result, and a session's ticks and findings survive a rework. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/qa-session/tests`. |
 
 ## Install
 
