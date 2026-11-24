@@ -1,6 +1,6 @@
 # Document template
 
-Three pages. The attack plan is for product, leadership and the team. The technical solution is for engineers and the implementing agents. The evidence page holds the proof, so the other two stay short. Plain US English, short sentences, one name per concept.
+Three pages. The attack plan is for product, leadership and the team. The technical solution is for engineers and the implementing agents. The evidence page holds the proof, so the other two stay short. Plain US English, short sentences, one name per concept. The writing discipline behind these rules is in [writing-craft](../../writing-craft/SKILL.md).
 
 ## Attack plan (`draft/attack-plan.md`)
 
