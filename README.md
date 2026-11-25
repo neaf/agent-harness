@@ -23,6 +23,7 @@ One source for the skills, subagents and global instructions used by Claude Code
 
 ## Design docs
 
+- [AGENTS.md](AGENTS.md): layout, checks and rules for agents working on this repo. `CLAUDE.md` imports it.
 - [Requirements](docs/requirements.md): what the harness does, one ID per requirement. Code, tests and topic docs cite these IDs.
 - [Architecture](docs/architecture.md): modules, data flow, interfaces, and which module holds each requirement.
 
