@@ -75,8 +75,9 @@ Code: `github.py` `check_item` (one dict shape per kind), `watch.py` `FAILING_CO
 | `PullRequestReviewThread` has `id`, `isResolved`, `path`, `line` (nullable) and `comments`. The thread has no author or URL of its own; the first comment's author started it. | GraphQL schema |
 | A deleted account's `author` is null; GitHub shows it as `ghost`. | Schema (nullable); the name is `unverified` |
 | The mutation `resolveReviewThread(input: {threadId})` resolves a thread. | GraphQL schema |
+| `node(id:)` with `... on PullRequestReviewThread` reads one thread by the id the snapshot gives: `isResolved`, `path`, `line`, `pullRequest { number }`, its first comment's `body` and author. | GraphQL schema; not run against GitHub (`unverified`) |
 
-Code: `github.py` `REVIEWS`, `THREADS`, `actor`, `review_item`, `thread_item`, `Gh.resolve_thread`; `watch.py` `REVIEWED_STATES`, `pr_state`. Tests: `test_github.py` `test_one_call_reads_state_head_rollup_reviews_and_threads`, `test_deleted_author_is_ghost_and_not_a_bot`; `test_watch.py` `test_changes_requested_counts_as_reviewed_dismissed_does_not`.
+Code: `github.py` `REVIEWS`, `THREADS`, `THREAD`, `actor`, `review_item`, `thread_item`, `Gh.thread`, `Gh.resolve_thread`; `watch.py` `REVIEWED_STATES`, `pr_state`; `review_threads.py` (bot threads only, Q17). Tests: `test_github.py` `test_one_call_reads_state_head_rollup_reviews_and_threads`, `test_deleted_author_is_ghost_and_not_a_bot`; `test_watch.py` `test_changes_requested_counts_as_reviewed_dismissed_does_not`.
 
 ### Quirk: bot logins differ between REST and GraphQL
 

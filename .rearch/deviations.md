@@ -156,3 +156,28 @@
 - The opencode `apply-tiers --general strong` line for both skills: opencode is not installed here.
 - The x64 Playwright folder name (`chrome-headless-shell-mac-x64`) stays `unverified`; only the arm64 shell exists on this Mac.
 - A real Chrome hang past 120 s and a real failed dump: covered by fakes only.
+
+## Phase 9 (2026-11-25)
+
+1. Integration event status `conflict` is new (architecture's list had it; the old script said `failed`). A conflict event carries `head`, `files` and `error: "CONFLICT merging <head>"`; a git failure carries `failed` and `error: "git <command>: <cause>"`. Test `test_stops_on_a_conflict_and_pushes_nothing` changed on purpose (FR-APE-08): status `conflict`, plus `head` and `files`. `Conflict` is not a subclass of `GitError`, so catching one never catches the other.
+2. Skip rule: a head is skipped only when `merge-base --is-ancestor <head> <current>` holds. A head whose changes are in the tree by another commit (cherry-pick) still gets a merge commit, so GitHub stops calling the branch behind. `unchanged` means the result equals the remote target's SHA; then nothing is pushed.
+3. Identity is checked before the first commit, not up front: a run where every head is skipped needs none.
+4. `github.py` changed outside Touches: threads now carry the first comment's `body` (one field added to the query Phase 6 checked live), and `Gh.thread(id)` reads one thread by node id, since `resolve --thread ID` has to know who started it. `test_github.py` thread expectation gained `body`. The `node(id:)` query and the `body` field were not run against GitHub.
+5. `review_threads.py` CLI differs from the architecture table: `resolve` takes no `--repo` (node ids are global); `list` and `resolve` take several values (`--pr 1 2`, `--thread T1 T2`); a list line names the login after `bot|human`; `list` ends with `<n> unresolved: <b> bot, <h> human`. Every result line goes to stdout, `REFUSED:` included (gate.py puts its `REFUSED:` on stderr), so a multi-thread run keeps its order in one stream. Usage errors exit 2 (argparse). Stage 6 updates architecture.md's CLI table.
+6. Bot REPLY threads: the exit goal says every bot thread is resolved, Q17 allows resolving bot FIX threads. review-pass.md resolves a bot REPLY thread only after the user says the reply is posted. Step 11 accepts a bot REPLY line still waiting for the user. Orchestrator: confirm with the user or leave as is.
+7. NFR-12 ("only build_integration_branch.py with --push writes to a remote") is now also broken on purpose by `review_threads.py resolve` (Q17). Stage 6 rewords NFR-12.
+8. input-readiness.md dropped "edge cases per endpoint" from the audit gaps: the task block's Edge cases part is required by check_draft now. `gate.py` rule: gates of stages `intake` to `milestones` plus this milestone's `tasks-m<n>` must be `approved`; `not reviewed` is an accepted gap; other milestones' task gates do not count.
+9. Test isolation: both git test files set `GIT_CONFIG_GLOBAL=/dev/null`, `GIT_CONFIG_NOSYSTEM=1`, and `gc.auto=0`, `maintenance.auto=false` through `GIT_CONFIG_COUNT`. One run failed in tearDown on a vanished `maintenance.lock` before that. Recorded in `topics/git.md`.
+10. `opencode.py` keeps its own small `git()` helper (`rev-parse --git-path`, exclude file). Not moved onto `git.py` in this phase (outside Touches). Stage 6 candidate.
+11. Files: 12 changed, 4 added (`git.py`, `test_git.py`, `review_threads.py`, `test_review_threads.py`), none deleted. Outside Touches: `github.py`, `test_github.py`, `harness-common/SKILL.md` (Scripts rows), `topics/GitHub.md` (code locations, `node(id:)` fact). Removed code: `git`, `git_or_fail`, `detect_default` and the fetch-exit target check in build_integration_branch.py; the GraphQL mutation in review-pass.md. Grep finds no reference.
+12. Counts: execute 27 (was 8), harness-common 81 (was 60). 7 suites, 330 tests, 0 expected failures (was 2).
+
+## Not verified in Phase 9
+
+- No live `gh`: `Gh.thread` (`node(id:)`), the `body` field and `resolve` against GitHub. Fakes only (a fake runner and a fake `gh` on PATH).
+- `--name-only` on git 2.38 itself; only git 2.56.0 ran. The version gate on an old git ran against a fake runner.
+- A live milestone run: the Spawns table, tier gate, `--until bots`, qa-session in Step 9, and the PR body opening with the context text are prose only.
+- opencode `apply-tiers --general default` for this skill: opencode is not installed here.
+- Real home: `install.py --check` still prints 20 changes (unchanged by this phase; no agent or skill folder added).
+
+- Orchestrator live check after Phase 9: `review_threads.py list --pr 15111 --repo cli/cli` (read-only) listed 1 unresolved thread, started by copilot-pull-request-reviewer and classified bot. The thread query and the bot/human split work live. Resolve stays untested live.

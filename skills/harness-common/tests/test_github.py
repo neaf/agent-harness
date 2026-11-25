@@ -54,7 +54,7 @@ def review(login, kind="Bot", state="COMMENTED", commit=HEAD):
 def thread(tid, resolved=False, kind="Bot", login="bot"):
     author = {"__typename": kind, "login": login} if kind else None
     return {"id": tid, "isResolved": resolved, "path": "a.py", "line": 3,
-            "comments": {"nodes": [{"url": f"https://x/{tid}", "author": author}]}}
+            "comments": {"nodes": [{"url": f"https://x/{tid}", "body": f"Fix {tid}\nmore", "author": author}]}}
 
 
 def answer(checks=None, reviews=None, threads=None, state="OPEN", head=HEAD, rollup=True):
@@ -87,9 +87,9 @@ class SnapshotTest(unittest.TestCase):
         self.assertEqual(snap["reviews"], [{"login": "claude", "is_bot": True, "state": "COMMENTED", "commit": HEAD}])
         self.assertEqual(snap["threads"], [
             {"id": "T1", "url": "https://x/T1", "resolved": False, "path": "a.py", "line": 3, "login": "bot",
-             "is_bot": True},
+             "is_bot": True, "body": "Fix T1\nmore"},
             {"id": "T2", "url": "https://x/T2", "resolved": True, "path": "a.py", "line": 3, "login": "ann",
-             "is_bot": False},
+             "is_bot": False, "body": "Fix T2\nmore"},
         ])
 
     def test_every_page_is_read_and_only_unfinished_connections_are_asked_again(self):
@@ -174,6 +174,25 @@ class RepoAndResolveTest(unittest.TestCase):
         self.assertTrue(Gh(fake).resolve_thread("T1"))
         self.assertIn("resolveReviewThread", fake.query(0))
         self.assertEqual(fake.variables(0), {"id": ("-f", "T1")})
+
+
+class ThreadTest(unittest.TestCase):
+    def node(self, kind="Bot", resolved=False):
+        return {"data": {"node": dict(thread("T1", resolved, kind, "rabbit"), __typename="PullRequestReviewThread",
+                                      pullRequest={"number": 12})}}
+
+    def test_thread_by_id(self):
+        fake = Fake(self.node())
+        found = Gh(fake).thread("T1")
+        self.assertEqual((found["pr"], found["login"], found["is_bot"], found["resolved"]), (12, "rabbit", True, False))
+        self.assertEqual(fake.variables(0), {"id": ("-f", "T1")})
+        self.assertIn("PullRequestReviewThread", fake.query(0))
+
+    def test_unknown_id_or_other_node_raises(self):
+        with self.assertRaisesRegex(GhError, "^no review thread T9$"):
+            Gh(Fake({"data": {"node": None}})).thread("T9")
+        with self.assertRaisesRegex(GhError, "^no review thread I1$"):
+            Gh(Fake({"data": {"node": {"__typename": "Issue"}}})).thread("I1")
 
 
 class RunTest(unittest.TestCase):

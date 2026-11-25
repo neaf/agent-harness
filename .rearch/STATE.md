@@ -4,7 +4,7 @@ Project: agent-harness, one source of skills, subagents and global instructions 
 Branch: rearch/2026-11-25
 Base tag: rearch-base (d4b56d4)
 Stage: 5 (phase execution)
-Phase: 9 of 10 (git adapter and milestone-execute), not started
+Phase: 10 of 10 (rearchitect), not started
 
 ## Done
 - Stage 0 setup, 7f686cb
@@ -21,7 +21,8 @@ Phase: 9 of 10 (git adapter and milestone-execute), not started
 - Phase 5 Global instructions, notes, writing: global.md 18 rules to 16 (delegation and test-output merged, no rule lost, checked by orchestrator), ai-notes State section, writing-craft Scope and neutral examples, 011d9cf
 - Phase 6 GitHub adapter and feedback-watch: harness-common github.py (one paginated GraphQL snapshot), watcher fixes, --until bots; 230 tests, 17 expected failures; live read-only check on cli/cli passed, 7dfddc7
 - Phase 7 Markdown parser and attack-plan-create: harness-common markdown.py, gate.py v2 gates (multi-pair, migrates v1), reopen fix, task-block schema (check_draft --tasks), per-milestone task tables; 277 tests, 14 expected failures, 5b21f35
-- Phase 8 qa-session and storyboard: QA page = collapsed setup, scenarios, empty Findings; check_page on markdown.py with --live; shoot.py FAIL lines, timeouts, 200000 px cap; 290 tests, 2 expected failures
+- Phase 8 qa-session and storyboard: QA page = collapsed setup, scenarios, empty Findings; check_page on markdown.py with --live; shoot.py FAIL lines, timeouts, 200000 px cap; 290 tests, 2 expected failures, 562a2b5
+- Phase 9 git adapter and milestone-execute: harness-common git.py, review_threads.py (resolves bot threads only), integration unchanged/conflict/failed events, exit goal and --until bots; 330 tests, 0 expected failures; live read-only thread listing on cli/cli passed. Open: bot REPLY threads (ask user)
 
 ## Decisions
 - 2026-11-25: target is agent-harness itself, user call.
@@ -42,4 +43,4 @@ Phase: 9 of 10 (git adapter and milestone-execute), not started
 
 ## Next prompt
     Use the rearchitect skill. Continue from .rearch/STATE.md.
-    Next: Phase 9 (git adapter and milestone-execute).
+    Next: Phase 10 (rearchitect).

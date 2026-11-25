@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""GitHub adapter over the `gh` CLI: one runner, `GhError`, the paginated pull request snapshot, thread resolve.
+"""GitHub adapter over the `gh` CLI: one runner, `GhError`, the paginated pull request snapshot, one thread, resolve.
 
 Facts: skills/harness-common/topics/GitHub.md. Library only, no CLI. Every gh failure raises GhError with
 one line that names the cause.
@@ -22,9 +22,12 @@ REVIEWS = """
       } }""" % PAGE
 THREADS = """
       reviewThreads(first: %d, after: $threads) { pageInfo { hasNextPage endCursor } nodes {
-        id isResolved path line comments(first: 1) { nodes { url author { __typename login } } }
+        id isResolved path line comments(first: 1) { nodes { url body author { __typename login } } }
       } }""" % PAGE
 PARTS = {"checks": CHECKS, "reviews": REVIEWS, "threads": THREADS}
+THREAD = ("query($id: ID!) { node(id: $id) { __typename ... on PullRequestReviewThread { "
+          "id isResolved path line pullRequest { number } "
+          "comments(first: 1) { nodes { url body author { __typename login } } } } } }")
 RESOLVE = ("mutation($id: ID!) { resolveReviewThread(input: {threadId: $id}) "
            "{ thread { id isResolved } } }")
 
@@ -86,7 +89,7 @@ def thread_item(node):
     comments = (node.get("comments") or {}).get("nodes") or [{}]
     login, is_bot = actor(comments[0])
     return {"id": node["id"], "url": comments[0].get("url"), "resolved": node["isResolved"], "path": node.get("path"),
-            "line": node.get("line"), "login": login, "is_bot": is_bot}
+            "line": node.get("line"), "login": login, "is_bot": is_bot, "body": comments[0].get("body") or ""}
 
 
 class Gh:
@@ -162,6 +165,16 @@ class Gh:
             raise GhError(f"#{number} head moved while it was read")
         rollup = commit["statusCheckRollup"]  # null before any check registers
         return rollup["contexts"] if rollup else {"nodes": [], "pageInfo": {"hasNextPage": False}}
+
+    def thread(self, thread_id):
+        """One review thread by its node id, in the snapshot's thread shape plus `pr` (its PR number)."""
+        node = self.graphql(THREAD, id=thread_id).get("node")
+        if not node or node.get("__typename") != "PullRequestReviewThread":
+            raise GhError(f"no review thread {thread_id}")
+        try:
+            return dict(thread_item(node), pr=node["pullRequest"]["number"])
+        except (KeyError, TypeError) as error:
+            raise GhError(f"unexpected GraphQL answer for thread {thread_id}: missing {error}") from None
 
     def resolve_thread(self, thread_id):
         """Resolve one review thread. Writes to GitHub: only callers that are allowed to resolve use it."""
