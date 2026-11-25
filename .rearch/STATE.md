@@ -11,7 +11,8 @@ Phase: 1 of 10 (Topic docs), not started
 - Stage 1 inventory, eb518ca, 6 aspects confirmed by user
 - Stage 2 audits, 19cf3c1, 6 aspect reports plus seams.md, coverage complete
 - Stage 3 requirements, f349b26, all questions answered
-- Stage 4 architecture: 22 modules, 10 phases
+- Stage 4 architecture, 61d78ce, 22 modules, 10 phases
+- Storyboard added: commit 96ecd40 (cherry-pick of ec14673 from skill/storyboard), audit/storyboard.md, FR-SB-01..16, folded into phases 1, 2, 4, 8; 24 modules
 
 ## Decisions
 - 2026-11-25: target is agent-harness itself, user call.
@@ -25,6 +26,7 @@ Phase: 1 of 10 (Topic docs), not started
 - 2026-11-25: all other Open questions settled by accepting the orchestrator's recommendations; listed at the end of requirements.md. Experimental FR-AGT-05, FR-QA-13, FR-FW-13 kept; FR-APC-18/19 dropped, user call.
 - 2026-11-25: manual checklist M1..M11 recorded, then dropped: zero manual checks for this run; phases verify automatically and report what is not verified. The rearchitect skill gets FR-RA-14 (ask how many manual checks, default zero; defaults at every gate), user call.
 - 2026-11-25: Stage 4 architect questions A1-A4 plus A5 settled with the recommended defaults, per the user's preference for defaults (end of requirements.md).
+- 2026-11-25: include the storyboard skill from ~/dev/agent-harness-storyboard; its questions SB-Q1..Q11 settled with defaults (end of requirements.md), user call.
 - 2026-11-25: models for this run: fast Sonnet 5.5, default Opus 5.5, strong Opus 5.5 (baseline.md), user call.
 
 ## Next prompt

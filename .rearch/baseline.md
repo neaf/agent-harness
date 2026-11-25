@@ -12,6 +12,7 @@ No build step. Scripts are standard-library Python 3.9+, run with `/usr/bin/pyth
 |---|---|---|
 | Parse all scripts | `PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m py_compile install.py skills/*/scripts/*.py` | ok |
 | Install drift | `/usr/bin/python3 -I install.py --check` | `0 change(s) needed`, exit 0 |
+| Install drift after storyboard | same | `2 change(s) needed`, exit 1: the two storyboard skill links are not installed yet. Expected until `install.py` runs. |
 
 ## Tests
 
@@ -21,8 +22,9 @@ No build step. Scripts are standard-library Python 3.9+, run with `/usr/bin/pyth
 | attack-plan-milestone-execute | `... -s skills/attack-plan-milestone-execute/tests` | 6 OK |
 | feedback-watch | `... -s skills/feedback-watch/tests` | 48 OK |
 | qa-session | `... -s skills/qa-session/tests` | 9 OK |
+| storyboard | `... -s skills/storyboard/tests` | 6 OK (added 2026-11-25 with commit 96ecd40) |
 
-Total 96 tests, all pass. Lint: none configured.
+Total 102 tests, all pass (96 at rearch-base, plus 6 storyboard). Lint: none configured.
 
 One-shot run, prints one line per suite:
 

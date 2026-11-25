@@ -1,6 +1,6 @@
 # Phases
 
-10 phases. Phase 1 writes the topic docs and Phase 2 adds the test harness. Phases 3-10 build the modules in dependency order: installer, shared conventions, global prompts, then the skills (feedback-watch before execute, create before execute, qa-session before execute, rearchitect last). Final cleanup and the traceability audit belong to Stage 6 (Q35), so this plan ends with the last code phase.
+10 phases. Phase 1 writes the topic docs and Phase 2 adds the test harness. Phases 3-10 build the modules in dependency order: installer, shared conventions, global prompts, then the skills (feedback-watch before execute, create before execute, qa-session before execute, rearchitect last). The storyboard skill (added 2026-11-25) folds into Phase 1 (its topic doc), Phase 2 (its tests) and Phase 8 (with qa-session: both build a human-read page through one strong Builder), so the count stays 10. Final cleanup and the traceability audit belong to Stage 6 (Q35), so this plan ends with the last code phase.
 
 ## Rules for every phase
 
@@ -32,14 +32,16 @@ What can't be checked this way (live `gh`, live opencode, Notion) gets listed in
 ## Phase 1: Topic docs
 
 Goal: every external fact from the audits lives in one topic doc with a source or the word `unverified`. Q37's opencode branch is settled as far as docs allow.
-Covers: CON-CC-01..03, CON-OC-01..02, CON-GH-01..06, CON-GIT-01..05, CON-NOTION-01, NFR-01, NFR-02, Q37 (check), FR-RA-11
-Touches: skills/harness-common/SKILL.md (new, description: shared harness conventions, load when another harness skill points here), skills/harness-common/topics/Claude Code.md, topics/opencode.md, topics/GitHub.md, topics/git.md, topics/Notion MCP.md, topics/macOS Python.md (all new), skills/attack-plan-create/references/publishing.md (Notion quirk list replaced by a link), README.md (harness-common row, topic links). 9 files.
+Covers: CON-CC-01..04, CON-OC-01..02, CON-GH-01..06, CON-GIT-01..05, CON-NOTION-01, CON-CHROME-01..05, NFR-01, NFR-02, Q37 (check), FR-RA-11
+Touches: skills/harness-common/SKILL.md (new, description: shared harness conventions, load when another harness skill points here), skills/harness-common/topics/Claude Code.md, topics/opencode.md, topics/GitHub.md, topics/git.md, topics/Notion MCP.md, topics/macOS Python.md, topics/Chrome headless shell.md (all new), skills/attack-plan-create/references/publishing.md (Notion quirk list replaced by a link), README.md (harness-common row, topic links). 10 files.
 Deletes: none
 Work:
 - Sources are the audits' External facts sections (X items) and requirements.md CON-* lines. Each quirk gets symptom, cause, workaround and code location (docs-style.md).
 - Q37 check, one scripted pass: if `opencode` is on PATH, run `opencode --help`, `opencode models` and `opencode agent --help`. In every case read the vendor docs pages for agents, CLI, permissions and the task tool. Record each answer with its link: does the task tool take a per-call model; which agent folder name (`agent/` or `agents/`) and frontmatter keys apply; are project-local agents loaded, and do they override global ones of the same name; are agents reloaded without restart; is the spawn tool deniable; does an agent with no `model` inherit the session model. opencode is not installed on the architect's Mac, so live answers wait for M2.
 - In `topics/opencode.md`, write a "Model per spawn" section ending in one of: `per-spawn parameter`, `override files`, `unknown`. Phase 4 builds what it says.
-Verify: V. `--check` shows 2 new skill links (harness-common, both hosts) until install.
+- `topics/Chrome headless shell.md` from audit/storyboard.md X1-X6, X8 and CON-CHROME-*. One scripted batch with the Playwright shell, output in `mktemp -d`, never a browser app: (a) shoot a generated page with `data-h` 20000 and 40000 and record the PNG heights, which settles the screenshot limit (CON-CHROME-04); (b) a page in a temp folder loading a font file copied from `/System/Library/Fonts/Supplemental` by a relative `url()`, checked with `document.fonts.check` in `--dump-dom`, which settles CON-CHROME-05. `PLAYWRIGHT_BROWSERS_PATH` comes from the Playwright docs with its link. CON-CHROME-01 stays `unverified`: reproducing it would steal the user's focus. Without a shell, every item stays `unverified`.
+- `topics/Claude Code.md` gets a plugin-skills section: `frontend-design` lives under `~/.claude/plugins/cache/`, is not shipped here, and is named "when available" (CON-CC-04).
+Verify: V. `--check` shows 2 new skill links (harness-common, both hosts) until install, plus the 2 storyboard links if install.py has not run since commit 96ecd40 (baseline.md).
 Manual: none. Verify automatically (see "Verification" at the top).
 Exit: each CON-* fact sits in exactly one topic doc. The Notion quirks exist only in `topics/Notion MCP.md`. Every fact has a source or `unverified`.
 
@@ -47,18 +49,19 @@ Exit: each CON-* fact sits in exactly one topic doc. The Notion quirks exist onl
 
 Goal: characterization tests for current behavior, defect tests marked expected-failure, install.py tests, and repo-wide rule tests including the FR-AGT-08 model-name grep.
 Covers: NFR-04, NFR-05, FR-AGT-08 (test), FR-XS-02 (shared fixture)
-Touches: .gitignore (`__pycache__/`, `*.pyc`), install.py (only `if __name__ == "__main__"` and `main(argv=None, home=None)` so tests use a temp home; no behavior change), tests/test_install.py (new), tests/test_repo_rules.py (new), tests/fixtures/markdown/fenced-headings.md (new), tests/fixtures/agents/bad-fence.md and bad-tier.md (new), skills/attack-plan-create/tests/test_gate.py, skills/attack-plan-create/tests/test_check_draft.py, skills/qa-session/tests/test_check_page.py, skills/feedback-watch/tests/test_watch.py, skills/attack-plan-milestone-execute/tests/test_build_integration_branch.py, README.md (test commands include `tests/`). 14 files.
+Touches: .gitignore (`__pycache__/`, `*.pyc`), install.py (only `if __name__ == "__main__"` and `main(argv=None, home=None)` so tests use a temp home; no behavior change), tests/test_install.py (new), tests/test_repo_rules.py (new), tests/fixtures/markdown/fenced-headings.md (new), tests/fixtures/agents/bad-fence.md and bad-tier.md (new), skills/attack-plan-create/tests/test_gate.py, skills/attack-plan-create/tests/test_check_draft.py, skills/qa-session/tests/test_check_page.py, skills/feedback-watch/tests/test_watch.py, skills/attack-plan-milestone-execute/tests/test_build_integration_branch.py, skills/storyboard/tests/test_shoot.py, README.md (test commands include `tests/`). 15 files.
 Deletes: none
 Work:
 - `tests/test_install.py`: empty temp home plan, second run is a no-op, `--check` exits 0 or 1, declined prompt, no-TTY exit 2, `--claude 0`, link replacement. Expected-failure tests: description with `: ` is quoted (FR-INST-11), prune of a removed agent (FR-INST-09), symlinked destination not written through (FR-INST-12), named error for a bad agent file (FR-INST-10), declined exit differs from drift (FR-INST-08).
 - `tests/test_repo_rules.py`:
-  - Model-name grep over `git ls-files`. Run-state folders `.rearch/`, `.attack-plan/` and `.ai-notes/` are excluded, because FR-AGT-07 records the confirmed mapping there. Patterns are stored ROT13-encoded, so the test file holds no model name. The allowlist `{targets/models.json, skills/rearchitect/SKILL.md}` is checked both ways: no hit outside it, and every listed file still hits.
+  - Model-name grep over `git ls-files`. It scans every tracked file under `skills/storyboard/` too, `skeleton.html` included; the test asserts each `skills/*/` folder contributed at least one scanned file, so a new skill cannot fall outside it. Run-state folders `.rearch/`, `.attack-plan/` and `.ai-notes/` are excluded, because FR-AGT-07 records the confirmed mapping there. Patterns are stored ROT13-encoded, so the test file holds no model name. The allowlist `{targets/models.json, skills/rearchitect/SKILL.md}` is checked both ways: no hit outside it, and every listed file still hits.
   - `__pycache__` is ignored. Every `skills/*/` has a SKILL.md whose `name` equals the folder name. Every `agents/*.md` parses.
 - Shared fixture `fenced-headings.md`: a section with a fenced `# comment` and `- [ ]`. gate, check_draft and check_page tests all read it.
+- `skills/storyboard/tests/test_shoot.py`: characterization of `main` with `subprocess.run` replaced by a fake (one `path  WxH` line per theme, height from `data-h`), and a skeleton render through the real shell, skipped when `find_chrome()` finds none (SB-Q11). Expected-failure tests: Chrome timeout gives one FAIL line (FR-SB-11), non-executable `$CHROME` gives a FAIL line (FR-SB-10), failed dump is reported (FR-SB-11), FAIL reason is plain text (FR-SB-11), `PLAYWRIGHT_BROWSERS_PATH` honoured and host-architecture shell preferred (FR-SB-10), skeleton OS reduced-motion rule covers every element (FR-SB-08), skeleton heading reads "Keyboard path" (FR-SB-05). 8 markers.
 - Expected-failure tests for the known defects: gate reopen-then-open, gate fenced hash, gate `--rounds abc`, integration no-op merge, non-conflict git failure reported as conflict, watch sole cancelled check, watch merged PR, watch gh failure on stdout, watch FAIL-to-FAIL output change, check_page `Q4 Budget` in backticks, check_page `[Next fact.]`, check_page `### 1 Title`.
-Verify: V. 5 suites green. Report the expected-failure count, 17.
+Verify: V. 6 suites green (tests/ plus 5 skill suites, storyboard included). Report the expected-failure count, 25 (17 plus 8 storyboard).
 Manual: none. Verify automatically (see "Verification" at the top).
-Exit: every item in requirements.md "Known defects" except the rearchitect prompt bug has an expected-failure test. `--check` prints 0 after Phase 1's install.
+Exit: every item in requirements.md "Known defects" except the prompt-only ones (rearchitect SKILL.md, storyboard brief.md:3 and SKILL.md:81) has an expected-failure test. The model-name grep scans `skills/storyboard/`. `--check` prints 0 after Phase 1's install.
 
 ## Phase 3: Installer and agent sources
 
@@ -85,7 +88,7 @@ Deletes: skills/attack-plan-create/references/publishing.md, skills/qa-session/r
 Work:
 - `model-tiers.md`: list, propose, confirm gate (one model for all tiers allowed), record the table, pass per spawn. Claude Code: Agent tool `model`. opencode: the Phase 1 outcome.
 - `subagents.md`: brief minimum, fresh subagent per unit, word caps, two layers, missing-agent fallback that finds the checkout with `realpath` of the installed harness-common link and reads `agents/<name>.md` there.
-- `state.md`: `Next` line, `Models for this run` table, exclude rule.
+- `state.md`: `Next` line, `Models for this run` table, exclude rule. Single-spawn skills (storyboard) keep no resume file: the table and Next line go in the work's ai-notes "State (start here)" when one exists, else the gate runs in the session and the hand-over ends with a fenced resume prompt (SB-Q1).
 - `publishing.md`: the merged procedure. Each calling skill states its source of truth.
 Verify: V. `opencode.py models` prints a clear "opencode not found" line and exits 1 on this Mac.
 Manual: none. Verify automatically (see "Verification" at the top).
@@ -136,19 +139,27 @@ Verify: V. `check_draft.py --tasks` passes on the example in executable-plan.md.
 Manual: none. Verify automatically (see "Verification" at the top).
 Exit: neither script holds a heading regex. No create expected-failure marker remains. "Milestone specs" and "appendix" appear nowhere in the skill.
 
-## Phase 8: qa-session
+## Phase 8: qa-session and storyboard
 
-Goal: the simplified page and check_page.py on the shared parser.
-Covers: FR-QA-01..15, FR-XS-02 (qa side), FR-AGT-07 (`Spawns`: Builder and Verifier, general, strong), FR-XS-01
-Touches: skills/qa-session/scripts/check_page.py, skills/qa-session/tests/test_check_page.py, skills/qa-session/SKILL.md, references/page-template.md, references/briefs.md, references/setup-checklist.md, README.md. 7 files.
-Deletes: Known limits, Product questions and After the session from the template and checker
+Goal: the simplified QA page and check_page.py on the shared parser. Storyboard on the shared tier gate, brief minimum and state rule, with shoot.py failing cleanly.
+Covers: FR-QA-01..15, FR-SB-01..16, NFR-14, NFR-15, FR-XS-02 (qa side), FR-AGT-07 (`Spawns`: qa Builder and Verifier, storyboard Builder, all general, strong), FR-XS-01, FR-XS-03 (storyboard)
+Touches: skills/qa-session/scripts/check_page.py, skills/qa-session/tests/test_check_page.py, skills/qa-session/SKILL.md, references/page-template.md, references/briefs.md, references/setup-checklist.md, skills/storyboard/SKILL.md, skills/storyboard/references/brief.md, skills/storyboard/references/skeleton.html, skills/storyboard/scripts/shoot.py, skills/storyboard/tests/test_shoot.py, skills/harness-common/topics/Chrome headless shell.md (code locations), README.md (both rows). 13 files.
+Deletes: Known limits, Product questions and After the session from the template and checker. In storyboard: "Commit the storyboard with the decisions", "strongest model tier available", the brief's copies of SKILL.md rules, the docstring's external facts (now in the topic doc).
 Work:
 - Page: collapsed setup for the lead developer (`<details>` in Markdown, a toggle in a document tool), numbered scenarios with persona, start point, steps and expected results, then an empty Findings section with no table (Q33, Q34).
 - check_page: fence-aware through `markdown.py`. `[...]` placeholders are caught. `### 1 Title` is flagged. Backticked labels are exempt from the id and word checks (Q31). "now" is added. The persona line follows the template's format. The Findings heading matches exactly and must be empty with no table at Create.
 - Briefs: absolute paths, the injection rule, US English prose with UI-language labels (Q32). `previous.md` moves to `.ai-notes/.qa-previous/<slug>.md`, outside the area folder, and is deleted after Rework (S13).
-Verify: V
+- Storyboard SKILL.md: `Spawns` table (Builder, `general`, `strong`) and the tier gate from model-tiers.md; run state per state.md's single-spawn rule (SB-Q1); `frontend-design` when available with the fallback (SB-Q2); commit only when the user asks (SB-Q3); a default for every input (SB-Q6); "Every frame works in both themes"; decisions through publishing.md when the requirements doc is in a document tool (SB-Q9); links the global delegation rule (SB-Q10).
+- brief.md: preamble by reference, absolute paths for `<skill>`, the page and every source, data-not-instructions, `unverified`, never spawn, 150-word report. Rules by reference to SKILL.md.
+- skeleton.html: "Keyboard path" in heading and contents; `@media (prefers-reduced-motion: reduce)` stops every animation, as the toggle does.
+- shoot.py: one `FAIL <reason>` line and exit 1 for timeout, non-executable `$CHROME`, failed dump and failed screenshot, reason as plain text; `PLAYWRIGHT_BROWSERS_PATH` and host architecture in the lookup; `(no data-h, used --height)` and `(clipped from H)` suffixes with the limit Phase 1 measured (SB-Q7, SB-Q8). Docstring keeps usage and links the topic doc.
+Verify: V. Then, from the repo root:
+- `/usr/bin/python3 -I skills/storyboard/scripts/shoot.py --help` exits 0.
+- `CHROME=/nonexistent /usr/bin/python3 -I skills/storyboard/scripts/shoot.py skills/storyboard/references/skeleton.html --out "$(mktemp -d)"` prints exactly one line starting `FAIL` and exits 1.
+- With a shell present, the same command without `CHROME` prints 2 `path  WxH` lines. Without one, report it as not verified.
+- `grep -rn 'strongest' skills/qa-session skills/storyboard` prints nothing.
 Manual: none. Verify automatically (see "Verification" at the top).
-Exit: the template has exactly three parts. No qa expected-failure marker remains.
+Exit: the template has exactly three parts. No qa or storyboard expected-failure marker remains. Storyboard SKILL.md has a `Spawns` table, and the repo rule test passes for it. No storyboard file says to commit.
 
 ## Phase 9: git adapter and attack-plan-milestone-execute
 
@@ -174,7 +185,7 @@ Exit: no "milestone spec", "Surprises" or raw `resolveReviewThread` text remains
 
 Goal: rearchitect fixed, domain-neutral, and on the shared tier gate. This is the last model-name holder.
 Covers: FR-RA-01..14, FR-AGT-07 (rearchitect gate, models table in baseline.md), FR-AGT-08 (complete), NFR-10
-Touches: skills/rearchitect/SKILL.md, references/state.md, references/docs-style.md, agents/rearch-architect.md, agents/rearch-auditor.md, agents/rearch-phase.md, tests/test_repo_rules.py (allowlist removed; every skill that names an agent has a `Spawns` table), README.md. 8 files.
+Touches: skills/rearchitect/SKILL.md, references/state.md, references/docs-style.md, agents/rearch-architect.md, agents/rearch-auditor.md, agents/rearch-phase.md, tests/test_repo_rules.py (allowlist removed; every skill that names an agent or a general spawn, storyboard and qa-session included, has a `Spawns` table), README.md. 8 files.
 Deletes: "Model routing" names and the fallback paragraph in SKILL.md, the allowlist in test_repo_rules.py
 Work:
 - Stage 0:

@@ -32,6 +32,12 @@ Topic docs live in `skills/harness-common/topics/`, not `docs/`. Running agents 
 | skills/ai-notes/SKILL.md | keep. Trigger fix, "State (start here)" defined, cites the state minimum (Phase 5) | same |
 | agents/*.md preamble lines (:8-12) | moved to the shared preamble, which install prepends (Phase 3) | harness-common/references/preamble.md |
 | targets/models.json | delete (Phase 3) | |
+| skills/storyboard/SKILL.md | keep. `Spawns` table, tier gate, single-spawn state rule, commit when asked, `frontend-design` when available, input defaults, "works in both themes" (Phase 8) | same |
+| skills/storyboard/references/brief.md | keep. Brief minimum, absolute paths, rules by reference to SKILL.md, no tier prose (Phase 8) | same |
+| skills/storyboard/references/page.md | keep unchanged | same |
+| skills/storyboard/references/skeleton.html | keep. "Keyboard path" heading, OS reduced-motion stops every animation (Phase 8) | same |
+| skills/storyboard/scripts/shoot.py docstring and `find_chrome` comment (focus, install hint, cache layout) | facts go to the topic doc (Phase 1). The docstring keeps usage and links it (Phase 8) | topics/Chrome headless shell.md |
+| skills/storyboard/SKILL.md:74 (headless rule, install hint) | the rule stays; the facts link the topic doc (Phase 8) | topics/Chrome headless shell.md |
 | .rearch/requirements.md | Stage 6 moves it | docs/requirements.md |
 | .rearch/architecture.md | Stage 6 moves it | docs/architecture.md |
 | .rearch/STATE.md, baseline.md, inventory.md, audit/*, docs-plan.md, phases.md, deviations.md | Stage 6 deletes them after the final baseline and checklist (Q36) | |
@@ -44,11 +50,12 @@ Topic docs live in `skills/harness-common/topics/`, not `docs/`. Running agents 
 | AGENTS.md (repo root) | Under 60 lines for agents working on this repo: baseline commands, layout, pointers. A one-line `CLAUDE.md` imports it with `@AGENTS.md` (Claude Code import syntax, unverified). Stage 6 writes both. |
 | docs/requirements.md | Functional requirements with IDs (Stage 6 move). |
 | docs/architecture.md | Modules, data flow, interfaces (Stage 6 move). |
-| skills/harness-common/topics/Claude Code.md | Agent file format and `tools`, Agent tool `model` parameter and how to read its values, Monitor tool and `timeout_ms`, no nested spawns, skill and CLAUDE.md paths, YAML strictness of frontmatter. |
+| skills/harness-common/topics/Claude Code.md | Agent file format and `tools`, Agent tool `model` parameter and how to read its values, Monitor tool and `timeout_ms`, no nested spawns, skill and CLAUDE.md paths, YAML strictness of frontmatter, plugin skills (`frontend-design` under `~/.claude/plugins/cache/`, not shipped, "when available"). |
 | skills/harness-common/topics/opencode.md | Agent folder and frontmatter, `mode`, `model` as `provider/model`, `tools`/`permission` keys, task tool parameters, `opencode models`, agent reload behavior, project-local agent precedence, no-model inheritance, no Monitor (background job), `execute` sandbox, skills folder, AGENTS.md. Mostly `unverified`. |
 | skills/harness-common/topics/GitHub.md | `statusCheckRollup` shapes, reruns and cancelled runs, empty and partial rollups, bot logins in REST and GraphQL, thread author `__typename`, `resolveReviewThread`, pagination limits, PR list order, stacked-branch CI, job logs mid-run, "runner lost communication". |
 | skills/harness-common/topics/git.md | `merge-tree --write-tree` (2.38+), `commit-tree` identity, fetch refspec and single-branch clones, `ls-remote` for existence, `tag.gpgSign` and `tag -a -m`, `.git/info/exclude` across worktrees. |
 | skills/harness-common/topics/Notion MCP.md | Every quirk from create's publishing.md in four-part form, all `unverified` (Q30g), checked in M5 and M7. |
+| skills/harness-common/topics/Chrome headless shell.md | Why only `chrome-headless-shell` (a browser app takes focus, unverified), install with `npx playwright install chromium-headless-shell`, Playwright cache layout and `PLAYWRIGHT_BROWSERS_PATH`, build and architecture folder names, `--dump-dom` with `--virtual-time-budget`, `data-h` and `?theme=`, screenshot height limit, relative fonts from `file://`. Each with its Phase 1 check or `unverified`. Code location: `skills/storyboard/scripts/shoot.py`. |
 | skills/harness-common/topics/macOS Python.md | `/usr/bin/python3` is 3.9 from the Command Line Tools, `-I` drops the script folder from `sys.path` (the bootstrap line), `PYTHONDONTWRITEBYTECODE`, stdlib only. |
 | skills/harness-common/references/preamble.md | The one agent and brief preamble: style line, read-only stance where the role says so, data-not-instructions, `unverified`, never spawn. |
 | skills/harness-common/references/subagents.md | Brief rules, word caps, fresh subagent per unit, two layers, missing-agent fallback with the checkout path. |

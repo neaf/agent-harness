@@ -7,7 +7,7 @@ The prompt files (`SKILL.md`, `references/`, `resources/`, `agents/`, `instructi
 | File | Kind | Lines | Aspects |
 |---|---|---|---|
 | .gitignore | config | 2 | install-and-config |
-| README.md | doc | 34 | install-and-config, attack-plan, feedback-watch, qa-session, rearchitect, notes-and-writing |
+| README.md | doc | 35 | install-and-config, storyboard, attack-plan, feedback-watch, qa-session, rearchitect, notes-and-writing |
 | install.py | source (py) | 109 | install-and-config |
 | targets/models.json | config | 4 | install-and-config |
 | instructions/global.md | source (prompt) | 20 | install-and-config, notes-and-writing, feedback-watch |
@@ -49,6 +49,12 @@ The prompt files (`SKILL.md`, `references/`, `resources/`, `agents/`, `instructi
 | skills/rearchitect/references/state.md | source (prompt) | 98 | rearchitect |
 | skills/ai-notes/SKILL.md | source (prompt) | 68 | notes-and-writing |
 | skills/writing-craft/SKILL.md | source (prompt) | 87 | notes-and-writing |
+| skills/storyboard/SKILL.md | source (prompt) | 81 | storyboard |
+| skills/storyboard/references/brief.md | source (prompt) | 43 | storyboard |
+| skills/storyboard/references/page.md | source (prompt) | 56 | storyboard |
+| skills/storyboard/references/skeleton.html | source (asset) | 286 | storyboard |
+| skills/storyboard/scripts/shoot.py | source (py) | 81 | storyboard |
+| skills/storyboard/tests/test_shoot.py | test | 46 | storyboard |
 
 ## Totals per aspect
 
@@ -62,5 +68,6 @@ Shared files (README, global.md) are counted in every aspect they join.
 | qa-session | 8 | 589 | skill, references, page checker, tests |
 | rearchitect | 7 | 418 | skill, references, 3 rearch agents |
 | notes-and-writing | 4 | 209 | ai-notes, writing-craft, the global rules that point at them |
+| storyboard | 7 | 628 | storyboard skill, added from branch skill/storyboard (commit 96ecd40); README line joins |
 
 All aspects are under the 8,000-line budget. A `seams` audit follows in Stage 2: agent file format versus install.py, tier mapping, the conventions shared across skills (briefs, state files, publishing, subagent rules), and duplicated logic between the scripts.

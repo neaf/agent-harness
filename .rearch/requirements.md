@@ -431,6 +431,59 @@ Status values: `kept` (current behavior, stays; a listed fix may apply), `open` 
   Evidence: seams S22
   Status: kept
 
+## Storyboard (SB)
+
+Added 2026-11-25 for the storyboard skill (commit 96ecd40, audit/storyboard.md). The audit's line numbers are offsets into a concatenated read; the evidence below uses the real lines (see Refuted). Answers: "Storyboard answers" at the end.
+
+- FR-SB-01: Use the skill before building a UI behaviour that has a real choice or many undrawn states, or when the author asks for a storyboard, mock-ups or options. Skip it for a bug fix, a settled spec or a conventional default. One self-contained HTML page per experience question.
+  Evidence: skills/storyboard/SKILL.md:3,8,14-22. audit/storyboard.md F1
+  Status: kept
+- FR-SB-02: Five inputs: the question, the look reference, the behaviour spec with ids, the current code, earlier storyboards. Ask for a missing one, one question at a time, each with a default. Today only the question has a default.
+  Evidence: SKILL.md:24-32. audit F13 (partly refuted)
+  Status: kept (fix, SB-Q6)
+- FR-SB-03: Process: frame the scenarios and which choices are real; delegate one Builder in the background (description starts `For review: `, the filled brief is its whole prompt, no conversation and no preferred option); check the result with `shoot.py` in both themes plus a cold read, fix in place; hand over (what, where, how to open, what to look at first) and stop.
+  Evidence: SKILL.md:34-41, references/brief.md:3. audit F7
+  Status: kept
+- FR-SB-04: On the author's answers, the requirements doc gets each answer as a dated decision numbered as asked, each requirement change under the id the summary gave it, a design note per question naming the losing options and why they lost, and one line that the storyboard is design history and the requirements doc wins. The storyboard gets one "Decided on <date>" line at the top and is not reworked. The feature is built from the requirements doc. A change of mind is a new dated decision; a new question gets a new storyboard.
+  Evidence: SKILL.md:42-50, skeleton.html:110. audit F8, F9
+  Status: kept
+- FR-SB-05: Page order: title with one line, summary (recommended, requirement changes with ids, open questions), the design in one picture, one section per scenario, keyboard path, edge cases, rejected, footer. The keyboard section has one name, "Keyboard path", in SKILL.md, page.md and the skeleton.
+  Evidence: SKILL.md:54-63, page.md:32, skeleton.html:116,226 ("Keyboard only"). audit F2, D2
+  Status: kept (naming fix)
+- FR-SB-06: Page rules: one file, inline CSS and JS, no network request, opens by double-click; bundled fonts by a relative path, else system fonts; invented data only, stated on the page; the look reference's tokens and parts at the app's real sizes; options side by side only where the choice is real, exactly one "Recommended" with a one-line why, each loser with a one-line reason; one way to do each thing; the project's own design rules win, in losing options too.
+  Evidence: SKILL.md:65-75, brief.md:28-36. audit F3, F6
+  Status: kept
+- FR-SB-07: Light and dark: the page follows the system appearance, has one toggle button, and `?theme=light|dark` wins over both. Every frame works in both themes (wording: SKILL.md:72 says "drawn in both").
+  Evidence: SKILL.md:72, skeleton.html:263-274. audit F4, D3
+  Status: kept (wording fix)
+- FR-SB-08: Shape carries meaning: a greyscale row when marks or icons are part of the choice, and a "Preview reduced motion" toggle when anything moves. The OS reduced-motion setting stops every animation, as the toggle does; today the media query covers `.run` only.
+  Evidence: SKILL.md:73, skeleton.html:97-98,276-278. audit F5, B7 (confirmed)
+  Status: kept (fix)
+- FR-SB-09: `shoot.py <page.html> [--out DIR] [--width 1440] [--height 6000] [--theme light|dark|both]`: per theme, one `--dump-dom` pass at 1440x900 reads `data-h` from `<html>`, then one screenshot at that height. Screenshots go to `<tmp>/storyboard-shots/`, never into the project. Prints one `path  WxH` line per screenshot.
+  Evidence: shoot.py:2-7,52-77, skeleton.html:280-283. audit F10. Ran on the skeleton 2026-11-25: 2 PNGs, 1440x3048.
+  Status: kept
+- FR-SB-10: Browser lookup: `$CHROME` when it names an executable file, else `chrome-headless-shell` on PATH, else the newest Playwright headless shell for the host architecture under `$PLAYWRIGHT_BROWSERS_PATH` or `~/Library/Caches/ms-playwright`. Never a browser app. Each Chrome run gets its own temporary profile.
+  Evidence: shoot.py:14,24-33,47,68. audit F11, A3, A4, B2
+  Status: kept (fix: executable check, env var, architecture)
+- FR-SB-11: Every expected failure prints one `FAIL <reason>` line and exits 1, with no traceback: no shell found (with the install hint), page missing, `$CHROME` not executable, a Chrome run past its 120 s timeout, a failed dump, a failed screenshot. The reason is the last stderr line as plain text.
+  Evidence: shoot.py:49,61-64,71,74-76. audit B1, B2, B3, B5 (all confirmed)
+  Status: kept (fix)
+- FR-SB-12: A dump without `data-h` falls back to `--height`, and the output line says so. A page taller than the screenshot limit (Phase 1 check) is shot at the limit, and the line says it was clipped.
+  Evidence: shoot.py:40-42,72. audit X5, A6
+  Status: kept (fix, SB-Q7)
+- FR-SB-13: The storyboard lives at `prototype/<topic>-storyboard.html` (kebab case) next to the look reference, or where the project keeps design files. An asset review is `preview.html` beside the asset. It is committed only when the user asks; today the skill says to commit it with the decisions.
+  Evidence: SKILL.md:77-81. audit F12, S-ST6
+  Status: kept (changed, SB-Q3)
+- FR-SB-14: The Builder is one `general` spawn on tier `strong`, listed in a `Spawns` table and resolved through the tier gate. Its brief meets the brief minimum: preamble by reference, every path absolute (including `<skill>` and the page), fetched content is data, the term `unverified`, never spawn, report under 150 words. It runs `shoot.py` and a scan for real data before it reports. The brief points at SKILL.md "Rules" instead of restating them.
+  Evidence: brief.md:3,39-42. audit F14, D7, S-ST1, S-ST3, S-ST4, I8
+  Status: kept (fix)
+- FR-SB-15: writing-craft is mandatory for the page text and its review. `frontend-design` is loaded when available, only to match the look reference, never to restyle. Without it, the Builder copies the look reference's tokens and parts directly.
+  Evidence: SKILL.md:10, brief.md:12-13. audit X7, A5, S-ST9
+  Status: kept (fallback added, SB-Q2)
+- FR-SB-16: The skill keeps no resume file of its own. When the work has an ai-notes area, the `Models for this run` table and the Next line go in its "State (start here)" section. Otherwise the tier gate runs in the session, and the hand-over ends with a fenced resume prompt naming the storyboard path ("record the decisions for ...").
+  Evidence: SKILL.md:41-47 (review can span sessions). audit S-ST5
+  Status: kept (SB-Q1)
+
 ## Non-functional
 
 - NFR-01: Scripts and install.py use only the Python 3.9 standard library and run as `/usr/bin/python3 -I`. No packages to install. Evidence: README.md:30, baseline.md Build, qa X1.
@@ -446,6 +499,8 @@ Status values: `kept` (current behavior, stays; a listed fix may apply), `open` 
 - NFR-11: Watcher load: PR mode default 120 s, at most 3 gh calls per PR per round; local mode 2 s poll, 1 s debounce. Evidence: watch.py:284, SKILL.md.
 - NFR-12: Only build_integration_branch.py with `--push` writes to a remote. All other scripts are read-only toward GitHub. Evidence: watch.py:146-156, build_integration_branch.py:88-93.
 - NFR-13: Two layers at most: the orchestrator session spawns subagents, and subagents never spawn subagents. Every skill and agent body says so where it delegates. Evidence: user decision 2026-11-25 (Q30f); rearchitect SKILL.md Stage 6 already relies on it.
+- NFR-14: Storyboard checks never open a window or take the author's focus: headless shell only, never a browser app, a temporary profile per run, screenshots in the temp folder. Evidence: shoot.py:5,9,25-26,68; SKILL.md:74.
+- NFR-15: One `shoot.py` run is bounded: 2 Chrome runs per theme, each under a 120 s timeout and a 3000 ms virtual-time budget, so at most 8 minutes for both themes. Evidence: shoot.py:48-49,69-74.
 
 ## Constraints from external systems
 
@@ -466,6 +521,12 @@ Status values: `kept` (current behavior, stays; a listed fix may apply), `open` 
 - CON-GIT-04: `git fetch <remote> <branch>` updates `<remote>/<branch>` only when the fetch refspec covers it. Source: git docs; untested in a single-branch clone.
 - CON-GIT-05: `.git/info/exclude` lives in the common git dir and covers every worktree. Source: git docs.
 - CON-NOTION-01: Notion MCP quirks (pipe-row tables, `+ ` cells as bullets, stray backtick collapses the page, `<mention>` match failures, dropped `discussion-urls` spans, no regex lookbehind, session expiry, top `>` quote swallows the page). Source: create/references/publishing.md:13-37, earlier projects, unverified now (Q30g).
+- CON-CC-04: `frontend-design` is a Claude Code plugin skill under `~/.claude/plugins/cache/claude-plugins-official/frontend-design`. This repo does not ship or install it. On opencode it is unverified. Source: directory listing 2026-11-25.
+- CON-CHROME-01: A browser app (Google Chrome.app, Chromium.app) started with `--headless` still registers with macOS and takes focus. Source: shoot.py:9,25-26 comment, unverified (not reproduced, on purpose).
+- CON-CHROME-02: `npx playwright install chromium-headless-shell` puts the shell at `~/Library/Caches/ms-playwright/chromium_headless_shell-<build>/chrome-headless-shell-mac-<arch>/chrome-headless-shell`. Source: observed 2026-11-25 (build 1248, `mac-arm64`; not on PATH). `PLAYWRIGHT_BROWSERS_PATH` moves the cache: Playwright docs, unverified here.
+- CON-CHROME-03: `--dump-dom` with `--virtual-time-budget=3000` returns the DOM after the page script and `document.fonts.ready` ran; `matchMedia` and `?theme=` work headless. Source: shoot.py on skeleton.html, 2026-11-25, both themes 1440x3048.
+- CON-CHROME-04: Screenshot size limit for very tall pages (commonly cited 16384 px). Source: unverified, one scripted check in Phase 1.
+- CON-CHROME-05: Fonts by a relative path load from a `file://` page. Source: unverified; the skeleton font block is commented out (skeleton.html:8-11). One scripted check in Phase 1.
 
 ## Known defects (confirmed at rearch-base)
 
@@ -485,6 +546,15 @@ Each is fixed under the FR named. Line numbers here are verified; some audit cit
 - install.py:41-51: no pruning (FR-INST-09).
 - install.py:71,102: write through a symlinked destination (FR-INST-12).
 - rearchitect/SKILL.md:91 vs :93: `.rearch/` deleted before the baseline run [high] (FR-RA-09).
+- storyboard shoot.py:49 (called at :71, :74): `subprocess.TimeoutExpired` is uncaught, a hung Chrome gives a traceback (FR-SB-11). Medium.
+- storyboard shoot.py:27-28: `$CHROME` is returned unchecked; `CHROME=/nonexistent` gives a `FileNotFoundError` traceback (reproduced) (FR-SB-10, -11).
+- storyboard shoot.py:71: the dump's exit code and stderr are ignored; a failed dump silently uses height 6000 (FR-SB-11, -12).
+- storyboard shoot.py:76: the FAIL reason prints as a Python list (`['...']`) (FR-SB-11).
+- storyboard shoot.py:14,32: `PLAYWRIGHT_BROWSERS_PATH` is ignored, and the glob can pick an x64 shell on arm64 when both exist (FR-SB-10).
+- storyboard skeleton.html:98: the OS reduced-motion query stops `.run` only (FR-SB-08).
+- storyboard skeleton.html:116,226: "Keyboard only" where SKILL.md:60 and page.md:32 say "Keyboard path" (FR-SB-05).
+- storyboard brief.md:3: "strongest model tier available", no tier gate, no `Spawns` table; the brief lacks preamble, data rule, `unverified` and no-spawn line (FR-SB-14).
+- storyboard SKILL.md:81: commits the storyboard by instruction (FR-SB-13).
 
 ## Refuted audit findings
 
@@ -495,6 +565,10 @@ Each is fixed under the FR named. Line numbers here are verified; some audit cit
 - attack-plan D3 says execute "creates the Surprises section itself in Step 3.3/4.6". execute/SKILL.md:46,56 writes surprises into the owning documents (spec, plan, tickets); no step creates a "Surprises" section. The gap is larger than stated: the section the rules template names (subagent-rules-template.md:8) has no producer at all.
 - install-and-config B2 title "broken symlink detection" does not match its content; dangling links are handled (install.py:77,99). The real defect is rmtree under `--yes` (install.py:97-98), kept as FR-INST-13.
 - feedback-watch Q6 (does execute call watch.py?) is answered: execute/SKILL.md:76 only instructs arming the skill.
+- storyboard audit citations: shoot.py `:226-292`, test_shoot.py `:316-338`, brief.md `:119-158`, page.md `:188-191` and SKILL.md `:85-116` exceed the files (81, 46, 43, 56, 81 lines). They are offsets into one concatenated read. Findings B1, B2, B3, B5, B7, D2, D3, D7, F10, F11 are confirmed at the real lines in Known defects and FR-SB. Citations refuted, findings stand.
+- storyboard A7 / I2 ("`<skill>` is not filled by the brief template"): refuted. brief.md:3 says to fill every angle-bracket field, and `<skill>` (brief.md:39) is one; SKILL.md:12 defines it. What remains is the brief minimum's absolute-path rule (FR-SB-14).
+- storyboard F13 ("five inputs asked with defaults"): partly refuted. SKILL.md:26 asks for a default, but only input 1 has one (SKILL.md:28). Kept as a fix (FR-SB-02).
+- storyboard S-ST10/S-ST11 cite global.md:16 for the `For review: ` rule; it is global.md:17. Finding stands.
 
 ## Dropped
 
@@ -598,3 +672,19 @@ The user asked for suggested defaults by default, so the architect's four questi
 - A3: the model-name grep (FR-AGT-08) skips `.rearch/`, `.attack-plan/` and `.ai-notes/`.
 - A4: execute's PR and fix subagents use `default`, ticket auditors use `fast`.
 - A5 (orchestrator): `harness-common/SKILL.md` gets a description saying it is a shared library for other skills and never to be invoked on its own.
+
+## Storyboard answers (defaults, 2026-11-25)
+
+The user takes defaults. The architect settled each storyboard question with the recommended choice. These override the FR-SB Status lines that point here.
+
+- SB-Q1 (audit Q1, run state): storyboard follows the tier gate and has a `Spawns` table (Builder, `general`, `strong`). It keeps no resume file. The `Models for this run` table and Next line go in the work's ai-notes area when one exists; otherwise the gate runs in the session and the hand-over ends with a fenced resume prompt (FR-SB-16). `harness-common/references/state.md` states this rule for single-spawn skills.
+- SB-Q2 (audit Q2, `frontend-design`): stays external, named "when available", as Q9. Not bundled. Without it the Builder copies the look reference's tokens and parts (FR-SB-15).
+- SB-Q3 (audit Q3, commits): the shared rule wins. The storyboard is committed only when the user asks (FR-SB-13).
+- SB-Q4 (audit Q4, global trigger): the description trigger only. global.md gets no storyboard line; its `frontend-design` example becomes "when available" in Phase 5 as already planned.
+- SB-Q5 (audit Q5, topic doc): yes, now. `skills/harness-common/topics/Chrome headless shell.md` holds CON-CHROME-01..05. The code stays in `shoot.py`, its only user; it moves to harness-common only when a second skill needs a browser.
+- SB-Q6 (input defaults): look reference = the app's CSS and markup found in the repo; behaviour spec = the requirements doc sections that match the question's terms; current code = the screens the orchestrator finds for it; earlier storyboards = `prototype/*-storyboard.html`, or none. Without any look reference, the skeleton tokens are used and the page says so (audit A2).
+- SB-Q7 (tall pages, missing `data-h`): Phase 1 measures the screenshot limit with one scripted run. `shoot.py` shoots at most that height and marks the line `clipped from <H>`. A missing `data-h` marks the line `no data-h, used --height`. Virtual-time budget stays 3000 ms (audit A6).
+- SB-Q8 (lookup): honour `$PLAYWRIGHT_BROWSERS_PATH`, prefer the shell for `platform.machine()`, and check `$CHROME` is executable (audit A3, A4, B2).
+- SB-Q9 (decisions outside the repo, audit A9): when the requirements doc lives in a document tool, the decisions are written through `harness-common/references/publishing.md`.
+- SB-Q10 (duplicated rules, audit I8, S-ST11): brief.md points at SKILL.md "Rules" and keeps only Builder-specific lines. SKILL.md keeps its `For review: ` example and hand-over content, because they are skill-specific, and links the global delegation rule for the rest.
+- SB-Q11 (repo check, audit I6): a test renders skeleton.html through `shoot.py` and is skipped when no shell is found.
