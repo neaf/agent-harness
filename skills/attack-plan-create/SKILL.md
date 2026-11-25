@@ -55,7 +55,7 @@ Ask in this order, one question at a time, each with its default:
 2. **Hard constraints, before any design:** what must not change (shared frameworks, code owned by others, data model rules, API style), deadlines, release windows. A constraint found after the design forces a rewrite. Default: "no change to shared framework code, no schema change without a reason".
 3. **Inputs on hand:** design exports (full image paths), earlier attack plans or explorations, pull requests open or merged for this project, reference pull requests of a similar feature, other work in flight on the same code.
 4. **Audience:** who reviews the product solution and who reviews the technical one, by name or role.
-5. **Output:** Markdown pages in the repository (default, `docs/attack-plans/<slug>/`), or Notion when its tools are connected.
+5. **Output:** Markdown pages in the repository (default, `docs/attack-plans/<slug>/`), or Notion when its tools are connected. Publishing follows [publishing.md](../harness-common/references/publishing.md) (Stage 7).
 6. **Pace:** section by section (recommended), or draft ahead and review afterwards. Follow any change of mind later.
 
 Write `STATE.md`. Run the loop on its Hard constraints section (`--file STATE.md --heading "Hard constraints"`): the challenge step asks the author, once more, what else must not change.
@@ -93,7 +93,7 @@ A product section has no code term: no table, model, class, endpoint or query.
 1. Write the scope callout and the summary (Today, Goal, Already decided, Still open). The technical and milestone sections hold only their heading.
 2. Run `check_draft.py <work folder>/draft --product`. Fix every `FAIL`.
 3. Launch an `attack-plan-critic` with the Product reviewer brief, then grill the author on its findings, one at a time.
-4. Publish the product part alone (`references/publishing.md`), with a note in place of the technical part: "Technical solution: starts once product has reviewed this page."
+4. Publish the product part alone (Stage 7 rules), with a note in place of the technical part: "Technical solution: starts once product has reviewed this page."
 5. Ask the author: "Is this ready for product review?" On a yes, approve and suggest sharing it with the reviewers named in Stage 0. When the author wants to start the technical part before that, skip the gate and go on.
 
 Product feedback that arrives later goes through Stage 8: a changed product rule reopens its section, and every technical section after it turns stale.
@@ -129,7 +129,11 @@ Split the tasks so each pull request can be reviewed alone by the team that owns
 
 ## Stage 7 — Publish (stage `publish`, section `publish`)
 
-Publish the full set (`references/publishing.md`): the attack plan, then the technical solution and evidence pages, linked to each other. Keep the reviewers' edits and comments. Record the locations in STATE and run the loop on `publish` once the author has read the pages.
+Publish the full set by [publishing.md](../harness-common/references/publishing.md): the attack plan, then the technical solution and evidence pages, linked to each other. Keep the reviewers' edits and comments. Record the locations in STATE and run the loop on `publish` once the author has read the pages.
+
+- Source of truth: the drafts. Publishing copies them; reviewer edits go back into the drafts in Stage 8.
+- Markdown: copy `draft/attack-plan.md`, `draft/technical-solution.md` and `draft/evidence.md` to the output folder. The scope callout is a `> **Scope**` block, and milestone colors become a `Milestone` column.
+- Notion: the attack plan is the parent page, the technical solution and evidence pages its children. Task-table rows take the milestone's color.
 
 Then offer the next steps, without doing either unasked: creating the tracker tickets, one per task with its task block and `blocked-by` relations (Linear, Jira or GitHub Issues, when its tools are connected), and building a milestone with the `attack-plan-milestone-execute` skill.
 

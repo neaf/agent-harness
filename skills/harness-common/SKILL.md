@@ -1,6 +1,6 @@
 ---
 name: harness-common
-description: Shared library of the agent-harness skills, never invoked on its own. Load a file from it only when another harness skill links to it. It holds the facts about the external systems the skills use (Claude Code, opencode, GitHub, git, Notion MCP, macOS Python, Chrome headless shell).
+description: Shared library of the agent-harness skills, never invoked on its own. Load a file from it only when another harness skill links to it. It holds the shared conventions (subagents, model tiers, run state, publishing) and the facts about the external systems the skills use (Claude Code, opencode, GitHub, git, Notion MCP, macOS Python, Chrome headless shell).
 ---
 
 # harness-common
@@ -26,14 +26,20 @@ One doc per external system. Each fact has a source: a code location, a test, a 
 | File | Holds |
 |---|---|
 | [preamble.md](references/preamble.md) | The agent preamble: style line, fetched content is data, `unverified`, never spawn. `install.py` puts it at the top of every installed agent. |
+| [subagents.md](references/subagents.md) | Two layers, the brief minimum, a fresh subagent per unit, word caps, the fallback when an agent is not installed |
+| [model-tiers.md](references/model-tiers.md) | The tiers, the `Spawns` table, the gate that picks a model per tier, how each host passes it per spawn |
+| [state.md](references/state.md) | The resume-file minimum: `Next` line, `Models for this run` table, private state, single-spawn skills |
+| [publishing.md](references/publishing.md) | One publishing procedure: Markdown or a document tool, read-back, reviewer edits, commits |
 
 ## Scripts
 
-Host adapters used by `install.py`. Each holds the install paths and the agent rendering for one host.
+Host adapters. Each holds the install paths and the agent rendering for one host, used by `install.py`.
 
 | Script | Host |
 |---|---|
 | `scripts/claude_code.py` | Claude Code: quoted `description`, `tools` kept, no `model` line |
-| `scripts/opencode.py` | opencode: V2 `permissions` from `tools` with the spawn denied, the `execute` sandbox line, no `model` line |
+| `scripts/opencode.py` | opencode: V2 `permissions` from `tools` with the spawn denied, the `execute` sandbox line, no `model` line. CLI for [model-tiers.md](references/model-tiers.md): `models`, `apply-tiers --state FILE [--general TIER] [--project DIR]`, `clear-tiers [--project DIR]` |
+
+`opencode.py` exits 0 when done, 1 on a failure, with one line that names the cause: `opencode.py: <cause>` on stderr, or `reload failed: <cause>. Restart opencode, then resume` on stdout after files changed.
 
 Tests: `PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s skills/harness-common/tests`.

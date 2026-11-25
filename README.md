@@ -19,7 +19,7 @@ One source for the skills, subagents and global instructions used by Claude Code
 | [writing-craft](skills/writing-craft/SKILL.md) | Craft rules for text a human reads and acts on: the form that mirrors the reader's task, the exact word, layout, and revision from the reader's failure point. |
 | [qa-session](skills/qa-session/SKILL.md) | Builds, reworks and checks the script for a live QA session on a test environment: fresh subagents re-derive it from the sources, a verifier checks every expected result, and a session's ticks and findings survive a rework. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/qa-session/tests`. |
 | [storyboard](skills/storyboard/SKILL.md) | Defines a user experience before it is built: one self-contained HTML page per experience question, with the scenarios as strips of states, options side by side where the choice is real, one recommended, and the requirement changes and open questions on top. The author decides, the requirements doc records why each option lost. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/storyboard/tests`. |
-| [harness-common](skills/harness-common/SKILL.md) | Shared library for the other skills, never invoked on its own. Holds one topic doc per external system the skills depend on, the agent preamble, and the host adapters `install.py` uses. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/harness-common/tests`. |
+| [harness-common](skills/harness-common/SKILL.md) | Shared library for the other skills, never invoked on its own. Holds one topic doc per external system the skills depend on, the agent preamble, the shared conventions ([subagents](skills/harness-common/references/subagents.md), [model tiers](skills/harness-common/references/model-tiers.md), [run state](skills/harness-common/references/state.md), [publishing](skills/harness-common/references/publishing.md)), and the host adapters `install.py` uses. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/harness-common/tests`. |
 
 ## Topic docs
 
@@ -69,11 +69,11 @@ Each `agents/<name>.md` starts with four `key: value` lines between `---` fences
 | `tier` | `fast` (cheap), `default` (the session model) or `strong` (most capable) |
 | `tools` | Comma-separated Claude Code tool names: `Read`, `Glob`, `Grep`, `Edit`, `Write`, `Bash`, `WebFetch`, `WebSearch`, `Skill`. Never `Agent` or `Task`: agents never spawn subagents. |
 
-Install puts the shared preamble (`skills/harness-common/references/preamble.md`) above the role prompt, so agent files leave it out. Claude Code gets `name`, `description` and `tools`. opencode gets `description`, `mode: subagent` and `permissions` that deny the tools not listed and the spawn tool, plus the `execute` sandbox line ([opencode topic](skills/harness-common/topics/opencode.md), "Permissions"). Neither gets a `model` line: a run picks a model per tier when it starts.
+Install puts the shared preamble (`skills/harness-common/references/preamble.md`) above the role prompt, so agent files leave it out. Claude Code gets `name`, `description` and `tools`. opencode gets `description`, `mode: subagent` and `permissions` that deny the tools not listed and the spawn tool, plus the `execute` sandbox line ([opencode topic](skills/harness-common/topics/opencode.md), "Permissions"). Neither gets a `model` line: a run picks a model per tier when it starts, and the user confirms it ([model tiers](skills/harness-common/references/model-tiers.md)). On opencode, `opencode.py apply-tiers` writes run-scoped copies of the agents with a `model` line into the project's `.opencode/agents/`, listed in `.git/info/exclude`, and `clear-tiers` removes them.
 
 ## Tests
 
-`tests/` covers `install.py` (against a throwaway home) and the repo-wide rules: no model names in tracked files, ignored bytecode caches, a `SKILL.md` named after each skill folder, well-formed agent files. Each skill with scripts has its own `tests/` folder. Run every suite, one line each:
+`tests/` covers `install.py` (against a throwaway home) and the repo-wide rules: no model names in tracked files, ignored bytecode caches, a `SKILL.md` named after each skill folder, well-formed agent files, and `Spawns` tables that name existing agents with their tier. Each skill with scripts has its own `tests/` folder. Run every suite, one line each:
 
 ```sh
 for s in tests skills/*/tests; do printf '%s: ' "$s"; PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s "$s" 2>&1 | tail -1; done

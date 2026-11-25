@@ -21,7 +21,7 @@ The page is derived from sources, never from the conversation. Each input is nee
 4. **Environment:** URL, deployed build, feature switch (its UI label and how to set it), how each seeded user signs in. Required.
 5. **Personas and order.** Default: the most powerful persona first, then the new role, its edge cases, the roles that must see no change, and the feature switch off.
 6. **Open product decisions.** Each becomes a product question on the page.
-7. **Publishing target** (optional). Default: a markdown file. See `references/publishing.md`.
+7. **Publishing target** (optional). Default: a markdown file at `docs/qa/<slug>/session.md` in the feature's repository. See "Publishing" below.
 
 ## Modes
 
@@ -51,7 +51,7 @@ The page never holds this history.
 3. Run the **Builder** brief (`references/briefs.md`) with the sources and `decisions.md`. It writes the page and a derivation file: each check and the source that settles it.
 4. Run `check_page.py <page> -v` and fix every FAIL.
 5. Run the **Verifier** brief: a fresh reader, given only the page and the sources, checks every fact and does a cold read as the tester. Fix each wrong check. Label each unverifiable check on the page with the check that would settle it.
-6. Show the user the shape of the page (scenarios, checks, product questions, unverified checks) and the verifier's counts. Publish after the user's go-ahead, following `references/publishing.md`.
+6. Show the user the shape of the page (scenarios, checks, product questions, unverified checks) and the verifier's counts. Publish after the user's go-ahead ("Publishing" below).
 
 Setup items come from `references/setup-checklist.md`. The page's section order and the writing of scenarios, checks and product questions come from `references/page-template.md`.
 
@@ -87,6 +87,16 @@ The full shape is in `references/page-template.md`. The rules a reviewer checks 
 - No internal reference ids, no bare "today", no history from earlier sessions. Each session starts with an empty Findings table.
 
 `check_page.py` checks the mechanical part of these rules (ids, placeholders, emoji, scenario shape, the Findings section). It decides nothing about facts.
+
+## Publishing
+
+Follow [publishing.md](../harness-common/references/publishing.md). What is specific to this skill:
+
+- Source of truth: the published page. `sources.md` records the target, the page URL and its id, and "Tool notes" for tool quirks.
+- Markdown: links are relative to the file or absolute to the test environment. Findings are written into the same file during the session; commit the page after the session, not during it.
+- Read-back also compares the scenario count.
+- A published page with ticks or findings is never overwritten from a fresh build: the Rework carry-over decides what moves.
+- No personal details on the page beyond the seeded emails.
 
 ## Subagents
 

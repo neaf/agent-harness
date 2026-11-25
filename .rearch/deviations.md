@@ -56,3 +56,24 @@
 ## Orchestrator, between Phase 3 and Phase 4
 
 - Commit 5519633 (user, from another session): qa-session setup-checklist.md gains two Environment rules, deploy confirmed before seeding and browser headers for script probes. That session's commit had swept in 17 uncommitted Phase 3 files, so the orchestrator split the history: 5519633 holds the qa-session change alone, and b70bcae holds all of Phase 3. The tree is unchanged. Phase 8 keeps both rules.
+
+## Phase 4 (2026-11-25)
+
+1. `opencode reload` runs inside `opencode.py`, not in the orchestrator. The Exit says nothing outside `opencode.py` runs the opencode CLI, and the Work said the orchestrator runs `opencode reload`; the Exit wins. `apply-tiers` and `clear-tiers` reload at the end. A failed reload prints `reload failed: <cause>. Restart opencode, then resume` on stdout after the file lines and exits 1; the files stay.
+2. `apply-tiers` takes `--general TIER` (default `default`) and `--project DIR` (default `.`). One `general.md` sets the model of every `general` spawn (A2), so the skill names the tier; model-tiers.md says to give the highest tier of the skill's `general` spawns. Phases 8 (`strong`), 9 (`default`) and 10 (`default`) now say which.
+3. Overrides are rendered from the checkout's `agents/` through `install.py`'s validation (`install.sources()`) with one `model` line after `mode: subagent`, not copied from `~/.config/opencode/agents/`: the installed file has no tier. When the install is current the two are the same file plus the `model` line (test `test_overrides_match_the_installed_agent_plus_the_model_line`). `render_agent` gained an optional `model`; install never passes it.
+4. Overrides go to `.opencode/agents/` at the git top level of `--project`, and the record is a marked block in the file `git rev-parse --git-path info/exclude` names. `clear-tiers` removes only the files in that block. `apply-tiers` refuses, before any write, a file there it did not write. Outside a git repository both exit 1.
+5. Agents whose tier has no row in the table are skipped with a `skip` line, so a single-spawn skill can record one tier. A model cell must be a `provider/model` id; the first backticked value in the cell wins, so a label may stand outside the backticks (state.md).
+6. `general.md` holds its own prompt (preamble plus sandbox line) and denies `subagent`, because whether a Markdown override replaces or merges the built-in `general` agent is `unverified`. New quirk in `topics/opencode.md`.
+7. Skill-specific publishing lines did not fit "pointer only". attack-plan-create Stage 7 got three bullets (source of truth, Markdown copy with the scope block and `Milestone` column, Notion parent and children with colored rows). qa-session got a short "Publishing" section (source of truth, `sources.md`, links, Findings in the file, scenario count, no overwrite of a page with ticks, seeded emails only). Phase 7 keeps the create lines; Phase 8 trims the qa section for the simplified page.
+8. Files outside Touches: `skills/qa-session/references/page-template.md` (its `publishing.md` link pointed at the deleted file), `skills/harness-common/topics/Notion MCP.md` ("Used by" and the code locations now name the shared `publishing.md` sections), `skills/harness-common/topics/Claude Code.md` (code locations for the nested-spawn quirk and the model per spawn). 15 files changed or added, 2 deleted.
+9. The missing-agent fallback paragraphs in attack-plan-create SKILL.md and rearchitect SKILL.md stay: Phase 4 touches create SKILL.md for publishing only. Phase 7 Work now replaces the create sentence with a pointer to `subagents.md`; Phase 10 already deletes the rearchitect one.
+10. Counts: tests/ 34 (was 30, 4 Spawns tests), harness-common 25 (was 9). 7 suites, 189 tests, 21 expected failures, unchanged: Phase 4 had no marker.
+
+## Not verified in Phase 4
+
+- opencode: not installed here. Not checked live: `opencode models` output format (printed as is, one id per line assumed), that `opencode reload` reloads agent files, that a project `.opencode/agents/<id>.md` override wins over the global agent, that `general.md` overrides the built-in `general`, and that the `model` value is accepted double-quoted. `opencode.py models` on this Mac prints `opencode.py: opencode not found on PATH` and exits 1 (checked).
+- Claude Code: that the orchestrator reads the Agent tool's allowed `model` values from the tool definition is a session fact, not testable by script.
+- The missing-agent fallback (`subagents.md` "Missing agent") is prose; no spawn ran. Its `realpath` command was checked: in a throwaway HOME both installed `harness-common` links resolve to this checkout, and `agents/rearch-phase.md` is there.
+- Publishing to a document tool (Notion): prose only, no MCP call.
+- The `Spawns` rule is vacuous: no SKILL.md has a `Spawns` table yet. Its fixtures pass.

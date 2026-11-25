@@ -82,4 +82,4 @@ Empty at the start of each session.
 - The Known limits section comes before the walk-through, because the surprise must be said before it happens.
 - A check is one fact the tester can see. Two facts become two checks; the same fact in two places becomes one sentence that says why the two places differ.
 - When a scenario has no product assumption, the assumption line is left out, not written as "none".
-- Callouts are blockquotes here. A document tool maps them to its own callout block (see `publishing.md`).
+- Callouts are blockquotes here. A document tool maps them to its own callout block (see [publishing.md](../../harness-common/references/publishing.md)).

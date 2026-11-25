@@ -4,7 +4,7 @@ Project: agent-harness, one source of skills, subagents and global instructions 
 Branch: rearch/2026-11-25
 Base tag: rearch-base (d4b56d4)
 Stage: 5 (phase execution)
-Phase: 4 of 10 (Shared conventions and model tiers), not started
+Phase: 5 of 10 (Global instructions, notes, writing), not started
 
 ## Done
 - Stage 0 setup, 7f686cb
@@ -17,6 +17,7 @@ Phase: 4 of 10 (Shared conventions and model tiers), not started
 - Phase 2 Test harness: 151 tests in 6 suites, 26 expected failures; root tests/ with install and repo-rule tests, 71255b6
 - Phase 3 Installer and agent sources: install.py rewritten (quote, prune by manifest, backup, no model lines, exit 0-4), models.json deleted, harness-common adapters and preamble; 169 tests in 7 suites. Real home needs one install.py run (18 changes), not run yet, b70bcae
 - User commit 5519633: two qa-session setup rules, kept by Phase 8
+- Phase 4 Shared conventions and model tiers: harness-common references subagents, model-tiers, state, publishing; opencode.py models/apply-tiers/clear-tiers; Spawns rule test; two old publishing.md deleted; 189 tests
 
 ## Decisions
 - 2026-11-25: target is agent-harness itself, user call.
@@ -36,4 +37,4 @@ Phase: 4 of 10 (Shared conventions and model tiers), not started
 
 ## Next prompt
     Use the rearchitect skill. Continue from .rearch/STATE.md.
-    Next: Phase 4 (Shared conventions and model tiers).
+    Next: Phase 5 (Global instructions, notes, writing).

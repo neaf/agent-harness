@@ -1,4 +1,4 @@
-"""Rules over the whole repository: no model names, ignored caches, well-formed skills and agents."""
+"""Rules over the whole repository: no model names, ignored caches, well-formed skills, agents and Spawns tables."""
 import codecs, re, subprocess, sys, unittest
 from pathlib import Path
 
@@ -34,6 +34,48 @@ def frontmatter(text):
 
 def check_agent(path):
     return install.parse_agent(path)[0]
+
+
+SPAWNS_HEADER = ["Spawn", "Tier", "Used for"]
+
+
+def spawns_problems(text, agents):
+    """Problems in the `Spawns` tables of one SKILL.md (harness-common/references/model-tiers.md "Spawns table").
+
+    A table follows a heading named `Spawns`. Its Spawn cell names an agent or `general` (the first
+    backticked word, else the cell), and its Tier cell is the agent's tier. `agents` maps name to tier.
+    """
+    problems, fenced, section, header = [], False, False, None
+    for number, line in enumerate(text.splitlines(), 1):
+        s = line.strip()
+        if s.startswith("```") or s.startswith("~~~"):
+            fenced = not fenced
+            continue
+        if fenced:
+            continue
+        if s.startswith("#"):
+            section, header = s.lstrip("#").strip() == "Spawns", None
+            continue
+        if not section or not s.startswith("|"):
+            continue
+        cells = [c.strip() for c in s.strip("|").split("|")]
+        if header is None:
+            header = cells
+            if cells != SPAWNS_HEADER:
+                problems.append(f"line {number}: header {cells}, want {SPAWNS_HEADER}")
+            continue
+        if all(set(c) <= set(":- ") for c in cells) or header != SPAWNS_HEADER:
+            continue
+        span = re.search(r"`([^`]+)`", cells[0])
+        spawn = span.group(1) if span else cells[0]
+        tier = cells[1].strip("` ") if len(cells) > 1 else ""
+        if tier not in install.TIERS:
+            problems.append(f"line {number}: {spawn}: unknown tier {tier!r}")
+        elif spawn != "general" and spawn not in agents:
+            problems.append(f"line {number}: {spawn}: no such agent in agents/")
+        elif spawn != "general" and agents[spawn] != tier:
+            problems.append(f"line {number}: {spawn}: tier {tier}, agents/{spawn}.md says {agents[spawn]}")
+    return problems
 
 
 class ModelNameTest(unittest.TestCase):
@@ -90,6 +132,35 @@ class RepoRulesTest(unittest.TestCase):
         for name, reason in (("bad-fence.md", "opening"), ("bad-tier.md", "tier")):
             with self.subTest(fixture=name), self.assertRaisesRegex(ValueError, reason):
                 check_agent(FIXTURES / "agents" / name)
+
+
+class SpawnsTableTest(unittest.TestCase):
+    AGENTS = {"critic": "strong", "reader": "fast"}
+
+    def test_every_spawns_table_names_real_agents_with_their_tier(self):
+        agents = {p.stem: check_agent(p)["tier"] for p in (REPO / "agents").glob("*.md")}
+        for path in sorted((REPO / "skills").glob("*/SKILL.md")):
+            with self.subTest(skill=path.parent.name):
+                self.assertEqual(spawns_problems(path.read_text(), agents), [])
+
+    def test_the_check_accepts_a_good_table(self):
+        text = ("## Spawns\n\n| Spawn | Tier | Used for |\n|---|---|---|\n"
+                "| `critic` | `strong` | attacks |\n| `general` | default | builds |\n| reader | fast | reads |\n")
+        self.assertEqual(spawns_problems(text, self.AGENTS), [])
+
+    def test_the_check_finds_bad_rows(self):
+        text = ("## Spawns\n\n| Spawn | Tier | Used for |\n|---|---|---|\n"
+                "| `critic` | fast | x |\n| `ghost` | fast | x |\n| `general` | quick | x |\n"
+                "\n## Other\n\n| `ghost` | fast | ignored |\n"
+                "\n## Spawns\n\n| Agent | Tier |\n|---|---|\n")
+        problems = spawns_problems(text, self.AGENTS)
+        self.assertEqual(len(problems), 4, problems)
+        for part in ("critic: tier fast", "ghost: no such agent", "unknown tier 'quick'", "header"):
+            self.assertTrue(any(part in p for p in problems), part)
+
+    def test_a_fenced_table_is_not_checked(self):
+        text = "## Spawns\n\n```\n| Spawn | Tier | Used for |\n|---|---|---|\n| `ghost` | fast | x |\n```\n"
+        self.assertEqual(spawns_problems(text, self.AGENTS), [])
 
 
 if __name__ == "__main__":

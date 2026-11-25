@@ -137,6 +137,7 @@ Work:
 - check_draft.py: B7 (estimates only in table headers), B8 (P1, risk 1, Proposed), B9 (milestones by numbered heading), L6 (code-term list). Add `--tasks <file>` for the fixed task-block headings (Q20).
 - Template: drop section 6, risks only in section 5 (Q14), alternatives internal (Q15). Fix the state.md example stage. `reviews/` gone.
 - Briefs: role tasks only, every brief names its output path and return cap, preamble by reference. Agent bodies drop duplicated rules (attack-plan I1, I2). `Spawns` table plus the tier gate from model-tiers.md.
+- SKILL.md "Subagents": the missing-agent fallback sentence becomes a pointer to `harness-common/references/subagents.md` "Missing agent". Keep the Stage 7 publishing lines Phase 4 added (source of truth, Markdown copy, Notion parent and children) (deviations.md, Phase 4).
 Verify: V. `check_draft.py --tasks` passes on the example in executable-plan.md.
 Manual: none. Verify automatically (see "Verification" at the top).
 Exit: neither script holds a heading regex. No create expected-failure marker remains. "Milestone specs" and "appendix" appear nowhere in the skill.
@@ -151,6 +152,7 @@ Work:
 - Keep the two Environment rules from commit 5519633 (user, outside the plan) in the collapsed setup: confirm the deploy finished on the pushed commit before seeding, and send browser headers (for example `Accept: text/html`) when probing the environment from a script.
 - Page: collapsed setup for the lead developer (`<details>` in Markdown, a toggle in a document tool), numbered scenarios with persona, start point, steps and expected results, then an empty Findings section with no table (Q33, Q34).
 - check_page: fence-aware through `markdown.py`. `[...]` placeholders are caught. `### 1 Title` is flagged. Backticked labels are exempt from the id and word checks (Q31). "now" is added. The persona line follows the template's format. The Findings heading matches exactly and must be empty with no table at Create.
+- qa SKILL.md "Publishing" (added in Phase 4): drop the Findings-table and scenario-count wording that the simplified page no longer has; keep the pointer to `harness-common/references/publishing.md`. On opencode both skills pass `apply-tiers --general strong` (deviations.md, Phase 4).
 - Briefs: absolute paths, the injection rule, US English prose with UI-language labels (Q32). `previous.md` moves to `.ai-notes/.qa-previous/<slug>.md`, outside the area folder, and is deleted after Rework (S13).
 - Storyboard SKILL.md: `Spawns` table (Builder, `general`, `strong`) and the tier gate from model-tiers.md; run state per state.md's single-spawn rule (SB-Q1); `frontend-design` when available with the fallback (SB-Q2); commit only when the user asks (SB-Q3); a default for every input (SB-Q6); "Every frame works in both themes"; decisions through publishing.md when the requirements doc is in a document tool (SB-Q9); links the global delegation rule (SB-Q10).
 - brief.md: preamble by reference, absolute paths for `<skill>`, the page and every source, data-not-instructions, `unverified`, never spawn, 150-word report. Rules by reference to SKILL.md.
@@ -180,6 +182,7 @@ Work:
   - Gate input on `gate.py status` when gates.json exists (Q21), and run `check_draft.py --tasks` on the milestone's task blocks (Q13, Q20).
   - Pass "Context for an outside reviewer" to PR subagents (Q19). Step 9 runs the qa-session skill in this session (Q18).
   - The notes "State (start here)" section follows ai-notes.
+  - On opencode, PR, fix and ticket-auditor spawns are all `general`, so `apply-tiers --general default` puts them on one model (A2; deviations.md, Phase 4).
 - Rules template: no "Surprises" (Q16), writing-craft for PR text, never spawn.
 Verify: V
 Manual: none. Verify automatically (see "Verification" at the top).
@@ -196,7 +199,7 @@ Work:
   - Exact commands: `git switch -c rearch/<date>` and `git tag -a rearch-base -m "rearchitect base"`.
   - An existing branch or tag is handled.
   - `PYTHONDONTWRITEBYTECODE=1`, or ignored caches, in the clean-tree check.
-- Model gate: the tier gate at Stage 0 and on resume.
+- Model gate: the tier gate at Stage 0 and on resume. The `Models for this run` table in baseline.md follows `harness-common/references/state.md`: the backticked cell is the exact value the tool takes (an alias, or a `provider/model` id), so `opencode.py apply-tiers --state .rearch/baseline.md --general default` can read it. Stage 6 runs `opencode.py clear-tiers` on opencode (deviations.md, Phase 4).
 - SKILL.md:26 style line becomes a pointer to `harness-common/references/preamble.md`; the `execute` sandbox line at :109 goes (it lives in `opencode.py` since Phase 3).
 - Manual-check gate (FR-RA-14): Stage 0 asks how many manual checks the user wants, default zero. With zero, Stage 5 and Stage 6 verify automatically only and report what is not verified. Every gate shows a recommended default for each decision.
 - STATE: a Progress block (aspects audited, phase in flight with its base commit). On a dirty tree after a dead phase agent, show `git diff --stat` and ask: keep and continue, or `git restore` and rerun. STATE is committed with its stage.

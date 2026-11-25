@@ -4,7 +4,7 @@ Facts about opencode that the installer and the skills depend on. Vendor docs we
 
 opencode is not installed on the maintainer's Mac, so nothing here was checked against a running opencode. Every fact below is from the docs only, and none is checked live. A fact the docs leave open says `unverified`.
 
-Adapter: `skills/harness-common/scripts/opencode.py`, called by `install.py`.
+Adapter: `skills/harness-common/scripts/opencode.py`. `install.py` calls its render functions; the skills run its CLI (`models`, `apply-tiers`, `clear-tiers`) through `skills/harness-common/references/model-tiers.md`. Nothing else runs the opencode CLI.
 
 ## Agent files
 
@@ -19,14 +19,14 @@ Adapter: `skills/harness-common/scripts/opencode.py`, called by `install.py`.
 | A subagent with no `model` runs on the parent session's model. | Agents doc, "Model" |
 | A built-in agent (`build`, `plan`, `general`, `explore`) is overridden by an agent with the same id. | Agents doc, "Built-ins" |
 
-Code: `opencode.py:39-48` writes `description`, `mode: subagent` and `permissions`, then the preamble, the sandbox line and the body. It writes no `model` line: the agent runs on the session model until a run applies tiers ("Model per spawn").
+Code: `opencode.py:57-74` writes `description`, `mode: subagent` and `permissions`, then the preamble, the sandbox line and the body. Install writes no `model` line: the agent runs on the session model until a run applies tiers ("Model per spawn").
 
 ### Quirk: V1 and V2 frontmatter
 
 - Symptom: keys in an agent file are ignored, with only a warning in the log.
 - Cause: a file that uses any of `permissions`, `request`, `system` or `disabled` is read as V2, and its V1 keys (`name`, `tools`, `permission`, `temperature`) are dropped. A file without them is read as V1 and translated.
 - Workaround: write only V2 keys. Express tool limits as `permissions` rules, never as `tools`.
-- Code: `opencode.py:39-48` writes `permissions` and never `tools`, `permission` or `name`.
+- Code: `opencode.py:57-63` writes `permissions` and never `tools`, `permission` or `name`.
 
 ## Permissions
 
@@ -53,14 +53,14 @@ Actions the harness maps tools to:
 
 V1 names map as `bash` to `shell`, `task` to `subagent`, `write` and `patch` to `edit` (Migrate doc, "Permissions and tools").
 
-How the harness renders `tools` (`opencode.py:25-36`): one `deny` rule with resource `*` for every action in the table above that the agent's `tools` do not cover, then `{action: subagent, resource: "*", effect: deny}`. Allowed actions get no rule, so they keep the defaults and the user's global rules, `.env` ask included. `execute`, `question` and `external_directory` get no rule. An agent's skill references sit outside the project, so a deny on `external_directory` would cut it off from them. Whether these rules take effect in a running opencode is `unverified`.
+How the harness renders `tools` (`opencode.py:43-54`): one `deny` rule with resource `*` for every action in the table above that the agent's `tools` do not cover, then `{action: subagent, resource: "*", effect: deny}`. Allowed actions get no rule, so they keep the defaults and the user's global rules, `.env` ask included. `execute`, `question` and `external_directory` get no rule. An agent's skill references sit outside the project, so a deny on `external_directory` would cut it off from them. Whether these rules take effect in a running opencode is `unverified`.
 
 ### Quirk: Write and Edit are one action
 
 - Symptom: an agent whose `tools` list `Write` but not `Edit` (attack-plan-critic, -designer, -reader, rearch-auditor) can still edit files on opencode. On Claude Code it cannot.
 - Cause: opencode's `edit` action covers writing, editing and patching. There is no write-only action.
 - Workaround: none in the permissions. The read-only stance stays in the agent's role text (FR-AGT-04).
-- Code: `opencode.py:10-13` maps both to `edit`.
+- Code: `opencode.py:17-20` maps both to `edit`.
 
 ## The `subagent` tool
 
@@ -86,9 +86,29 @@ How the harness renders `tools` (`opencode.py:25-36`): one `deny` rule with reso
 | Does an agent without `model` inherit? | Yes, the parent session's model. | Agents doc, "Model" |
 | How are models listed? | `opencode models` lists every available model. Its output format is not documented: `unverified`. Availability depends on the project's providers. | CLI commands doc, "models"; Models doc |
 
-Answer: override files. At the tier gate, `opencode.py apply-tiers` writes one `.opencode/agents/<id>.md` per tiered agent in the project, each a full copy of the installed agent with the tier's `model` line, so the result does not depend on how files merge. A `general.md` override puts every `general` spawn on one model (A2). The written paths go into `.git/info/exclude`, and `clear-tiers` removes them when the run ends. After writing, the orchestrator runs `opencode reload`. If the next spawn does not use the new model, the gate ends with "restart opencode, then resume".
+Answer: override files. At the tier gate, `opencode.py apply-tiers` writes one `.opencode/agents/<id>.md` per tiered agent at the project's git top level, each a full copy of the installed agent with the tier's `model` line, so the result does not depend on how files merge. A `general.md` override puts every `general` spawn on one model (A2). The written paths go into `.git/info/exclude`, and `clear-tiers` removes them when the run ends. After writing, and after removing, the script runs `opencode reload`. If the reload fails or the next spawn does not use the new model, the orchestrator tells the user "restart opencode, then resume". Procedure: `skills/harness-common/references/model-tiers.md`.
 
 `override files`
+
+Code:
+- `opencode.py models` (`list_models`, `opencode.py:97-102`) prints the lines of `opencode models`. A missing binary prints `opencode not found on PATH` and exits 1 (`run`, `opencode.py:83-94`).
+- `apply-tiers` (`opencode.py:198-222`) reads the `Models for this run` table of the resume file (`tier_models`, `opencode.py:105-147`), renders each agent from the checkout's `agents/` through `install.py`'s validation with the model added (`render_agent`, `render_general`), and refuses to overwrite a file it did not write.
+- `clear-tiers` (`opencode.py:225-243`) removes only the files listed in its `info/exclude` block, then the block.
+- The written files are listed between the marker lines `BEGIN` and `END` (`opencode.py:29-30`) in the file `git rev-parse --git-path info/exclude` names.
+
+### Quirk: an override may not take effect until a restart
+
+- Symptom: after `apply-tiers`, a spawn still runs on the session model.
+- Cause: whether opencode reloads agent files on `opencode reload` or on its own is `unverified`.
+- Workaround: `apply-tiers` and `clear-tiers` run `opencode reload` and report `reload failed: ...` with exit 1 when it fails. The orchestrator then tells the user to restart opencode and resume.
+- Code: `opencode.py:246-252` (`reload`); `skills/harness-common/references/model-tiers.md` "Every spawn passes its tier's model".
+
+### Quirk: a `general.md` override replaces or merges the built-in agent
+
+- Symptom: unknown until checked live. A full replacement drops the built-in `general` prompt and permissions; a merge keeps them.
+- Cause: the docs say an agent with a built-in's id overrides it, but not whether a Markdown file replaces it whole. `unverified`.
+- Workaround: the override carries its own prompt (the preamble and the sandbox line) and denies `subagent`, so it holds the harness rules either way.
+- Code: `opencode.py:77-80` (`render_general`).
 
 ## No Monitor tool
 
@@ -112,7 +132,7 @@ Answer: override files. At the tier gate, `opencode.py apply-tiers` writes one `
 | `execute` runs JavaScript that calls other tools. It has no filesystem access, no imports and no timers; it has `fetch`. | Tools doc, "Execute" |
 | Denying `execute` with resource `*` removes Code Mode; its tools are then listed directly. | Tools doc; Permissions doc |
 
-Code: `opencode.py:16-17` (`SANDBOX_LINE`), added to opencode agents only (FR-AGT-06).
+Code: `opencode.py:23-24` (`SANDBOX_LINE`), added to opencode agents only (FR-AGT-06).
 
 ## Skills and global instructions
 

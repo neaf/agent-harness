@@ -34,6 +34,8 @@ Code: `claude_code.py:19-26` writes `name`, `description` and `tools`, then the 
 | The allowed values of `model` are listed in the Agent tool's definition in the session. The orchestrator reads them there. | This run: `.rearch/baseline.md` "Models for this run", every spawn passed `model` |
 | A resumed subagent keeps the alias it started with. | Subagents doc |
 
+Code: `skills/harness-common/references/model-tiers.md` "The gate" and "Every spawn passes its tier's model".
+
 ## Nested spawns
 
 | Fact | Source |
@@ -47,7 +49,7 @@ Code: `claude_code.py:19-26` writes `name`, `description` and `tools`, then the 
 - Symptom: a `general-purpose` subagent has the Agent tool and can start a third layer. The harness allows two layers at most (NFR-13).
 - Cause: nesting is on by default, up to three layers.
 - Workaround: every harness agent lists `tools` without `Agent`, and install rejects an agent that lists `Agent` or `Task`. The preamble says "You never spawn subagents". A brief for a `general-purpose` spawn carries the preamble rule "never spawn a subagent". The harness does not change the user's `settings.json`.
-- Code: `agents/*.md` `tools` lines; `claude_code.py:11` (`SPAWN_TOOLS`), checked in `install.py:62-64`; `skills/harness-common/references/preamble.md`.
+- Code: `agents/*.md` `tools` lines; `claude_code.py:11` (`SPAWN_TOOLS`), checked in `install.py:62-64`; `skills/harness-common/references/preamble.md`; `skills/harness-common/references/subagents.md` "Two layers" and "Brief minimum".
 
 ## Subagent environment
 
