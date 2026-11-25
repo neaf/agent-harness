@@ -112,6 +112,10 @@ Status values: `kept` (current behavior, stays; a listed fix may apply), `open` 
   Evidence: global.md:16. audit/notes-and-writing.md A5, I4
   Status: open, Q8
 
+- FR-GLB-12: When a reply suggests a shell command for the user to run (open a file, log in, clean up), write it with the `!` prefix, for example `! open prototype/storyboard.html`, so it runs in the session and its output lands in the conversation. Commands the agent runs itself are unaffected. Claude Code supports the prefix; opencode support is unverified, and the rule says so.
+  Evidence: user decision 2026-11-25.
+  Status: kept
+
 ## Notes (NOTES, skill ai-notes)
 
 - FR-NOTES-01: On a new session read `.ai-notes/README.md`, then the area README, and resume from its to-do.

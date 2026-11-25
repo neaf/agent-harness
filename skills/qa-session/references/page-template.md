@@ -1,85 +1,74 @@
 # Page template
 
-The shape of a QA session page. Square brackets are placeholders the builder fills in; the finished page has none. Section order is fixed because the tester reads top to bottom with the app open. Add nothing that is not on this list unless the content needs it.
+The shape of a QA session page. Square brackets are placeholders the Builder fills in; the finished page has none. The page has three parts, in this order: the setup for the lead developer, collapsed; the scenarios; an empty Findings section. Add nothing else.
+
+The driver reads the page top to bottom with the app open. Each scenario carries everything the driver needs to run it, so nobody has to scroll back or ask.
 
 ````markdown
 # QA session: [feature in plain words] ([date of the session])
 
-> [One or two sentences: what this session walks through, the order of the personas, and that the tester ticks each check as they go.]
+[One sentence: what the session walks through and in which order of personas. The driver ticks each check as they see it, and anyone adds what surprised them under Findings.]
 
-## Before the session
+<details>
+<summary>Setup for the lead developer</summary>
 
-- [ ] Environment: [URL] runs build [commit or pull request]. Check: [the first thing the tester sees that proves the build].
-- [ ] Feature switch [name in the UI, not the code name] is on for [scope]. Check: [where to see it].
-- [ ] Data: run [exact command] and compare the output with "Expected seed output".
-- [ ] Sign-in: each user below signs in once before the session. [How impersonation or sign-in works, if not obvious.]
-- [ ] Users, in order: [email] (scenarios 1, 3); [email] (scenario 2); [email] (scenario 4).
+Done before the session. Each check below has been run, and its result is written here.
 
-### Expected seed output
+- [ ] Environment: [URL] runs build [commit or pull request]. The deploy finished on that commit before the seed ran. Check: [the first thing on screen that proves the build].
+- [ ] Feature switch [its exact UI label] is on for [scope]. Check: [where to see it]. To turn it off: [how].
+- [ ] Data: [exact seed command] ran. It printed:
+  - [label as printed]: [value], [what it means in one phrase]
+  - [one line for every printed value a scenario relies on]
+- [ ] Sign-in: each user below signed in once. [How sign-in or impersonation works, when it is not obvious.]
+- [ ] Users: [email] (scenarios 1 and 3); [email] (scenario 2).
 
-- [label as printed]: [value], [what it means in one phrase]
-- [one line for every printed value the checks rely on]
+</details>
 
-## Known limits, not bugs
+## Scenarios
 
-> - **[Surprise in the words the tester will use]:** [what they will see]. [Why it is so here, with the source of the reason.] [What to do: carry on, or the check that is skipped.]
-> - [One line per surprise. Environment gaps, production behavior kept on purpose, real data next to seeded data.]
+### 1. [Title: what this scenario shows, in plain words]
 
-## Walk-through
+As [persona, by the role label the UI shows] (`[email]`):
 
-One story, one persona at a time, in this order. Tick each check as you see it. Anything unexpected goes into Findings at the end.
+Start: [the real URL or screen where the scenario starts].
 
-### 1. [Scenario title that advances the story]
+Context: [what the driver needs to know first: the seeded data this scenario uses, what changed since the previous scenario, and anything that will look odd but is expected here, with the reason].
 
-As [user label in the UI's words] (`[email]`):
+1. [One action, naming each control by its exact label.]
+   - [ ] [One observable fact this action shows.]
+   - [ ] [Next fact.]
+2. [Next action.]
+   - [ ] [Fact.]
 
-Baseline: [only for the first scenario, what the tester sees before any change].
+### 2. [Next title]
 
-What changed since the previous scenario: [one sentence, only the difference].
+As [persona] (`[email]`):
 
-- [ ] [One observable fact: what is on screen, or what a value is.]
-- [ ] [Next fact.]
+Start: [URL or screen].
 
-> **Why:** [only if the result needs a reason].
-> **Caveat:** [only if a limit applies here].
-> **Product assumption:** [only if the result depends on a decision not yet made; link the question below by its heading.]
+Context: [only what differs from scenario 1, and why the results below follow].
 
-### 2. [Next scenario title]
+1. [Action.]
+   - [ ] [Fact.]
 
-As [user label] (`[email]`):
+## Findings
+````
 
-What changed since the previous scenario: [one sentence].
+## Writing the scenarios
 
-- [ ] [Fact.]
-
-## Product questions
-
-Each question is for a product person who has not seen the project. Only the questions the session can answer.
-
-### [The question, as a question, in plain words]
-
-[Context: only what is needed to answer. Two or three sentences.]
-
-- **A. [option].** Currently in this test environment, scenario [n]: [consequence].
-- **B. [option].** [Consequence.]
+- **Order.** One persona at a time. Default order: the most powerful persona, then the new role, its edge cases, the roles that must see no change, then the feature switch off.
+- **Persona line.** Exactly ``As [persona] (`[email]`):``, the first line under the heading. The persona is the role label the UI shows, the email the seeded one.
+- **Context.** Everything the driver needs before the first step: the data the results depend on, the difference from the previous scenario, and any surprise with its reason (an environment gap, production behavior kept on purpose, real data next to seeded data). Show the data relationships in the UI in one scenario before a later one relies on them.
+- **Steps.** One action each, numbered. A step that shows nothing new has no checkbox.
+- **Checks.** One fact the driver can see, under the step that shows it. Two facts become two checks. Every expected result comes from the code and the seed. A result nobody could verify is labeled `unverified` with the check that would settle it, never written as a plain check.
+- **Labels.** Every on-screen word is the exact label that scenario's persona sees, in their UI language, traced to the code that renders it. No paraphrase. Write a label that looks like an id or a date word (`Q4 Budget`, `Today`) in backticks; `check_page.py` skips backticked text for those checks.
+- **Open product decisions.** A result that depends on a decision not yet made says so in the Context line: what the environment does now, and that it may change.
+- **Words.** Prose in US English. No internal reference ids (spec rules, decision or question ids): name the case. Scenario numbers are allowed. No bare "today" or "now": say "on production" or "in this test environment". No history from earlier sessions.
 
 ## Findings
 
-Empty at the start of each session.
+The heading is exactly `## Findings`, and nothing follows it when the page is built: no table, no placeholder text. The team writes findings there during the session, one bullet each.
 
-| # | Scenario | What you saw | What was expected | Status |
-|---|---|---|---|---|
+## In a document tool
 
-## After the session
-
-- [ ] [Restore anything the walk-through changed, for example the feature switch.]
-- [ ] [Record the answers to the product questions in [where the team tracks decisions].]
-````
-
-## Notes on the shape
-
-- Scenario numbers are positions in the walk-through, so "scenario 2" is allowed. Spec or decision ids are not.
-- The Known limits section comes before the walk-through, because the surprise must be said before it happens.
-- A check is one fact the tester can see. Two facts become two checks; the same fact in two places becomes one sentence that says why the two places differ.
-- When a scenario has no product assumption, the assumption line is left out, not written as "none".
-- Callouts are blockquotes here. A document tool maps them to its own callout block (see [publishing.md](../../harness-common/references/publishing.md)).
+The setup becomes the tool's toggle block, titled "Setup for the lead developer", collapsed. Checkboxes become to-do blocks. See [publishing.md](../../harness-common/references/publishing.md).

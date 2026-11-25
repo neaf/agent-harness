@@ -5,7 +5,7 @@ description: Builds, reworks and checks the QA session page for a feature milest
 
 # QA session
 
-Before a milestone merges, the team walks through it together on a test environment (review app or staging) with seeded users and data. One person drives; the others watch. The page is the script: setup, a linear walk-through with checkboxes, product questions, and an empty findings table. The tester reads it with the app open, so every step must work without help.
+Before a milestone merges, the team walks through it together on a test environment (review app or staging) with seeded users and data. One person drives; the others watch. The page is the script, in three parts: the setup for the lead developer, collapsed; numbered scenarios, each with the persona, where to start, the steps and the expected results; and an empty Findings section. The driver reads it with the app open, so every step must work without help.
 
 [writing-craft](../writing-craft/SKILL.md) is mandatory before drafting and before any review of the page. This skill adds what is specific to QA pages and the process around them. It does not repeat the craft rules.
 
@@ -20,7 +20,7 @@ The page is derived from sources, never from the conversation. Each input is nee
 3. **Seed:** the script or task that creates users, roles and data, and its printed output. Required: without it no check can be verified.
 4. **Environment:** URL, deployed build, feature switch (its UI label and how to set it), how each seeded user signs in. Required.
 5. **Personas and order.** Default: the most powerful persona first, then the new role, its edge cases, the roles that must see no change, and the feature switch off.
-6. **Open product decisions.** Each becomes a product question on the page.
+6. **Open product decisions.** Each scenario whose result depends on one says so in its Context line. Default: none.
 7. **Publishing target** (optional). Default: a markdown file at `docs/qa/<slug>/session.md` in the feature's repository. See "Publishing" below.
 
 ## Modes
@@ -29,7 +29,7 @@ Pick the mode from the state, then say which one runs in one line.
 
 - **Create:** no page yet. Full derivation, verification, publish.
 - **Rework:** the page exists and no session is running. The whole script is re-derived in fresh subagents that never see the previous page. Then the carry-over and a change report.
-- **Live edit:** a session is running and the tester is on the page. Small targeted edits only, state preserved. No rebuild.
+- **Live edit:** a session is running and the driver is on the page. Small targeted edits only, state preserved. No rebuild.
 
 Never rebuild a page that has ticks or findings without asking the user first.
 
@@ -41,71 +41,75 @@ Never rebuild a page that has ticks or findings without asking the user first.
 - `sources.md`: each source with its path, the code's commit, the seed command, the environment build, the publishing target and its page location, and "Tool notes".
 - `decisions.md`: each decision the user made about the page, with the date and their reason. The rework reads it first; a decision in it survives every rework unless the user changes it.
 - `rework-log.md`: one dated section per rework: what changed, and the source or decision behind each change.
+- `derivation.md`: the Builder's source for each check. The Verifier never reads it.
 
-The page never holds this history.
+The page never holds this history. The README's "State (start here)" section holds the `Models for this run` table and the `Next:` line ([state.md](../harness-common/references/state.md)).
 
 ## Create
 
 1. Check the required inputs. Stop and ask for any that is missing.
 2. Record `sources.md`: commit SHAs, seed command, environment build, feature switch, publishing target.
 3. Run the **Builder** brief (`references/briefs.md`) with the sources and `decisions.md`. It writes the page and a derivation file: each check and the source that settles it.
-4. Run `check_page.py <page> -v` and fix every FAIL.
-5. Run the **Verifier** brief: a fresh reader, given only the page and the sources, checks every fact and does a cold read as the tester. Fix each wrong check. Label each unverifiable check on the page with the check that would settle it.
-6. Show the user the shape of the page (scenarios, checks, product questions, unverified checks) and the verifier's counts. Publish after the user's go-ahead ("Publishing" below).
+4. Run `/usr/bin/python3 -I <skill>/scripts/check_page.py <page> -v` and fix every FAIL.
+5. Run the **Verifier** brief: a fresh reader, given only the page and the sources, checks every fact and does a cold read as the driver. Fix each wrong check. Label each unverifiable check on the page `unverified`, with the check that would settle it.
+6. Show the user the shape of the page (scenarios, checks, unverified checks) and the Verifier's counts. Publish after the user's go-ahead ("Publishing" below).
 
-Setup items come from `references/setup-checklist.md`. The page's section order and the writing of scenarios, checks and product questions come from `references/page-template.md`.
+The setup comes from `references/setup-checklist.md`. The page's shape and the writing of scenarios and checks come from `references/page-template.md`.
 
 ## Rework
 
 1. Read `decisions.md`, `sources.md` and the last entry of `rework-log.md`.
-2. Copy the current page, read from its publishing target, to `.ai-notes/qa-<slug>/previous.md`. It is kept for step 6 only. Never give its path to a subagent.
+2. Copy the current page, read from its publishing target, to `.ai-notes/.qa-previous/<slug>.md`. It sits outside the session folder, so no subagent pointed at the notes reads it. It is kept for steps 5 and 6 only. Never give its path to a subagent.
 3. Run the **Builder** brief again with the sources, the decisions and the current version of this skill's references. Its page goes to a new working file, not over the current page.
 4. Run `check_page.py` and the **Verifier** brief on the new page, as in Create.
-5. Carry over the live state. Ticks and findings are matched by scenario title and check text. A tick carries over only when the check still means the same thing; otherwise it is removed and the reply says why. Findings the user asked to keep are copied with their original wording. Nothing else moves.
-6. Compare the new page with `previous.md` and write the change report in `rework-log.md`: scenarios added, removed or reordered; checks changed, with old and new wording and the source or decision behind each; product questions changed; ticks removed. Show the user the report in one table.
-7. Ask for review. Publish after the go-ahead. Keep `previous.md`.
+5. Carry over the live state (`references/briefs.md` "Carry-over"). Ticks and findings are matched by scenario title and check text. A tick carries over only when the check still means the same thing; otherwise it is removed and the reply says why. Findings the user asked to keep are copied under Findings with their original wording, and `check_page.py` then runs with `--live`. Nothing else moves.
+6. Compare the new page with the previous copy and write the change report in `rework-log.md`: scenarios added, removed or reordered; checks changed, with old and new wording and the source or decision behind each; ticks removed. Show the user the report in one table.
+7. Ask for review. Publish after the go-ahead. Then delete `.ai-notes/.qa-previous/<slug>.md`: the change report and the published page keep what it held.
 
 ## Live edit
 
-- Change only what the tester asked for, or a check the session proved wrong. One edit per finding.
+- Change only what the team asked for, or a check the session proved wrong. One edit per finding.
 - Keep every tick and finding. When a check changes meaning, untick it and say in one line what changed and why.
 - Record a decision the user makes in `decisions.md` with the date.
-- Run `check_page.py` after the edit. No rebuild, no rework until the session is over. If a new fact is needed, verify it in one narrow fact check.
+- Run `check_page.py <page> --live` after the edit. No rebuild, no rework until the session is over. If a new fact is needed, verify it in one narrow fact check.
 
 ## Page rules
 
-The full shape is in `references/page-template.md`. The rules a reviewer checks first:
+The shape and the writing rules are in `references/page-template.md`. The rules a reviewer checks first:
 
-- One linear story, persona after persona. Each scenario: a title that advances the story, "As <user>:", one sentence on what changed since the previous scenario, checkboxes with one observable fact each, then only the note lines that apply (why, caveat, product assumption).
-- Show the data relationships in the UI before switching persona, so the next result is expected.
-- Every expected result is derived from the code and the seed, verified before it is written. An unverified check is labelled, never written as a step.
+- Three parts, in order: the setup for the lead developer, collapsed (`<details>` in Markdown, a toggle in a document tool); the numbered scenarios; `## Findings`, empty, with no table.
+- Each scenario carries all the context its driver needs: the persona line, where to start, the context, then numbered steps with the expected results as checkboxes under the step that shows them.
+- Every expected result is derived from the code and the seed, verified before it is written. An unverified check is labeled `unverified`, never written as a plain check.
 - The seed makes every scenario possible. A seed gap is fixed in the seed, with a test.
-- Every value the tester needs is resolved on the page before the session: real URLs, real ids, real emails.
-- Surprises go in "Known limits, not bugs", before the walk-through.
-- Product questions are written for a product person new to the project: the question as a heading, short context, option A (marked as what the test environment currently does, with the scenario where it shows) and option B, each with its consequence.
-- Every on-screen word is the exact label that scenario's user sees, in their language, traced to the code that renders it for them. No UI element is paraphrased; when a screen differs by persona, each scenario uses its persona's labels.
-- No internal reference ids, no bare "today", no history from earlier sessions. Each session starts with an empty Findings table.
+- Every value the driver needs is resolved on the page before the session: real URLs, real ids, real emails.
+- Every on-screen word is the exact label that scenario's persona sees, in their UI language, traced to the code that renders it. Prose is US English.
+- No internal reference ids, no bare "today" or "now", no history from earlier sessions.
 
-`check_page.py` checks the mechanical part of these rules (ids, placeholders, emoji, scenario shape, the Findings section). It decides nothing about facts.
+`check_page.py` checks the mechanical part of these rules: emoji, internal ids, `<…>` and `[…]` placeholders, unfinished markers (TODO, TBD, FIXME, XXX), bare "today" and "now", "(cont.)", the collapsed setup, scenario headings and their order, the persona line, scenarios without checks, and an empty Findings section. Fenced code is skipped, and so is backticked text for the id and "today" checks. With `--live` Findings may hold entries. It decides nothing about facts.
 
 ## Publishing
 
 Follow [publishing.md](../harness-common/references/publishing.md). What is specific to this skill:
 
 - Source of truth: the published page. `sources.md` records the target, the page URL and its id, and "Tool notes" for tool quirks.
-- Markdown: links are relative to the file or absolute to the test environment. Findings are written into the same file during the session; commit the page after the session, not during it.
-- Read-back also compares the scenario count.
+- Markdown: links are relative to the file or absolute to the test environment. Findings are written into the same file during the session.
 - A published page with ticks or findings is never overwritten from a fresh build: the Rework carry-over decides what moves.
 - No personal details on the page beyond the seeded emails.
 
-## Subagents
+## Spawns
 
-- **Builder** and **Verifier**: `references/briefs.md`. Run them as general-purpose subagents on the strongest model tier, with the brief as the whole prompt. Never give them the conversation, a previous page, or the orchestrator's conclusions.
+| Spawn | Tier | Used for |
+|---|---|---|
+| `general` | `strong` | the page Builder |
+| `general` | `strong` | the page Verifier |
+
+- Models: before the first spawn of a run, run the tier gate in [model-tiers.md](../harness-common/references/model-tiers.md) and write the table into the session README's "State (start here)". On opencode, `apply-tiers` takes `--general strong`.
+- Each prompt is the filled brief from `references/briefs.md`, and nothing else: never the conversation, a previous page, or the orchestrator's conclusions. Briefs follow [subagents.md](../harness-common/references/subagents.md).
 - Without subagents, run each brief yourself, say so in `README.md`, and keep the two passes separate: derive the page first, then check it as if you had not written it.
 
 ## Stopping and resuming
 
-Stop when the user asks, when a required input is missing, or when a tool keeps failing. Write the state in the session `README.md`, then print:
+Stop when the user asks, when a required input is missing, or when a tool keeps failing. Write the state in the session README's "State (start here)" section, then print:
 
 ```
 Use the qa-session skill. Continue from .ai-notes/qa-<slug>/README.md.
@@ -117,5 +121,5 @@ Next: <mode, step>.
 - **Sources decide, the user decides.** Facts come from code, seed and environment. Choices come from the user and are recorded in `decisions.md`.
 - **Fresh eyes are the point.** A rework starts from the sources, not from the previous page.
 - **Test environments only.** Writes go to the test environment. Shared or production data is read-only, and read only when the user allows it.
-- **Nothing is removed silently.** Old pages and notes are kept and marked as superseded.
+- **Nothing is removed silently.** Old pages and notes are kept and marked as superseded. The one file deleted is the Rework's copy of the previous page, after its change report is written.
 - **A failed tool call is retried or reported,** never replaced by a guess.

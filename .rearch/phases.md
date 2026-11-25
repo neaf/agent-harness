@@ -180,7 +180,7 @@ Work:
   - Exit goal: every PR in every stack has green CI, and every bot review thread is addressed and resolved. Human threads are listed for the user.
   - Arm feedback-watch with `--until bots`. Its stop line is `BOTS DONE`; open human threads show as `(human M)` on the PR line (deviations.md, Phase 6).
   - Gate input on `gate.py status` when gates.json exists (Q21), and run `check_draft.py --tasks <technical-solution.md> --milestone <n>` on the milestone's task blocks (Q13, Q20). The task headings are fixed in create's `executable-plan.md` "Task block schema"; input-readiness.md points there instead of restating the fields (deviations.md, Phase 7).
-  - Pass "Context for an outside reviewer" to PR subagents (Q19). Step 9 runs the qa-session skill in this session (Q18).
+  - Pass "Context for an outside reviewer" to PR subagents (Q19). Step 9 runs the qa-session skill in this session (Q18). Its own page description ("personas, happy path scenarios ..., and a findings table", SKILL.md:99) goes: the qa-session page has no findings table since Phase 8.
   - The notes "State (start here)" section follows ai-notes.
   - On opencode, PR, fix and ticket-auditor spawns are all `general`, so `apply-tiers --general default` puts them on one model (A2; deviations.md, Phase 4).
 - Rules template: no "Surprises" (Q16), writing-craft for PR text, never spawn.
@@ -191,7 +191,7 @@ Exit: no "milestone spec", "Surprises" or raw `resolveReviewThread` text remains
 ## Phase 10: rearchitect
 
 Goal: rearchitect fixed, domain-neutral, and on the shared tier gate. This is the last model-name holder.
-Covers: FR-RA-01..14, FR-AGT-07 (rearchitect gate, models table in baseline.md), FR-AGT-08 (complete), NFR-10
+Covers: FR-RA-01..14, FR-GLB-12, FR-AGT-07 (rearchitect gate, models table in baseline.md), FR-AGT-08 (complete), NFR-10
 Touches: skills/rearchitect/SKILL.md, references/state.md, references/docs-style.md, agents/rearch-architect.md, agents/rearch-auditor.md, agents/rearch-phase.md, tests/test_repo_rules.py (allowlist removed; every skill that names an agent or a general spawn, storyboard and qa-session included, has a `Spawns` table), README.md. 8 files.
 Deletes: "Model routing" names and the fallback paragraph in SKILL.md, the allowlist in test_repo_rules.py
 Work:
@@ -199,6 +199,7 @@ Work:
   - Exact commands: `git switch -c rearch/<date>` and `git tag -a rearch-base -m "rearchitect base"`.
   - An existing branch or tag is handled.
   - `PYTHONDONTWRITEBYTECODE=1`, or ignored caches, in the clean-tree check.
+- FR-GLB-12 (added after Phase 8): one new rule in instructions/global.md: shell commands suggested for the user to run use the `!` prefix, for example `! open <file>`. Commands the agent runs itself are unaffected. Mark opencode support unverified. Also use the prefix in every user-facing command line in rearchitect SKILL.md (Stage 0 clean-tree and stop/resume text).
 - Model gate: the tier gate at Stage 0 and on resume. The `Models for this run` table in baseline.md follows `harness-common/references/state.md`: the backticked cell is the exact value the tool takes (an alias, or a `provider/model` id), so `opencode.py apply-tiers --state .rearch/baseline.md --general default` can read it. Stage 6 runs `opencode.py clear-tiers` on opencode (deviations.md, Phase 4).
 - SKILL.md:26 style line becomes a pointer to `harness-common/references/preamble.md`; the `execute` sandbox line at :109 goes (it lives in `opencode.py` since Phase 3).
 - Manual-check gate (FR-RA-14): Stage 0 asks how many manual checks the user wants, default zero. With zero, Stage 5 and Stage 6 verify automatically only and report what is not verified. Every gate shows a recommended default for each decision.

@@ -95,7 +95,7 @@
   .run { width: 10px; height: 10px; flex: none; border: 1.5px solid var(--side-ink-2); border-top-color: var(--green); border-radius: 50%; animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .reduced .run, .reduced * { animation: none !important; }
-  @media (prefers-reduced-motion: reduce) { .run { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
 
   @media (max-width: 900px) { .sum, .opts, .opts.two, .flow { grid-template-columns: minmax(0, 1fr); } }
 </style>
@@ -113,7 +113,7 @@
       <li><a href="#picture">The design in one picture</a></li>
       <li><a href="#s1">1. First day</a></li>
       <li><a href="#s2">2. After a year</a></li>
-      <li><a href="#keys">Keyboard only</a></li>
+      <li><a href="#keys">Keyboard path</a></li>
       <li><a href="#edges">Edge cases</a></li>
       <li><a href="#rejected">Rejected</a></li>
     </ul>
@@ -223,7 +223,7 @@
 </section>
 
 <section id="keys">
-  <h2>Keyboard only</h2>
+  <h2>Keyboard path</h2>
   <table>
     <tr><th>You want to</th><th>Keys</th><th>Presses</th></tr>
     <tr><td>Start where the screen is</td><td><kbd>⌘N</kbd> <kbd>Enter</kbd></td><td>2</td></tr>

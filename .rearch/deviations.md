@@ -136,3 +136,23 @@
 - Agents rendered in a throwaway HOME parse as YAML (Ruby `YAML.safe_load`); no live load in Claude Code or opencode.
 - The opencode `apply-tiers --general strong` line for this skill: opencode is not installed here.
 - The Notion layout of the per-milestone task tables (colored rows per milestone table): no MCP call.
+
+## Phase 8 (2026-11-25)
+
+1. check_page.py gets `--live`. FR-QA-15 makes a non-empty Findings section a FAIL at Create, but Live edit and the Rework carry-over also run check_page on a page whose Findings hold the team's entries. Without `--live` Findings must be empty (any non-blank line, a table included, is a FAIL); with it entries are allowed and counted. architecture.md's CLI table (`<page> [-v]`) becomes `<page> [-v] [--live]` in Stage 6.
+2. Page shape (FR-QA-07, Q33, Q34): `<details>` with `<summary>Setup for the lead developer</summary>`, then `## Scenarios`, then `## Findings` with nothing after it. A scenario is `### N. Title`, the persona line ``As <persona> (`<email>`):`` as its first line, `Start:`, `Context:`, then numbered steps with the checks as checkboxes under the step that shows them. Known limits moved into each scenario's Context line (setup-checklist.md "Surprises"); open product decisions go there too. The two Environment rules from 5519633 stay in setup-checklist.md, and the deploy rule is also in the template's Environment item.
+3. check_page rules: the checker FAILs a missing `<details>` block before the first scenario, a first scenario line that is not the persona line (this replaces "check before the As line" and fixes audit B5, "As expected, ..."), any level-3 heading starting with a digit that is not `N. Title`, `[...]` placeholders (not checkboxes, links or references), and a Findings heading that is not exactly `Findings`. Backticked text is skipped for the id and "today"/"now" checks only; placeholder, emoji and unfinished-marker checks still read the whole line, so a leftover `` `[email]` `` still fails. Heading lines get the text checks too. The summary's `findings` count is top-level bullets in Findings (was table rows); the counts key `finding_rows` is now `findings`.
+4. Tests that locked in old behavior: `test_check_before_as_line_fails` (message changed), `test_missing_findings_section_fails` (message), `test_filled_findings_rows_are_counted` (replaced by `test_live_session_counts_findings`), `test_chrome_from_env` (now an executable file; a missing one raises `Fail`), `test_newest_playwright_shell` (executable files; non-executable ones are skipped), `test_a_dump_without_data_h_uses_the_height_option` (now asserts the suffix). 12 markers removed: 4 qa, 8 storyboard.
+5. shoot.py prints `FAIL <reason>` on stdout (was stderr through `sys.exit`), like the other harness CLIs. A start failure of Chrome (`OSError`) is a FAIL line too. With `--theme both`, a dark-theme failure follows the light line, so that output has two lines.
+6. Skeleton: `@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }`, the same scope as the toggle (animations only, not transitions). Checked live with `--force-prefers-reduced-motion` (new fact in the Chrome topic doc).
+7. Storyboard SKILL.md links the global delegation rule by path in prose, not by a Markdown link: from the installed skill link a relative link to `instructions/global.md` does not resolve.
+8. Files outside Touches: `.rearch/phases.md` (Phase 9 Work: execute SKILL.md:99 still says "findings table"). `references/page.md` unchanged. 13 files in Touches changed, plus phases.md and deviations.md; none added, none deleted.
+9. Counts: qa-session 22 (was 13), storyboard 24 (was 20). 7 suites, 290 tests, 2 expected failures (was 14).
+
+## Not verified in Phase 8
+
+- No live qa-session or storyboard run: that a session follows the new template, briefs, Spawns tables and tier gate is prose only.
+- The page in a document tool: the toggle block for the setup and the empty Findings section after a Notion write (no MCP call).
+- The opencode `apply-tiers --general strong` line for both skills: opencode is not installed here.
+- The x64 Playwright folder name (`chrome-headless-shell-mac-x64`) stays `unverified`; only the arm64 shell exists on this Mac.
+- A real Chrome hang past 120 s and a real failed dump: covered by fakes only.

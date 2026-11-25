@@ -4,7 +4,7 @@ Project: agent-harness, one source of skills, subagents and global instructions 
 Branch: rearch/2026-11-25
 Base tag: rearch-base (d4b56d4)
 Stage: 5 (phase execution)
-Phase: 8 of 10 (qa-session and storyboard), not started
+Phase: 9 of 10 (git adapter and milestone-execute), not started
 
 ## Done
 - Stage 0 setup, 7f686cb
@@ -20,7 +20,8 @@ Phase: 8 of 10 (qa-session and storyboard), not started
 - Phase 4 Shared conventions and model tiers: harness-common references subagents, model-tiers, state, publishing; opencode.py models/apply-tiers/clear-tiers; Spawns rule test; two old publishing.md deleted; 189 tests, dcf1a2d
 - Phase 5 Global instructions, notes, writing: global.md 18 rules to 16 (delegation and test-output merged, no rule lost, checked by orchestrator), ai-notes State section, writing-craft Scope and neutral examples, 011d9cf
 - Phase 6 GitHub adapter and feedback-watch: harness-common github.py (one paginated GraphQL snapshot), watcher fixes, --until bots; 230 tests, 17 expected failures; live read-only check on cli/cli passed, 7dfddc7
-- Phase 7 Markdown parser and attack-plan-create: harness-common markdown.py, gate.py v2 gates (multi-pair, migrates v1), reopen fix, task-block schema (check_draft --tasks), per-milestone task tables; 277 tests, 14 expected failures
+- Phase 7 Markdown parser and attack-plan-create: harness-common markdown.py, gate.py v2 gates (multi-pair, migrates v1), reopen fix, task-block schema (check_draft --tasks), per-milestone task tables; 277 tests, 14 expected failures, 5b21f35
+- Phase 8 qa-session and storyboard: QA page = collapsed setup, scenarios, empty Findings; check_page on markdown.py with --live; shoot.py FAIL lines, timeouts, 200000 px cap; 290 tests, 2 expected failures
 
 ## Decisions
 - 2026-11-25: target is agent-harness itself, user call.
@@ -36,8 +37,9 @@ Phase: 8 of 10 (qa-session and storyboard), not started
 - 2026-11-25: Stage 4 architect questions A1-A4 plus A5 settled with the recommended defaults, per the user's preference for defaults (end of requirements.md).
 - 2026-11-25: include the storyboard skill from ~/dev/agent-harness-storyboard; its questions SB-Q1..Q11 settled with defaults (end of requirements.md), user call.
 - 2026-11-25: a commit from another session swept in Phase 3 files; history split into 5519633 (qa-session) and b70bcae (Phase 3), user call. The user does no more harness work today, so the run handles that change now: Phase 8 keeps the rules.
+- 2026-11-25: new global rule FR-GLB-12: shell commands suggested for the user to run are written with the `!` prefix (for example `! open <file>`). Added to requirements.md and the Phase 10 Work list, user call.
 - 2026-11-25: models for this run: fast Sonnet 5.5, default Opus 5.5, strong Opus 5.5 (baseline.md), user call.
 
 ## Next prompt
     Use the rearchitect skill. Continue from .rearch/STATE.md.
-    Next: Phase 8 (qa-session and storyboard).
+    Next: Phase 9 (git adapter and milestone-execute).

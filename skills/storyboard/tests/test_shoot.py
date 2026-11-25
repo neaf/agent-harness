@@ -60,20 +60,33 @@ class ShootTest(unittest.TestCase):
         self.assertTrue(url.endswith("topic-storyboard.html?theme=dark"))
 
     def test_chrome_from_env(self):
-        self.assertEqual(find_chrome({"CHROME": "/opt/chrome"}), "/opt/chrome")
+        with tempfile.TemporaryDirectory() as folder:
+            chrome = executable(Path(folder, "chrome"))
+            self.assertEqual(find_chrome({"CHROME": chrome}), chrome)
 
-    def shell(self, home, build):
-        d = Path(home, "Library/Caches/ms-playwright", f"chromium_headless_shell-{build}", "chrome-headless-shell-mac-arm64")
-        d.mkdir(parents=True)
-        (d / "chrome-headless-shell").write_text("")
-        return str(d / "chrome-headless-shell")
+    def test_FR_SB_10_chrome_from_env_must_be_executable(self):
+        with tempfile.TemporaryDirectory() as folder:
+            plain = Path(folder, "chrome")
+            plain.write_text("")
+            for chrome in ("/nonexistent/chrome", str(plain), folder):
+                with self.subTest(chrome=chrome), self.assertRaisesRegex(shoot.Fail, "not an executable file"):
+                    find_chrome({"CHROME": chrome})
 
     def test_newest_playwright_shell(self):
         with tempfile.TemporaryDirectory() as home:
-            self.shell(home, 998)
-            newest = self.shell(home, 1248)
-            self.shell(home, 1100)
+            cache = Path(home, "Library/Caches/ms-playwright")
+            playwright_shell(cache, 998)
+            newest = playwright_shell(cache, 1248)
+            playwright_shell(cache, 1100)
             self.assertEqual(find_chrome({"PATH": ""}, home=home), newest)
+
+    def test_FR_SB_10_non_executable_shells_are_skipped(self):
+        with tempfile.TemporaryDirectory() as home:
+            cache = Path(home, "Library/Caches/ms-playwright")
+            working = playwright_shell(cache, 1100)
+            broken = Path(playwright_shell(cache, 1248))
+            os.chmod(broken, 0o644)
+            self.assertEqual(find_chrome({"PATH": ""}, home=home), working)
 
     def test_never_a_browser_app(self):
         with tempfile.TemporaryDirectory() as home, tempfile.TemporaryDirectory() as bin_dir:
@@ -83,15 +96,13 @@ class ShootTest(unittest.TestCase):
                 os.chmod(exe, 0o755)
             self.assertIsNone(find_chrome({"PATH": bin_dir}, home=home))
 
-    # Known defects. Phase 8 fixes each and removes its marker.
+    # Defects fixed in Phase 8.
 
-    @unittest.expectedFailure
     def test_FR_SB_10_playwright_browsers_path_is_honoured(self):
         with tempfile.TemporaryDirectory() as home, tempfile.TemporaryDirectory() as cache:
             shell = playwright_shell(cache, 1248)
             self.assertEqual(find_chrome({"PATH": "", "PLAYWRIGHT_BROWSERS_PATH": cache}, home=home), shell)
 
-    @unittest.expectedFailure
     def test_FR_SB_10_host_architecture_shell_is_preferred(self):
         with tempfile.TemporaryDirectory() as home:
             cache = Path(home, "Library/Caches/ms-playwright")
@@ -158,7 +169,19 @@ class MainTest(unittest.TestCase):
     def test_a_dump_without_data_h_uses_the_height_option(self):
         code, stdout, _ = self.main(FakeChrome(dom="<html><head>"), "--theme", "light", "--height", "5000")
         self.assertEqual(code, 0)
-        self.assertTrue(stdout[0].startswith(f"{self.out / 'skeleton-light.png'}  1440x5000"), stdout)
+        self.assertEqual(stdout, [f"{self.out / 'skeleton-light.png'}  1440x5000 (no data-h, used --height)"])
+
+    def test_FR_SB_12_a_page_taller_than_the_limit_is_clipped(self):
+        fake = FakeChrome(dom='<html data-h="250000"><head>')
+        code, stdout, _ = self.main(fake, "--theme", "light")
+        self.assertEqual(code, 0)
+        self.assertEqual(stdout, [f"{self.out / 'skeleton-light.png'}  1440x200000 (clipped from 250000)"])
+        self.assertIn("--window-size=1440,200000", fake.calls[-1])
+
+    def test_a_failed_screenshot_without_stderr_names_the_cause(self):
+        code, _, lines = self.main(FakeChrome(shot_code=1), "--theme", "light")
+        self.assert_one_fail_line(code, lines)
+        self.assertEqual(lines[0], "FAIL light: no screenshot")
 
     def test_a_missing_page_fails(self):
         code, _, lines = self.main(FakeChrome(), page=self.tmp / "missing.html")
@@ -170,23 +193,19 @@ class MainTest(unittest.TestCase):
         self.assert_one_fail_line(code, lines)
         self.assertIn("playwright install", lines[0])
 
-    @unittest.expectedFailure
     def test_FR_SB_11_chrome_timeout_gives_one_fail_line(self):
         code, _, lines = self.main(FakeChrome(error=subprocess.TimeoutExpired(["chrome"], 120)))
         self.assert_one_fail_line(code, lines)
 
-    @unittest.expectedFailure
     def test_FR_SB_10_non_executable_chrome_gives_a_fail_line(self):
         code, _, lines = self.main(None, env={"CHROME": str(self.tmp / "nonexistent")})
         self.assert_one_fail_line(code, lines)
 
-    @unittest.expectedFailure
     def test_FR_SB_11_failed_dump_is_reported(self):
         code, _, lines = self.main(FakeChrome(dump_code=1, dump_err="starting\ndump crashed\n"), "--theme", "light")
         self.assert_one_fail_line(code, lines)
         self.assertIn("dump crashed", lines[0])
 
-    @unittest.expectedFailure
     def test_FR_SB_11_fail_reason_is_plain_text(self):
         code, _, lines = self.main(FakeChrome(shot_code=1, shot_err="starting\nrenderer crashed\n"), "--theme", "light")
         self.assert_one_fail_line(code, lines)
@@ -197,7 +216,6 @@ class SkeletonTest(unittest.TestCase):
     def setUp(self):
         self.html = SKELETON.read_text()
 
-    @unittest.expectedFailure
     def test_FR_SB_08_os_reduced_motion_stops_every_animation(self):
         rules = []
         for start in [m.end() for m in re.finditer(r"@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{", self.html)]:
@@ -211,7 +229,6 @@ class SkeletonTest(unittest.TestCase):
                             and re.search(r"animation(-name)?\s*:\s*none", body)
                             for selectors, body in rules), rules)
 
-    @unittest.expectedFailure
     def test_FR_SB_05_keyboard_section_is_named_keyboard_path(self):
         self.assertNotIn("Keyboard only", self.html)
         self.assertRegex(self.html, r'<a href="#keys">Keyboard path</a>')
