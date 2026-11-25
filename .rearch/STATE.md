@@ -4,7 +4,7 @@ Project: agent-harness, one source of skills, subagents and global instructions 
 Branch: rearch/2026-11-25
 Base tag: rearch-base (d4b56d4)
 Stage: 5 (phase execution)
-Phase: 7 of 10 (Markdown parser and attack-plan-create), not started
+Phase: 8 of 10 (qa-session and storyboard), not started
 
 ## Done
 - Stage 0 setup, 7f686cb
@@ -19,7 +19,8 @@ Phase: 7 of 10 (Markdown parser and attack-plan-create), not started
 - User commit 5519633: two qa-session setup rules, kept by Phase 8
 - Phase 4 Shared conventions and model tiers: harness-common references subagents, model-tiers, state, publishing; opencode.py models/apply-tiers/clear-tiers; Spawns rule test; two old publishing.md deleted; 189 tests, dcf1a2d
 - Phase 5 Global instructions, notes, writing: global.md 18 rules to 16 (delegation and test-output merged, no rule lost, checked by orchestrator), ai-notes State section, writing-craft Scope and neutral examples, 011d9cf
-- Phase 6 GitHub adapter and feedback-watch: harness-common github.py (one paginated GraphQL snapshot), watcher fixes, --until bots; 230 tests, 17 expected failures; live read-only check on cli/cli passed
+- Phase 6 GitHub adapter and feedback-watch: harness-common github.py (one paginated GraphQL snapshot), watcher fixes, --until bots; 230 tests, 17 expected failures; live read-only check on cli/cli passed, 7dfddc7
+- Phase 7 Markdown parser and attack-plan-create: harness-common markdown.py, gate.py v2 gates (multi-pair, migrates v1), reopen fix, task-block schema (check_draft --tasks), per-milestone task tables; 277 tests, 14 expected failures
 
 ## Decisions
 - 2026-11-25: target is agent-harness itself, user call.
@@ -39,4 +40,4 @@ Phase: 7 of 10 (Markdown parser and attack-plan-create), not started
 
 ## Next prompt
     Use the rearchitect skill. Continue from .rearch/STATE.md.
-    Next: Phase 7 (Markdown parser and attack-plan-create).
+    Next: Phase 8 (qa-session and storyboard).

@@ -179,7 +179,7 @@ Work:
 - SKILL.md:
   - Exit goal: every PR in every stack has green CI, and every bot review thread is addressed and resolved. Human threads are listed for the user.
   - Arm feedback-watch with `--until bots`. Its stop line is `BOTS DONE`; open human threads show as `(human M)` on the PR line (deviations.md, Phase 6).
-  - Gate input on `gate.py status` when gates.json exists (Q21), and run `check_draft.py --tasks` on the milestone's task blocks (Q13, Q20).
+  - Gate input on `gate.py status` when gates.json exists (Q21), and run `check_draft.py --tasks <technical-solution.md> --milestone <n>` on the milestone's task blocks (Q13, Q20). The task headings are fixed in create's `executable-plan.md` "Task block schema"; input-readiness.md points there instead of restating the fields (deviations.md, Phase 7).
   - Pass "Context for an outside reviewer" to PR subagents (Q19). Step 9 runs the qa-session skill in this session (Q18).
   - The notes "State (start here)" section follows ai-notes.
   - On opencode, PR, fix and ticket-auditor spawns are all `general`, so `apply-tiers --general default` puts them on one model (A2; deviations.md, Phase 4).

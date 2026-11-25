@@ -33,13 +33,14 @@ One doc per external system. Each fact has a source: a code location, a test, a 
 
 ## Scripts
 
-Adapters, one per external system. The host adapters hold the install paths and the agent rendering, used by `install.py`.
+Adapters, one per external system, and the Markdown parser. The host adapters hold the install paths and the agent rendering, used by `install.py`.
 
 | Script | System |
 |---|---|
 | `scripts/claude_code.py` | Claude Code: quoted `description`, `tools` kept, no `model` line |
 | `scripts/opencode.py` | opencode: V2 `permissions` from `tools` with the spawn denied, the `execute` sandbox line, no `model` line. CLI for [model-tiers.md](references/model-tiers.md): `models`, `apply-tiers --state FILE [--general TIER] [--project DIR]`, `clear-tiers [--project DIR]` |
 | `scripts/github.py` | GitHub through `gh`: `Gh(runner).repo()`, `.pr_snapshot(repo, number)` (state, head, rollup, reviews, threads with bot or human, every page), `.resolve_thread(id)`. Raises `GhError` with one line. Library only, no CLI. Used by `feedback-watch` |
+| `scripts/markdown.py` | Markdown structure, no external system: `fence_mask`, `headings` (ATX, outside fences), `section`, `digest` (SHA-256 over one or more file and heading pairs). Raises `Missing` naming the file or section. Library only. Used by `attack-plan-create` |
 
 `opencode.py` exits 0 when done, 1 on a failure, with one line that names the cause: `opencode.py: <cause>` on stderr, or `reload failed: <cause>. Restart opencode, then resume` on stdout after files changed.
 

@@ -14,7 +14,8 @@ You propose the technical solution of an attack plan. The caller gives the work 
 3. Prefer the smallest change that delivers the approved product solution. Do not widen the scope.
 4. For every change to access rules, say who gains access and check every path the change reaches.
 5. Write each alternative you ruled out, with why, to `draft/alternatives.md`. The proposal names none of them.
-6. Read code only at the pinned commit: `git grep <term> <sha>`, `git show <sha>:<path>`. Mark what you could not verify. Evidence comes from our code, the docs and the typings. When those leave something open, write it as unverified with the check that would settle it. Do not read third-party internals (minified code, binaries).
+6. Read code only at the pinned commit: `git grep <term> <sha>`, `git show <sha>:<path>`, never the working tree. Evidence comes from our code, the docs and the typings. Do not read third-party internals (minified code, binaries).
+7. Do not write the step sections. Write nothing to any outside tool.
 
 ## Reply to the caller
 

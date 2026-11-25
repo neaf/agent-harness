@@ -1,10 +1,12 @@
-import shutil, sys, tempfile, unittest
+import io, re, shutil, subprocess, sys, tempfile, unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-from check_draft import CheckDraft, headings, section_text  # noqa: E402
+from check_draft import TASK_HEADINGS, CheckDraft, check_tasks, main  # noqa: E402
 
-FIXTURE = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "markdown" / "fenced-headings.md"
+SKILL = Path(__file__).resolve().parent.parent
+FIXTURE = SKILL.parents[1] / "tests" / "fixtures" / "markdown" / "fenced-headings.md"
 
 QUESTIONS = """**Q1. Overdue tasks**
 - **Context**
@@ -120,9 +122,142 @@ class CheckDraftTest(unittest.TestCase):
         self.assertEqual(failures, ["exists before the product solution is approved"])
 
     def test_fenced_lines_are_not_headings(self):
-        text = FIXTURE.read_text()
-        self.assertEqual([title for _, title, _ in headings(text)], ["product solution", "glossary", "setup", "week widget"])
-        self.assertIn("After the seed, the list shows 3 tasks.", section_text(text, r"\bsetup\b"))
+        text = plan().replace("# 5. Risks\n1. **Query cost**\n", "```sh\n# 5. Risks\n```\n")
+        self.assertEqual(self.messages(self.run_check(text), "FAIL"), ["no risks section"])
+        fixture = FIXTURE.read_text().replace("# Product solution", "# 1. Product solution")
+        text = plan().replace("# 1. Product solution\n" + PRODUCT, fixture)
+        self.assertEqual(self.messages(self.run_check(text), "FAIL"), [])
+
+    def test_FR_APC_11_B7_an_estimated_rows_column_is_not_an_estimate(self):
+        table = "| Table | Estimated rows |\n|---|---|\n| tasks | 10 estimate |\n"
+        self.assertEqual(self.run_check(plan(technical=table)), [("PASS", "all", "no blocking issue")])
+
+    def test_FR_APC_11_B7_an_estimate_header_fails_in_the_technical_solution_too(self):
+        for table in ("| Milestone | Tasks | **Effort** |\n|---|---|---|\n",
+                      "<table>\n<tr><td>Milestone</td><td>Estimate</td></tr>\n<tr><td>M1</td><td>x</td></tr>\n</table>\n"):
+            with self.subTest(table=table):
+                results = self.run_check(plan(), technical_solution=f"# Overview\n{table}")
+                self.assertIn(("FAIL", "technical-solution.md", "a task table has an estimate column"), results)
+        (self.folder / "technical-solution.md").unlink()
+        rows = "| Milestone | Tasks |\n|---|---|\n| M1 | Estimate the load |\n"
+        self.assertEqual(self.messages(self.run_check(plan(technical=rows)), "FAIL"), [])
+
+    def test_FR_APC_11_B8_template_banned_labels_warn(self):
+        warnings = self.messages(self.run_check(plan(technical="1. Add it for P1, which risk 2 covers.\n")), "WARN")
+        self.assertEqual(warnings, ['line 14: inline cross-reference "risk 2"', 'line 14: inline cross-reference "P1"'])
+        warnings = self.messages(self.run_check(plan(product="Proposed: managers see every task.\n")), "WARN")
+        self.assertEqual(warnings, ['line 4: "Proposed": write the rule as decided, or as an open question'])
+
+    def test_FR_APC_11_B9_a_product_page_named_milestones_is_not_the_section(self):
+        product = PRODUCT + "## Milestones overview\nThe page lists the milestones of a client.\n"
+        text = plan(product=product).replace("# 4. Milestones and verification\n- M1: the week widget.\n",
+                                             "# 4. Milestones and verification\n")
+        failures = self.messages(self.run_check(text, "product"), "FAIL")
+        self.assertEqual(sorted(failures), ["the technical section has content before the product solution is approved"])
+        unnumbered = text.replace("# 0. ", "# ").replace("# 1. ", "# ").replace("# 2. ", "# ") \
+            .replace("# 3. ", "# ").replace("# 4. ", "# ").replace("# 5. ", "# ")
+        failures = self.messages(self.run_check(unnumbered, "product"), "FAIL")
+        self.assertEqual(sorted(failures), ["the technical section has content before the product solution is approved"])
+
+    def test_FR_APC_11_L6_prose_words_are_not_code_terms(self):
+        product = "A first-class view. Managers query the list by client and see the schema of the week.\n"
+        self.assertEqual(self.messages(self.run_check(plan(product=product)), "WARN"), [])
+
+
+def task(title="[WK M1-1] Add the widget", skip=(), extra="", empty=()):
+    parts = [f"### {title}\n"]
+    for heading, _ in TASK_HEADINGS:
+        if heading in skip:
+            continue
+        parts.append(f"#### {heading}\n" + ("" if heading in empty else "None, for the test.\n"))
+    return "".join(parts) + extra
+
+
+class TasksTest(unittest.TestCase):
+    def setUp(self):
+        self.folder = Path(tempfile.mkdtemp())
+        self.path = self.folder / "technical-solution.md"
+
+    def tearDown(self):
+        shutil.rmtree(self.folder)
+
+    def check(self, text, milestone=None):
+        self.path.write_text("# 6. Task detail\n## M1 tasks\n" + text)
+        return [(level, message) for level, _, message in check_tasks(self.path, milestone)]
+
+    def test_a_full_block_passes(self):
+        self.assertEqual(self.check(task() + task("[WK M1-2] Add the endpoint")), [("PASS", "2 task block(s)")])
+
+    def test_names_missing_empty_and_unknown_parts(self):
+        results = self.check(task(skip=("Files", "QA"), empty=("Base",), extra="#### Notes\nx\n"))
+        self.assertIn(("FAIL", "M1-1: no Files, QA"), results)
+        self.assertIn(("FAIL", 'M1-1: Base is empty (write "None" and why)'), results)
+        self.assertTrue(any(level == "WARN" and 'heading "Notes"' in m for level, m in results), results)
+
+    def test_the_tracker_ticket_is_optional(self):
+        self.assertEqual(self.check(task(skip=("Tracker ticket",))), [("PASS", "1 task block(s)")])
+
+    def test_parts_must_keep_the_schema_order(self):
+        text = task().replace("#### Base\n", "#### Tmp\n").replace("#### QA\n", "#### Base\n").replace("#### Tmp\n", "#### QA\n")
+        self.assertIn(("FAIL", "M1-1: headings out of the schema order"), self.check(text))
+
+    def test_numbering_and_project_code(self):
+        results = self.check(task() + task("[WK M1-3] Add the endpoint") + task("[SHOP M2-1] Other"))
+        self.assertIn(("FAIL", "M1 tasks are not numbered 1 to 2 in order: M1-1, M1-3"), results)
+        self.assertIn(("FAIL", "task titles use more than one project code: SHOP, WK"), results)
+
+    def test_milestone_filter_and_no_block(self):
+        text = task() + task("[WK M2-1] Next milestone")
+        self.assertEqual(self.check(text, 2), [("PASS", "1 task block(s)")])
+        self.assertEqual(self.check(text, 3)[0][0], "FAIL")
+        self.assertIn("no task block", self.check("Just prose.\n")[0][1])
+
+    def test_a_fenced_task_is_not_a_task(self):
+        self.assertIn("no task block", self.check("```markdown\n" + task() + "```\n")[0][1])
+
+    def test_the_example_in_executable_plan_passes_and_follows_the_schema(self):
+        doc = (SKILL / "references" / "executable-plan.md").read_text()
+        example = re.search(r"## Task block example\n\n```markdown\n(.*?)\n```", doc, re.DOTALL).group(1)
+        self.path.write_text(example + "\n")
+        self.assertEqual([r[0] for r in check_tasks(self.path)], ["PASS"])
+        listed = re.search(r"these headings, in this order: (.*?)\.\n", doc).group(1).split(", ")
+        self.assertEqual(listed, [h for h, _ in TASK_HEADINGS])
+
+
+class CommandLineTest(unittest.TestCase):
+    def run_main(self, *args):
+        with redirect_stdout(io.StringIO()) as out, redirect_stderr(io.StringIO()) as err:
+            code = main(list(args))
+        return code, out.getvalue(), err.getvalue()
+
+    def test_bad_command_lines_name_the_problem(self):
+        missing = str(Path(tempfile.gettempdir()) / "no-such-draft-folder")
+        for args, text in (((), "give one draft folder, got 0"), ((missing,), "no draft folder"),
+                           (("--tasks",), "--tasks needs a file"), (("--tasks", missing), "no file"),
+                           ((".", "--strict"), "unknown option --strict"),
+                           (("--tasks", __file__, "--milestone", "x"), "--milestone needs a milestone number")):
+            with self.subTest(args=args):
+                code, out, err = self.run_main(*args)
+                self.assertEqual((code, out), (1, ""))
+                self.assertIn(text, err)
+                self.assertEqual(len(err.splitlines()), 1)
+
+    def test_help_exits_0(self):
+        code, out, _ = self.run_main("--help")
+        self.assertEqual(code, 0)
+        self.assertIn("check_draft.py --tasks <file>", out)
+
+    def test_tasks_from_the_command_line(self):
+        folder = Path(tempfile.mkdtemp())
+        try:
+            (folder / "t.md").write_text(task())
+            script = SKILL / "scripts" / "check_draft.py"
+            done = subprocess.run(["/usr/bin/python3", "-I", str(script), "--tasks", str(folder / "t.md"), "--milestone", "M1"],
+                                  capture_output=True, text=True, cwd=tempfile.gettempdir(),
+                                  env={"PYTHONDONTWRITEBYTECODE": "1"})
+            self.assertEqual((done.returncode, done.stdout), (0, f"PASS {folder / 't.md'}: 1 task block(s)\n"), done.stderr)
+        finally:
+            shutil.rmtree(folder)
 
 
 if __name__ == "__main__":
