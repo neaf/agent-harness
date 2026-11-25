@@ -4,7 +4,8 @@ The "Before the session" part of the page is built from this list. Each item is 
 
 ## Environment
 
-- The deployed build is the intended commit. Record the commit in `sources.md` and print it on the page next to the URL. Check it in the app or in the deploy log, whichever the team trusts.
+- The deployed build is the intended commit. Record the commit in `sources.md` and print it on the page next to the URL. Check it in the app or in the deploy log, whichever the team trusts. A pushed head is not a deployed one: confirm the deploy finished on that commit before seeding, or the seed of the previous build runs.
+- When probing the environment from a script, send the headers a browser sends (for example `Accept: text/html`). An app can answer a bare request with an error page while serving browsers normally.
 - The feature switch is on for the test scope and the page names its exact UI label and where to see it. Write down how to turn it off, for the scenario that needs it.
 - Every URL on the page is a real, working link to the test environment. No "[id]" in a link.
 
