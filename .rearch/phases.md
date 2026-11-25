@@ -175,10 +175,10 @@ Touches: skills/harness-common/scripts/git.py (new), skills/harness-common/tests
 Deletes: `git()` in build_integration_branch.py, the GraphQL commands in review-pass.md
 Work:
 - Integration: skip a head already contained in the target (event status `unchanged`). `Conflict` is distinct from `GitError`. The git version is checked up front. Target existence comes from `ls-remote`. Fetch each branch with an explicit refspec `+refs/heads/<b>:refs/remotes/<remote>/<b>`: a single-branch clone does not update `<remote>/<b>` otherwise (`topics/git.md`).
-- `review_threads.py`: list with bot or human per thread; resolve refuses human threads (Q17).
+- `review_threads.py`: list with bot or human per thread; resolve refuses human threads (Q17). Use `github.Gh.pr_snapshot` (threads carry `is_bot`, every page read) and `Gh.resolve_thread`, both in place since Phase 6.
 - SKILL.md:
   - Exit goal: every PR in every stack has green CI, and every bot review thread is addressed and resolved. Human threads are listed for the user.
-  - Arm feedback-watch with `--until bots`.
+  - Arm feedback-watch with `--until bots`. Its stop line is `BOTS DONE`; open human threads show as `(human M)` on the PR line (deviations.md, Phase 6).
   - Gate input on `gate.py status` when gates.json exists (Q21), and run `check_draft.py --tasks` on the milestone's task blocks (Q13, Q20).
   - Pass "Context for an outside reviewer" to PR subagents (Q19). Step 9 runs the qa-session skill in this session (Q18).
   - The notes "State (start here)" section follows ai-notes.

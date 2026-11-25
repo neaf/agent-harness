@@ -67,7 +67,7 @@ Code: `skills/harness-common/references/model-tiers.md` "The gate" and "Every sp
 | Stopping a subagent stops the monitors it started. | Tools reference |
 | Monitor commands follow the Bash permission rules. | Tools reference |
 
-Code: `skills/feedback-watch/SKILL.md:58-61` arms `watch.py` with `timeout_ms` 1800000.
+Code: `skills/feedback-watch/SKILL.md` "Arming it" arms `watch.py` with `timeout_ms` 1800000.
 
 ## Skills and global instructions
 

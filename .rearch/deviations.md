@@ -91,3 +91,26 @@
 - That a session follows the merged rules and that the ai-notes and writing-craft triggers fire as described (old M9, M10, M11). Prose only.
 - The real home: `install.py --check` prints 20 changes (the 18 from Phase 3 plus the 2 global files). The orchestrator's `install.py` run makes it 0. In a throwaway HOME the old global.md gave `2 change(s) needed` (both global files), then 0 after install.
 - `.rearch/baseline.md` and `.rearch/STATE.md` name models; the repo test skips `.rearch/` (A3), and Stage 6 deletes the folder.
+
+## Phase 6 (2026-11-25)
+
+1. `--until bots` ends with `BOTS DONE`, exit 0. The architecture's output list has only `ALL DONE` and `CI DONE`; a third line keeps "all done" from meaning "human threads still open". Phase 9 Work now names it.
+2. A merged or closed PR prints `#N merged, stopped watching` (or `closed`) once and leaves the watched set. When none is left open, the watcher prints `ALL DONE` and exits 0 at once. `test_FR_FW_08_a_merged_pr_prints_one_line_and_stops` asserts exactly those two lines and exit 0.
+3. Q25 (two identical polls) applies to `ALL DONE`, `CI DONE` and `BOTS DONE`. `--once` decides from its one round, so it can still read a partial rollup as done; SKILL.md says so.
+4. `GH FAILING` counts per PR: the same PR failing 3 rounds in a row prints `GH FAILING: #N <cause>` and exits 4; a good round resets its count. A repository that cannot be resolved at start now prints `GH FAILING: cannot resolve the repository: <cause>` on stdout and exits 4 (was stderr, exit 1). The per-round `skipped #N` line stays on stderr.
+5. Local mode: `--cmd-timeout` defaults to 600 s. A command past it is killed with its process group (`start_new_session`, `killpg`) and prints `FAIL <cmd> (timed out)`. A FAIL prints again when the exit code or the last 15 lines change, so output with a timing line reprints on every rerun. The file scan is taken after the commands finish: an edit made during a run is missed until the next edit. `--timeout` was added to local mode too; it is the exit path opencode needs besides `--once`.
+6. `github.py` page reads re-ask only the connections that have more pages, by building the query from parts (no `@include` directive). A head that changes between page calls raises `GhError`, so the round is skipped. String variables go as `-f`, integers as `-F` (`gh api --help`: `-F` reads `@file` values). `Gh.resolve_thread` is in now for Phase 9; watch.py never calls it (test `test_watch_has_no_gh_subprocess_and_no_write`).
+7. Tests that locked in old behavior: `test_cancelled_run_is_ignored` deleted (FR-FW-03). `FetchPrTest` (three gh calls, REST reviews) deleted; `test_github.py` covers the snapshot. Run-loop tests that ended on one done round now feed two (FR-FW-04, Q25). Four markers removed (FR-FW-03, -07, -08, -09). The caller's "three tests lock in defects" maps to these: the cancelled test, the 3-call fetch test and the single-done-round test.
+8. SKILL.md drops `-u`: `emit` flushes every line (audit D1).
+9. Files outside Touches: `skills/harness-common/SKILL.md` (Scripts table row for `github.py`), `topics/opencode.md` and `topics/Claude Code.md` (code locations and the opencode exit rule). 10 files: 8 changed, 2 added. Nothing deleted as a file; `run_gh`, `gh`, `resolve_repo`, `fetch_pr`, `THREADS_QUERY` and the REST reviews call are gone from watch.py, grep finds no reference.
+10. Counts: feedback-watch 74 (was 52), harness-common 44 (was 25). 7 suites, 230 tests, 17 expected failures (was 21).
+
+## Not verified in Phase 6
+
+- No live `gh` call. The GraphQL query was checked field by field against the published schema (`schema.docs.graphql`, every field and enum it uses exists with the expected nullability) and for balanced braces in every part combination. It was not run through a GraphQL validator (installing one was denied) or against GitHub.
+- `pr` mode ran end to end only against a fake `gh` on `PATH` (one round, `--once`, and the repo-resolve failure).
+- Whether `gh api graphql` exits non-zero on a GraphQL `errors` answer; the code handles both. Whether a queued run's `startedAt` is null or a zero date; both sort newest. That a deleted author is null (the name `ghost` is a label).
+- Claude Code Monitor and the opencode background-job flow for the new stop lines: prose only.
+- The real home: `install.py --check` still prints 20 changes (unchanged by this phase). A throwaway-HOME install applied 34, and `watch.py` ran through both installed skill links (`local --once`, `--help`), so the `harness-common` import works through the symlink.
+
+- Orchestrator live check after Phase 6: `watch.py pr 15111 15157 --repo cli/cli --once` ran the new GraphQL query against GitHub. The merged PR printed "merged, stopped watching", and the open PR printed its CI, failing and threads line, then NOT DONE. The query is valid live.

@@ -122,8 +122,8 @@ Code:
 
 - Symptom: a background `watch.py` reports nothing to the session until it exits. Claude Code's Monitor delivers each line as it prints.
 - Cause: background shell calls notify only on finish.
-- Workaround: run `watch.py` as a background shell job with its output in a log file outside the repo. Read the tail of the log when the job finishes, when the session is idle, or when the user asks. Pull-request mode exits on `ALL DONE` and `CI DONE`, and on `TIMEOUT` only when `--timeout` is set (default `0`, no limit). Local mode without `--once` never exits, so it never notifies.
-- Code: `skills/feedback-watch/SKILL.md:63`; exits in `skills/feedback-watch/scripts/watch.py:175-181`, `--timeout` default at `:286`.
+- Workaround: every watcher on opencode ends on its own. Run `watch.py pr` as a background shell job with `--timeout`, its output in a log file outside the repo, and read the tail of the log when the job exits or the session is idle. Pull-request mode exits on every stop line (`ALL DONE`, `CI DONE`, `BOTS DONE`, `TIMEOUT`, `GH FAILING`); without `--timeout` (default `0`, no limit) it may never exit. Local mode exits only with `--once` or `--timeout`; run `--once` after each change, or the loop with `--timeout`.
+- Code: `skills/feedback-watch/SKILL.md` "Arming it"; exits in `skills/feedback-watch/scripts/watch.py` `run_pr` and `run_local`, `--timeout` defaults in `parser`.
 
 ## `execute` (Code Mode)
 

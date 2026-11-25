@@ -33,12 +33,13 @@ One doc per external system. Each fact has a source: a code location, a test, a 
 
 ## Scripts
 
-Host adapters. Each holds the install paths and the agent rendering for one host, used by `install.py`.
+Adapters, one per external system. The host adapters hold the install paths and the agent rendering, used by `install.py`.
 
-| Script | Host |
+| Script | System |
 |---|---|
 | `scripts/claude_code.py` | Claude Code: quoted `description`, `tools` kept, no `model` line |
 | `scripts/opencode.py` | opencode: V2 `permissions` from `tools` with the spawn denied, the `execute` sandbox line, no `model` line. CLI for [model-tiers.md](references/model-tiers.md): `models`, `apply-tiers --state FILE [--general TIER] [--project DIR]`, `clear-tiers [--project DIR]` |
+| `scripts/github.py` | GitHub through `gh`: `Gh(runner).repo()`, `.pr_snapshot(repo, number)` (state, head, rollup, reviews, threads with bot or human, every page), `.resolve_thread(id)`. Raises `GhError` with one line. Library only, no CLI. Used by `feedback-watch` |
 
 `opencode.py` exits 0 when done, 1 on a failure, with one line that names the cause: `opencode.py: <cause>` on stderr, or `reload failed: <cause>. Restart opencode, then resume` on stdout after files changed.
 

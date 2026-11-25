@@ -4,7 +4,7 @@ Project: agent-harness, one source of skills, subagents and global instructions 
 Branch: rearch/2026-11-25
 Base tag: rearch-base (d4b56d4)
 Stage: 5 (phase execution)
-Phase: 6 of 10 (GitHub adapter and feedback-watch), not started
+Phase: 7 of 10 (Markdown parser and attack-plan-create), not started
 
 ## Done
 - Stage 0 setup, 7f686cb
@@ -18,7 +18,8 @@ Phase: 6 of 10 (GitHub adapter and feedback-watch), not started
 - Phase 3 Installer and agent sources: install.py rewritten (quote, prune by manifest, backup, no model lines, exit 0-4), models.json deleted, harness-common adapters and preamble; 169 tests in 7 suites. Real home needs one install.py run (18 changes), not run yet, b70bcae
 - User commit 5519633: two qa-session setup rules, kept by Phase 8
 - Phase 4 Shared conventions and model tiers: harness-common references subagents, model-tiers, state, publishing; opencode.py models/apply-tiers/clear-tiers; Spawns rule test; two old publishing.md deleted; 189 tests, dcf1a2d
-- Phase 5 Global instructions, notes, writing: global.md 18 rules to 16 (delegation and test-output merged, no rule lost, checked by orchestrator), ai-notes State section, writing-craft Scope and neutral examples
+- Phase 5 Global instructions, notes, writing: global.md 18 rules to 16 (delegation and test-output merged, no rule lost, checked by orchestrator), ai-notes State section, writing-craft Scope and neutral examples, 011d9cf
+- Phase 6 GitHub adapter and feedback-watch: harness-common github.py (one paginated GraphQL snapshot), watcher fixes, --until bots; 230 tests, 17 expected failures; live read-only check on cli/cli passed
 
 ## Decisions
 - 2026-11-25: target is agent-harness itself, user call.
@@ -38,4 +39,4 @@ Phase: 6 of 10 (GitHub adapter and feedback-watch), not started
 
 ## Next prompt
     Use the rearchitect skill. Continue from .rearch/STATE.md.
-    Next: Phase 6 (GitHub adapter and feedback-watch).
+    Next: Phase 7 (Markdown parser and attack-plan-create).
