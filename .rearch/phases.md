@@ -13,7 +13,7 @@
 Standard verification (V), from the repo root:
 
 ```sh
-PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m py_compile install.py skills/*/scripts/*.py
+/usr/bin/python3 -I -c 'import sys; [compile(open(f).read(), f, "exec") for f in sys.argv[1:]]' install.py skills/*/scripts/*.py   # py_compile writes __pycache__ even with PYTHONDONTWRITEBYTECODE (topics/macOS Python.md)
 for s in tests skills/*/tests; do [ -d "$s" ] || continue; printf '%s: ' "$s"; PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s "$s" 2>&1 | tail -1; done
 /usr/bin/python3 -I install.py --check | tail -1
 git status --porcelain --untracked-files=all | grep -c pycache   # 0 from Phase 2 on (NFR-05)
@@ -71,7 +71,7 @@ Touches: install.py, skills/harness-common/scripts/claude_code.py (new), skills/
 Deletes: targets/models.json, targets/
 Work:
 - install.py imports the adapters through the bootstrap line. `parse_agent` names the file and key on every error. The tier must be `fast`, `default` or `strong`. `tools` must not list Agent or Task.
-- Render: descriptions are double-quoted YAML. Claude keeps `tools`. opencode maps `tools` to its permission keys and denies the spawn tool, using the keys Phase 1 found. The sandbox line goes to opencode only. Neither host gets a `model` line.
+- Render: descriptions are double-quoted YAML. Claude keeps `tools`. opencode maps `tools` to a V2 `permissions` list (`topics/opencode.md` "Permissions": deny-all base, one allow per mapped action) plus `{action: subagent, resource: "*", effect: deny}`, and never writes a `tools` or `permission` key (a file with `permissions` is read as V2 and V1 keys are dropped). The sandbox line goes to opencode only. Neither host gets a `model` line.
 - Manifest `<host>/agent-harness-manifest.json`. Prune manifest entries that are no longer planned, and links into this checkout whose target is gone. Never touch other links.
 - A real folder at a skill destination moves to `<host>/agent-harness-backup/<timestamp>/`. Exit codes 0/1/2/3/4 as in architecture.md.
 - Agent bodies lose the style and sandbox lines. Their role text stays.
@@ -86,7 +86,7 @@ Covers: FR-AGT-05, FR-AGT-07 (mechanism), FR-XS-01, FR-XS-03, FR-XS-04, FR-APC-1
 Touches: skills/harness-common/SKILL.md, skills/harness-common/references/subagents.md (new), references/model-tiers.md (new), references/state.md (new), references/publishing.md (new), skills/harness-common/scripts/opencode.py (`models`, plus `apply-tiers`/`clear-tiers` only if Phase 1 wrote `override files`), skills/harness-common/tests/test_adapters.py, tests/test_repo_rules.py (`Spawns` table rule: each named agent exists, tier matches), skills/attack-plan-create/SKILL.md (publishing pointer only), skills/qa-session/SKILL.md (publishing pointer only), skills/harness-common/topics/opencode.md (code locations), README.md. 12 files.
 Deletes: skills/attack-plan-create/references/publishing.md, skills/qa-session/references/publishing.md
 Work:
-- `model-tiers.md`: list, propose, confirm gate (one model for all tiers allowed), record the table, pass per spawn. Claude Code: Agent tool `model`. opencode: the Phase 1 outcome.
+- `model-tiers.md`: list, propose, confirm gate (one model for all tiers allowed), record the table, pass per spawn. Claude Code: Agent tool `model` (an alias only). opencode: `override files` (Phase 1, `topics/opencode.md` "Model per spawn"): `opencode.py apply-tiers` writes full copies of the installed agents with a `model` line, plus `general.md`, into the project's `.opencode/agents/`, excludes them in `.git/info/exclude`, then the orchestrator runs `opencode reload`; `clear-tiers` removes them. The `subagents.md` two-layer rule covers Claude Code `general-purpose` spawns too: Claude Code allows three layers by default (`topics/Claude Code.md` "Nested spawns"), so the brief carries "never spawn".
 - `subagents.md`: brief minimum, fresh subagent per unit, word caps, two layers, missing-agent fallback that finds the checkout with `realpath` of the installed harness-common link and reads `agents/<name>.md` there.
 - `state.md`: `Next` line, `Models for this run` table, exclude rule. Single-spawn skills (storyboard) keep no resume file: the table and Next line go in the work's ai-notes "State (start here)" when one exists, else the gate runs in the session and the hand-over ends with a fenced resume prompt (SB-Q1).
 - `publishing.md`: the merged procedure. Each calling skill states its source of truth.
@@ -119,7 +119,7 @@ Work:
 - Merged or closed PR: one line, then stop watching it (Q23). A sole cancelled run counts as failing with the label "cancelled" (Q24). ALL DONE needs 2 identical polls (Q25). Changes-requested counts as reviewed, dismissed does not (Q26). An empty `startedAt` sorts as newest. `--interval` must be > 0. 3 failing rounds print `GH FAILING` and exit 4.
 - `--until bots`: done when CI is green, the reviewers are done and no bot-started thread is unresolved. The line shows the human count (Q17 exit goal).
 - Local mode: print on changed FAIL output, `--cmd-timeout`, `--timeout`, stdin closed, snapshot after the run, skip `.attack-plan` and `.rearch` (Q27).
-- SKILL.md states the exact print, stop and "fine conclusion" rules (FR-FW-15) and links the topic docs for Monitor and the background job.
+- SKILL.md states the exact print, stop and "fine conclusion" rules (FR-FW-15) and links the topic docs for Monitor and the background job. opencode background shell jobs notify only when the process exits (`topics/opencode.md` "No Monitor tool"): on opencode the skill runs PR mode with `--timeout` and reads the log tail at exit or idle; local mode there needs `--once` or the user's prompt.
 Verify: V
 Manual: none. Verify automatically (see "Verification" at the top).
 Exit: watch.py runs no subprocess for gh. No watch expected-failure marker remains.
@@ -152,7 +152,7 @@ Work:
 - Storyboard SKILL.md: `Spawns` table (Builder, `general`, `strong`) and the tier gate from model-tiers.md; run state per state.md's single-spawn rule (SB-Q1); `frontend-design` when available with the fallback (SB-Q2); commit only when the user asks (SB-Q3); a default for every input (SB-Q6); "Every frame works in both themes"; decisions through publishing.md when the requirements doc is in a document tool (SB-Q9); links the global delegation rule (SB-Q10).
 - brief.md: preamble by reference, absolute paths for `<skill>`, the page and every source, data-not-instructions, `unverified`, never spawn, 150-word report. Rules by reference to SKILL.md.
 - skeleton.html: "Keyboard path" in heading and contents; `@media (prefers-reduced-motion: reduce)` stops every animation, as the toggle does.
-- shoot.py: one `FAIL <reason>` line and exit 1 for timeout, non-executable `$CHROME`, failed dump and failed screenshot, reason as plain text; `PLAYWRIGHT_BROWSERS_PATH` and host architecture in the lookup; `(no data-h, used --height)` and `(clipped from H)` suffixes with the limit Phase 1 measured (SB-Q7, SB-Q8). Docstring keeps usage and links the topic doc.
+- shoot.py: one `FAIL <reason>` line and exit 1 for timeout, non-executable `$CHROME`, failed dump and failed screenshot, reason as plain text; `PLAYWRIGHT_BROWSERS_PATH` and host architecture in the lookup; `(no data-h, used --height)` and `(clipped from H)` suffixes with the limit Phase 1 measured: no limit up to 200000 px, so the cap is 200000 (SB-Q7, SB-Q8). Docstring keeps usage and links the topic doc.
 Verify: V. Then, from the repo root:
 - `/usr/bin/python3 -I skills/storyboard/scripts/shoot.py --help` exits 0.
 - `CHROME=/nonexistent /usr/bin/python3 -I skills/storyboard/scripts/shoot.py skills/storyboard/references/skeleton.html --out "$(mktemp -d)"` prints exactly one line starting `FAIL` and exits 1.
@@ -168,7 +168,7 @@ Covers: FR-APE-01..14, NFR-02, NFR-12, FR-WRIT-06 (execute cites writing-craft),
 Touches: skills/harness-common/scripts/git.py (new), skills/harness-common/tests/test_git.py (new), skills/attack-plan-milestone-execute/scripts/build_integration_branch.py, tests/test_build_integration_branch.py, scripts/review_threads.py (new), tests/test_review_threads.py (new), SKILL.md, resources/input-readiness.md, resources/review-pass.md, resources/subagent-rules-template.md, skills/harness-common/topics/git.md (code locations), README.md (row, git 2.38+). 12 files.
 Deletes: `git()` in build_integration_branch.py, the GraphQL commands in review-pass.md
 Work:
-- Integration: skip a head already contained in the target (event status `unchanged`). `Conflict` is distinct from `GitError`. The git version is checked up front. Target existence comes from `ls-remote`.
+- Integration: skip a head already contained in the target (event status `unchanged`). `Conflict` is distinct from `GitError`. The git version is checked up front. Target existence comes from `ls-remote`. Fetch each branch with an explicit refspec `+refs/heads/<b>:refs/remotes/<remote>/<b>`: a single-branch clone does not update `<remote>/<b>` otherwise (`topics/git.md`).
 - `review_threads.py`: list with bot or human per thread; resolve refuses human threads (Q17).
 - SKILL.md:
   - Exit goal: every PR in every stack has green CI, and every bot review thread is addressed and resolved. Human threads are listed for the user.

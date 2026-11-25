@@ -4,7 +4,7 @@ Project: agent-harness, one source of skills, subagents and global instructions 
 Branch: rearch/2026-11-25
 Base tag: rearch-base (d4b56d4)
 Stage: 5 (phase execution)
-Phase: 1 of 10 (Topic docs), not started
+Phase: 2 of 10 (Test harness), not started
 
 ## Done
 - Stage 0 setup, 7f686cb
@@ -13,6 +13,7 @@ Phase: 1 of 10 (Topic docs), not started
 - Stage 3 requirements, f349b26, all questions answered
 - Stage 4 architecture, 61d78ce, 22 modules, 10 phases
 - Storyboard added: commit 96ecd40 (cherry-pick of ec14673 from skill/storyboard), audit/storyboard.md, FR-SB-01..16, folded into phases 1, 2, 4, 8; 24 modules
+- Phase 1 Topic docs: 7 topic docs in skills/harness-common/topics/, Q37 = override files (opencode subagent tool has no model input), 7 deviations in deviations.md
 
 ## Decisions
 - 2026-11-25: target is agent-harness itself, user call.
@@ -31,4 +32,4 @@ Phase: 1 of 10 (Topic docs), not started
 
 ## Next prompt
     Use the rearchitect skill. Continue from .rearch/STATE.md.
-    Next: Phase 1 (Topic docs).
+    Next: Phase 2 (Test harness).

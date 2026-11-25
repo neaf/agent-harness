@@ -10,9 +10,10 @@ No build step. Scripts are standard-library Python 3.9+, run with `/usr/bin/pyth
 
 | Check | Command | Result |
 |---|---|---|
-| Parse all scripts | `PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m py_compile install.py skills/*/scripts/*.py` | ok |
+| Parse all scripts | `/usr/bin/python3 -I -c 'import sys; [compile(open(f).read(), f, "exec") for f in sys.argv[1:]]' install.py skills/*/scripts/*.py` | ok. (`py_compile` writes `__pycache__` even with `PYTHONDONTWRITEBYTECODE=1`; `compile()` writes nothing.) |
 | Install drift | `/usr/bin/python3 -I install.py --check` | `0 change(s) needed`, exit 0 |
 | Install drift after storyboard | same | `2 change(s) needed`, exit 1: the two storyboard skill links are not installed yet. Expected until `install.py` runs. |
+| Install drift after Phase 1 | same | `4 change(s) needed`, exit 1: storyboard and harness-common links on both hosts. Expected until `install.py` runs. |
 
 ## Tests
 

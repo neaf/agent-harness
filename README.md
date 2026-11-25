@@ -20,6 +20,19 @@ One source for the skills, subagents and global instructions used by Claude Code
 | [writing-craft](skills/writing-craft/SKILL.md) | Craft rules for text a human reads and acts on: the form that mirrors the reader's task, the exact word, layout, and revision from the reader's failure point. |
 | [qa-session](skills/qa-session/SKILL.md) | Builds, reworks and checks the script for a live QA session on a test environment: fresh subagents re-derive it from the sources, a verifier checks every expected result, and a session's ticks and findings survive a rework. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/qa-session/tests`. |
 | [storyboard](skills/storyboard/SKILL.md) | Defines a user experience before it is built: one self-contained HTML page per experience question, with the scenarios as strips of states, options side by side where the choice is real, one recommended, and the requirement changes and open questions on top. The author decides, the requirements doc records why each option lost. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/storyboard/tests`. |
+| [harness-common](skills/harness-common/SKILL.md) | Shared library for the other skills, never invoked on its own. Holds one topic doc per external system the skills depend on. |
+
+## Topic docs
+
+Facts about the external systems, each with its source or marked `unverified`. They live in `skills/harness-common/topics/`, so running skills can read them.
+
+- [Claude Code](<skills/harness-common/topics/Claude Code.md>): agent files, the spawn `model` parameter, nested spawns, Monitor, skill and `CLAUDE.md` paths, plugin skills.
+- [opencode](skills/harness-common/topics/opencode.md): agent files and permissions, the `subagent` tool, model per spawn, background shell jobs, skills and `AGENTS.md`.
+- [GitHub](skills/harness-common/topics/GitHub.md): check rollups, reviews and threads, pagination, PR order, stacked-branch CI, job logs.
+- [git](skills/harness-common/topics/git.md): `merge-tree --write-tree`, `commit-tree` identity, fetch refspecs, signed tags, `info/exclude`.
+- [Notion MCP](<skills/harness-common/topics/Notion MCP.md>): quirks of writing and updating Notion pages.
+- [macOS Python](<skills/harness-common/topics/macOS Python.md>): `/usr/bin/python3` 3.9, `-I`, bytecode files.
+- [Chrome headless shell](<skills/harness-common/topics/Chrome headless shell.md>): which binary, the Playwright cache, tall screenshots, fonts from `file://`.
 
 ## Install
 
