@@ -210,3 +210,17 @@ Risk: the running orchestrator re-reads SKILL.md on resume, so Stage 6 of this r
 Verify: V. The grep test runs with no allowlist.
 Manual: none. Verify automatically (see "Verification" at the top).
 Exit: no model name in the tracked tree outside run state. Every skill that spawns has a `Spawns` table that matches the agent tiers.
+
+## Phase 11: Final fixes (Stage 6 extra phase)
+Goal: close every finding of the final audits, build FR-APE-15, and move the design docs into docs/.
+Covers: FR-APE-15, FR-RA-09, NFR-09, NFR-12 (reworded), NFR-13, FR-QA-03, FR-AGT-08 (docs/)
+Input: .rearch/audit/final-*.md (6 reports). Fix every finding marked as needing a change.
+Work:
+- FR-APE-15: a reply call in harness-common github.py and `review_threads.py reply` (bot threads only, human threads refused). Reword execute SKILL.md, review-pass.md, attack-plan-create executable-plan.md, feedback-watch SKILL.md and README so bot REPLY threads are posted and resolved by the orchestrator, and human threads are never touched.
+- Text leftovers: "surprises", the markdown.py users list, stale topic-doc history and `.rearch/` references, and comments or tests that cite requirement, answer or phase IDs that disappear with `.rearch/`.
+- Dead code: shoot.py page_height and the stale SystemExit branch, install.py's unused `verb`, the undeclared conflict.head field. opencode.py's own git helper is optional.
+- Notion MCP.md "Code:" lines match publishing.md.
+- Copy .rearch/requirements.md and .rearch/architecture.md to docs/requirements.md and docs/architecture.md. Fix the text the deviations made stale there (CON-CC-03, NFR-12, the CLI tables, old-locations tables, FR-QA-03, FR-FW-08), and remove every model name, so the FR-AGT-08 test also passes on docs/. Write them in present tense, as current design, with no run history. Leave the .rearch/ originals alone.
+- README points at docs/requirements.md and docs/architecture.md. Apply the deletions that .rearch/docs-plan.md marks and that are still open.
+Verify: as in "Verification" above. No manual checks.
+Exit: every final-audit finding needing a change is fixed or listed with a reason; no reference to `.rearch/` outside .rearch/; all suites OK.
