@@ -409,6 +409,9 @@ Status values: `kept` (current behavior, stays; a listed fix may apply), `open` 
 - FR-RA-13: STATE.md changes land in the same commit as the stage or phase they record.
   Evidence: rearchitect/SKILL.md:51,57,69,81. rearchitect B7
   Status: kept (fix)
+- FR-RA-14: Stage 0 asks explicitly how many manual checks the user wants, with zero as the default. With zero, the run keeps no M checklist in its verify steps, and every phase verifies only by automated means (baseline, throwaway-HOME installs, fixtures, grep tests). Whatever those can't cover is reported as "not verified", not blocked on. Gates offer a recommended default for every decision, so the user can decide up front or accept the defaults. After the run the user goes straight to daily use, and later fixes come as normal changes.
+  Evidence: user decision 2026-11-25. Overrides the manual-check parts of FR-RA-03, FR-RA-08 and FR-RA-09.
+  Status: kept
 
 ## Cross-skill conventions (XS)
 
@@ -586,3 +589,12 @@ The user accepted the orchestrator's recommendation for every question not answe
 - Q35: Stage 6 alone owns the final cleanup; the architect's plan ends with the last code phase.
 - Q36: `.rearch/` is committed on the branch; Stage 6 runs the baseline and manual checklist first, then deletes it (fixes rearchitect B1).
 - Experimental FR-AGT-05, FR-QA-13, FR-FW-13: kept.
+
+## Answers at the Stage 4 gate (2026-11-25)
+
+The user asked for suggested defaults by default, so the architect's four questions take the orchestrator's recommendation:
+- A1: topic docs live in `skills/harness-common/topics/`.
+- A2: if opencode has no per-spawn model, general-purpose spawns there run on one model for now. Revisit when Phase 1 has the opencode facts.
+- A3: the model-name grep (FR-AGT-08) skips `.rearch/`, `.attack-plan/` and `.ai-notes/`.
+- A4: execute's PR and fix subagents use `default`, ticket auditors use `fast`.
+- A5 (orchestrator): `harness-common/SKILL.md` gets a description saying it is a shared library for other skills and never to be invoked on its own.

@@ -32,7 +32,7 @@ for s in skills/*/tests; do printf '%s: ' "$s"; PYTHONDONTWRITEBYTECODE=1 /usr/b
 
 ## Manual checklist
 
-Only the user can verify these. Every phase names the ones it affects.
+Not run in this run: the user chose zero manual checks (2026-11-25). Kept as a reference for what automated checks cannot cover. Phases verify automatically (phases.md, "Verification").
 
 - M1: Claude Code install. After `install.py`, every skill, every agent with the model of its tier, and `~/.claude/CLAUDE.md` load in Claude Code.
 - M2: opencode install. Same as M1 for opencode: skills, agents with the DeepSeek tiers, `~/.config/opencode/AGENTS.md`.
