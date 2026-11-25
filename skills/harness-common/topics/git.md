@@ -54,4 +54,4 @@ Adapter: `skills/attack-plan-milestone-execute/scripts/build_integration_branch.
 | `info/exclude` lives in the common git dir. A linked worktree resolves `git rev-parse --git-path info/exclude` to the main checkout's `.git/info/exclude`. | Scripted check, `git worktree add` |
 | So one exclude file covers every worktree of a repository, and it is never committed. | follows from the row above |
 
-Code: `skills/ai-notes/SKILL.md:20`.
+Code: `skills/harness-common/references/state.md` "Private state", cited by `skills/ai-notes/SKILL.md` and `references/publishing.md`.

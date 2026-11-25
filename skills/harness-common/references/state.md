@@ -37,7 +37,7 @@ Confirmed by the user on <date> in <tool>.
 
 ## Private state
 
-State is committed by default. To keep it out of the repository, add its folder to `.git/info/exclude`, never to `.gitignore` (`../topics/git.md` "`.git/info/exclude` and worktrees"). A `.gitignore` change needs the user's OK.
+State is committed by default. To keep it out of the repository, add its folder to `.git/info/exclude`, never to the repo's `.gitignore` or the global gitignore. The exclude file covers every worktree of the repo and is never shared (`../topics/git.md` "`.git/info/exclude` and worktrees"). A gitignore change needs the user's OK.
 
 ## Single-spawn skills
 

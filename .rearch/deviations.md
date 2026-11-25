@@ -77,3 +77,17 @@
 - The missing-agent fallback (`subagents.md` "Missing agent") is prose; no spawn ran. Its `realpath` command was checked: in a throwaway HOME both installed `harness-common` links resolve to this checkout, and `agents/rearch-phase.md` is there.
 - Publishing to a document tool (Notion): prose only, no MCP call.
 - The `Spawns` rule is vacuous: no SKILL.md has a `Spawns` table yet. Its fixtures pass.
+
+## Phase 5 (2026-11-25)
+
+1. global.md: 18 rules became 16 (20 lines to 19). Delegation (old 8, 13, 17) is one rule with two sub-bullets: when to delegate, and the `For review: ` flow. Test output (old 9, 16) is one rule without "Claude". The skills rule names `frontend-design` and REA "when available". The notes rule (old 11) already states the body trigger (sessions, subagents or PRs) and stays as is. The other 12 rules are unchanged.
+2. ai-notes duplicated two shared rules. Its "fork" bullet is gone (the global delegation rule holds it), and its private-notes paragraph now points at `state.md` "Private state". `state.md` gained the two facts only ai-notes had: never the global gitignore, and the exclude file covers every worktree and is never shared. The brief bullet cites `subagents.md` "Brief minimum".
+3. Files outside Touches: `skills/harness-common/references/state.md` (the rule above) and `skills/harness-common/topics/git.md` (its code location pointed at `skills/ai-notes/SKILL.md:20`, now at `state.md` "Private state"). 6 files instead of 4.
+4. writing-craft section 7 is gone. Each of its 10 items now sits in sections 2-6 or was already there word for word (placeholders, "(cont.)"). The labelled-bullets item now sits under Sequence and no longer prescribes checkboxes for every walk-through (audit B4). QA examples (tester, reviewer, review app, assigned files) became deploy and export examples. A new "Scope" section names the exempt agent-to-agent text and allows ids such as F1 there (audit B5).
+5. The global writing-craft rule and the skill description keep the same trigger list (audit I7). Q12 did not decide it; left as is.
+
+## Not verified in Phase 5
+
+- That a session follows the merged rules and that the ai-notes and writing-craft triggers fire as described (old M9, M10, M11). Prose only.
+- The real home: `install.py --check` prints 20 changes (the 18 from Phase 3 plus the 2 global files). The orchestrator's `install.py` run makes it 0. In a throwaway HOME the old global.md gave `2 change(s) needed` (both global files), then 0 after install.
+- `.rearch/baseline.md` and `.rearch/STATE.md` name models; the repo test skips `.rearch/` (A3), and Stage 6 deletes the folder.
