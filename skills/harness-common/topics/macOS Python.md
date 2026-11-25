@@ -11,7 +11,7 @@ Used by: `install.py` and every `skills/*/scripts/*.py` (shebang `#!/usr/bin/pyt
 | `/usr/bin/python3` is a shim for the Command Line Tools Python, 3.9.6, under `/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9`. | Scripted check (`sys.version`, `sys.prefix`, `xcode-select -p`) |
 | A fresh Mac gets it with the Command Line Tools (`xcode-select --install`, or the prompt the first `git` call shows). | `README.md` "Install" |
 | asdf, pyenv and Homebrew Python do not change what `/usr/bin/python3` runs. | Absolute path; `README.md` "Install" |
-| Scripts use the standard library only, and no syntax newer than 3.9. | NFR-01; `skills/qa-session` audit X1 |
+| Scripts use the standard library only, and no syntax newer than 3.9. | NFR-01; `install.py:1`, `#!/usr/bin/python3` in every script |
 | In 3.9, `unittest` counts an unexpected success of an `expectedFailure` test as a failure: the run is not successful. | unittest docs, `TestResult.wasSuccessful` |
 
 ## `-I` (isolated mode)
@@ -40,5 +40,5 @@ Used by: `install.py` and every `skills/*/scripts/*.py` (shebang `#!/usr/bin/pyt
 
 - Symptom: `__pycache__/` folders appear next to `install.py` and in `skills/*/scripts/`, and show as untracked files.
 - Cause: `py_compile` writes bytecode on purpose; the environment variable and `-I` do not stop it.
-- Workaround: parse without writing, `/usr/bin/python3 -I -c 'import sys; [compile(open(f).read(), f, "exec") for f in sys.argv[1:]]' install.py skills/*/scripts/*.py`. Phase 2 also adds `__pycache__/` and `*.pyc` to `.gitignore`.
-- Code: the parse line of the standard verification in `.rearch/phases.md` and `.rearch/baseline.md`.
+- Workaround: parse without writing, `/usr/bin/python3 -I -c 'import sys; [compile(open(f).read(), f, "exec") for f in sys.argv[1:]]' install.py skills/*/scripts/*.py`. `.gitignore` lists `__pycache__/` and `*.pyc`, so a stray cache never shows as untracked.
+- Code: the parse check in `skills/rearchitect/SKILL.md` Stage 0 (`compile()`, not `py_compile`); `.gitignore`.

@@ -7,7 +7,7 @@ description: Executes one milestone of an attack plan as stacked draft PRs, one 
 
 Turns one milestone of an already specified attack plan (the plan, the milestone's task blocks, its tracker tickets) into a set of small stacked draft PRs. This session is the orchestrator: it plans, briefs one fresh subagent per PR, checks their work and keeps the state on disk. It writes little code itself.
 
-The run is done when every PR of every stack of the milestone has green CI, and every review thread a bot started is addressed and resolved. Threads a person started are listed for the user, with the fix or the reply text (Step 11).
+The run is done when every PR of every stack of the milestone has green CI, and every review thread a bot started is addressed and resolved: fixed, or answered with a reply this session posts. Threads a person started are never replied to or resolved; they are listed for the user, with the fix or the reply text (Step 11).
 
 This skill builds a plan that exists. It does not write one: the `attack-plan-create` skill writes the plan, its milestones and its task blocks. Step 2 checks the input is good enough before anything else.
 
@@ -41,8 +41,9 @@ This skill builds a plan that exists. It does not write one: the `attack-plan-cr
 | `build_integration_branch.py --target B --heads A,B [--from target\|<branch>] [--default B] [--message T] [--push] [--repo P] [--remote R]` | one progress line per step, `skipped <head>: already in <sha>` for a head already merged, last line `INTEGRATION_BRANCH_EVENT {json}` with `status` `pushed`, `built`, `unchanged`, `conflict` (with `head` and `files`) or `failed` (with `error`) | 0 pushed, built or unchanged; 1 conflict or failed |
 | `review_threads.py list --pr N [N ...] [--repo OWNER/NAME]` | one line per unresolved thread, `#<pr> <id> bot\|human <login> <path>:<line> <url> \| <first line>`, then `<n> unresolved: <b> bot, <h> human`; `FAIL #<pr>: <cause>` | 0, 1 when a PR could not be read |
 | `review_threads.py resolve --thread ID [ID ...]` | `RESOLVED <id>`, `RESOLVED <id> (already)`, `REFUSED: <id> human thread (<login>), the user resolves it`, `FAIL <id>: <cause>` | 0 every thread resolved, 1 otherwise |
+| `review_threads.py reply --thread ID --body-file FILE\|-` | posts the text in a thread a bot started, then resolves it: `REPLIED <id> <url>`, `RESOLVED <id>`. `REFUSED: <id> human thread (<login>), the user replies`, `REFUSED: <id> already resolved, no reply posted`, `FAIL <id>: <cause>`, or `FAIL <id>: replied, not resolved: <cause>` (then run `resolve`, not `reply` again) | 0 replied and resolved, 1 otherwise |
 
-`build_integration_branch.py` needs git 2.38 or later and stops with `needs git 2.38 or later, found <version>` on an older one. It is the only script of this skill that writes to a remote, and only with `--push`: a plain push, never forced. `review_threads.py resolve` writes only to threads a bot started (facts in the [git topic](../harness-common/topics/git.md) and the [GitHub topic](../harness-common/topics/GitHub.md)).
+`build_integration_branch.py` needs git 2.38 or later and stops with `needs git 2.38 or later, found <version>` on an older one. It is the only script of this skill that pushes, and only with `--push`: a plain push, never forced. `review_threads.py resolve` and `reply` write only to threads a bot started (facts in the [git topic](../harness-common/topics/git.md) and the [GitHub topic](../harness-common/topics/GitHub.md)).
 
 ## Instructions
 
@@ -142,7 +143,7 @@ The milestone is ready for human review when:
 
 - `gh pr list --label <label> --state open --json number,title,isDraft` matches the notes table;
 - `gh pr checks <n>` is green on every PR of every stack;
-- `review_threads.py list --pr <every PR>` shows no `bot` line, except a bot REPLY whose text waits for the user (review pass, "Apply");
+- `review_threads.py list --pr <every PR>` shows no `bot` line;
 - every `human` line is in the notes pending items, with its fix commit or its reply text;
 - the notes `README.md` says what the user must do next.
 
@@ -150,8 +151,8 @@ If one is not true, say which and why, instead of reporting the milestone as don
 
 ## Notes
 
-- Never post a comment, a review or a reply on GitHub as the user, never mark a PR ready for review, never merge. Write the texts; the user posts them.
-- The only GitHub write besides your pushes is `review_threads.py resolve` on threads a bot started, after their fix is pushed. Threads a person started are theirs to resolve.
+- Never post a comment or a review on GitHub as the user, never mark a PR ready for review, never merge. The one exception is a reply in a thread a bot started (review pass, "Apply"). Texts for people are written for the user, who posts them.
+- The only GitHub writes besides your pushes are `review_threads.py resolve` and `review_threads.py reply`, on threads a bot started: resolve after the fix is pushed, reply for a REPLY decision. Threads a person started are never replied to or resolved: they are the user's.
 - Messages to other people (another team whose open PR collides with yours) are drafted for the user, never sent.
 - A subagent never edits files of a lower PR of its stack. It reports the needed change; the orchestrator fixes it at the bottom and merges up.
 - Prefer reading a fact again over trusting a summary: a PR head, a ticket status or a CI result can change while you work.

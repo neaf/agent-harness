@@ -184,7 +184,7 @@ def plan_host(p, items, stamp):
 
 
 def apply(entry):
-    verb, dest, kind, payload = entry
+    _, dest, kind, payload = entry
     dest.parent.mkdir(parents=True, exist_ok=True)
     if kind == "backup":
         payload.parent.mkdir(parents=True, exist_ok=True)

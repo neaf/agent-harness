@@ -146,7 +146,7 @@ class CheckPageTest(unittest.TestCase):
         number = next(n for n, line in enumerate(text.splitlines(), 1) if needle in line)
         return [(level, message) for n, level, message in scan(text.splitlines())[0] if n == number]
 
-    # Defects fixed in Phase 8.
+    # Defects fixed by the rewrite.
 
     def test_FR_QA_09_backticked_label_is_not_an_internal_id(self):
         findings, _ = self.rules(GOOD.replace("The menu shows Reports.", "The menu shows `Q4 Budget` and `Today`."))

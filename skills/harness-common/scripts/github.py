@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""GitHub adapter over the `gh` CLI: one runner, `GhError`, the paginated pull request snapshot, one thread, resolve.
+"""GitHub adapter over the `gh` CLI: one runner, `GhError`, the paginated pull request snapshot, one thread, reply, resolve.
 
 Facts: skills/harness-common/topics/GitHub.md. Library only, no CLI. Every gh failure raises GhError with
 one line that names the cause.
@@ -28,6 +28,8 @@ PARTS = {"checks": CHECKS, "reviews": REVIEWS, "threads": THREADS}
 THREAD = ("query($id: ID!) { node(id: $id) { __typename ... on PullRequestReviewThread { "
           "id isResolved path line pullRequest { number } "
           "comments(first: 1) { nodes { url body author { __typename login } } } } } }")
+REPLY = ("mutation($id: ID!, $body: String!) { addPullRequestReviewThreadReply("
+         "input: {pullRequestReviewThreadId: $id, body: $body}) { comment { url } } }")
 RESOLVE = ("mutation($id: ID!) { resolveReviewThread(input: {threadId: $id}) "
            "{ thread { id isResolved } } }")
 
@@ -175,6 +177,14 @@ class Gh:
             return dict(thread_item(node), pr=node["pullRequest"]["number"])
         except (KeyError, TypeError) as error:
             raise GhError(f"unexpected GraphQL answer for thread {thread_id}: missing {error}") from None
+
+    def reply_to_thread(self, thread_id, body):
+        """Post `body` as a reply in one review thread, as the gh user. Writes to GitHub. Returns the comment URL."""
+        data = self.graphql(REPLY, id=thread_id, body=body)
+        try:
+            return data["addPullRequestReviewThreadReply"]["comment"]["url"]
+        except (KeyError, TypeError):
+            raise GhError(f"unexpected GraphQL answer replying to {thread_id}") from None
 
     def resolve_thread(self, thread_id):
         """Resolve one review thread. Writes to GitHub: only callers that are allowed to resolve use it."""

@@ -2,7 +2,7 @@
 
 Facts about opencode that the installer and the skills depend on. Vendor docs were read on 2026-11-25: [Agents](https://opencode.ai/docs/agents/), [Tools](https://opencode.ai/docs/tools/), [Permissions](https://opencode.ai/docs/permissions/), [CLI commands](https://opencode.ai/docs/cli/commands/), [Config](https://opencode.ai/docs/config/), [Models](https://opencode.ai/docs/models/), [Skills](https://opencode.ai/docs/skills/), [Instructions](https://opencode.ai/docs/instructions/), [Migrate from V1](https://opencode.ai/docs/migrate-v1/). These pages describe OpenCode 2.
 
-opencode is not installed on the maintainer's Mac, so nothing here was checked against a running opencode. Every fact below is from the docs only, and none is checked live. A fact the docs leave open says `unverified`.
+No fact here was checked against a running opencode: every fact below is from the docs only. A fact the docs leave open says `unverified`.
 
 Adapter: `skills/harness-common/scripts/opencode.py`. `install.py` calls its render functions; the skills run its CLI (`models`, `apply-tiers`, `clear-tiers`) through `skills/harness-common/references/model-tiers.md`. Nothing else runs the opencode CLI.
 
@@ -86,9 +86,7 @@ How the harness renders `tools` (`opencode.py:43-54`): one `deny` rule with reso
 | Does an agent without `model` inherit? | Yes, the parent session's model. | Agents doc, "Model" |
 | How are models listed? | `opencode models` lists every available model. Its output format is not documented: `unverified`. Availability depends on the project's providers. | CLI commands doc, "models"; Models doc |
 
-Answer: override files. At the tier gate, `opencode.py apply-tiers` writes one `.opencode/agents/<id>.md` per tiered agent at the project's git top level, each a full copy of the installed agent with the tier's `model` line, so the result does not depend on how files merge. A `general.md` override puts every `general` spawn on one model (A2). The written paths go into `.git/info/exclude`, and `clear-tiers` removes them when the run ends. After writing, and after removing, the script runs `opencode reload`. If the reload fails or the next spawn does not use the new model, the orchestrator tells the user "restart opencode, then resume". Procedure: `skills/harness-common/references/model-tiers.md`.
-
-`override files`
+Answer: override files. At the tier gate, `opencode.py apply-tiers` writes one `.opencode/agents/<id>.md` per tiered agent at the project's git top level, each a full copy of the installed agent with the tier's `model` line, so the result does not depend on how files merge. A `general.md` override puts every `general` spawn on one model. The written paths go into `.git/info/exclude`, and `clear-tiers` removes them when the run ends. After writing, and after removing, the script runs `opencode reload`. If the reload fails or the next spawn does not use the new model, the orchestrator tells the user "restart opencode, then resume". Procedure: `skills/harness-common/references/model-tiers.md`.
 
 Code:
 - `opencode.py models` (`list_models`, `opencode.py:97-102`) prints the lines of `opencode models`. A missing binary prints `opencode not found on PATH` and exits 1 (`run`, `opencode.py:83-94`).

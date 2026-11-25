@@ -75,7 +75,7 @@ def render_agent(meta, body, preamble, model=None):
 
 
 def render_general(preamble, model):
-    """Override of the built-in `general` agent: one model for every `general` spawn (A2), spawn denied."""
+    """Override of the built-in `general` agent: one model for every `general` spawn, spawn denied."""
     rules = [{"action": SPAWN_ACTION, "resource": "*", "effect": "deny"}]
     return _render(GENERAL_DESCRIPTION, rules, model, [preamble.strip(), SANDBOX_LINE + "\n"])
 

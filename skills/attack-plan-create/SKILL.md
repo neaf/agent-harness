@@ -33,6 +33,7 @@ The author sets the pace. When they ask to go faster, skip a review, or draft th
 - Claude Code spawns them with the Agent tool (`subagent_type: attack-plan-critic`) and the tier's `model`; opencode with the `subagent` tool.
 - Each prompt is the role brief from `references/briefs.md`, filled in. Briefs follow [subagents.md](../harness-common/references/subagents.md); an agent that is not installed is handled there ("Missing agent").
 - Never hand a subagent your conclusion to confirm: reviewers get the drafts and the code.
+- Subagents never spawn subagents: this session runs every spawn.
 
 ## The section loop
 
@@ -91,7 +92,7 @@ Sections, in this order, in `draft/attack-plan.md`, following `references/docume
 5. `delivery`: the slices users get, in order, numbered from M1. Each says what users can do once it ships, why it comes in that place, and how it is released. No technical preparation and no tasks: a preparation milestone users do not see (M0) is added after the technical solution.
 6. `open-questions`: the questions the author does not own, each with its recommendation.
 
-A product section has no code term: no table, model, class, endpoint or query.
+A product section has no code term: no controller, endpoint, serializer, migration, ORM or SQL, and no table, model or class name. `check_draft.py` warns on the first six.
 
 ## Stage 3 — Ready for product review (stage `product-review`, section `ready-for-review`)
 
@@ -173,7 +174,7 @@ Next: <stage, section id, loop step>.
 
 - **Facts are found, decisions are asked.** Only what no source settles goes to the author.
 - **Pages people read follow [writing-craft](../writing-craft/SKILL.md):** the drafts, the published pages, the questions to the author, tickets. Briefs and digests are agent-to-agent text and exempt.
-- **No estimates of any kind:** no days, weeks, points or sizes. The plan tracks verification, review and surprises instead.
+- **No estimates of any kind:** no days, weeks, points or sizes. The plan tracks verification and review instead.
 - **The plan says where we are, not how we got here:** no decision log, no "Option A / B" in the main text, no history.
 - **Persist before you stop.** Evidence goes to the digests or `draft/evidence.md` when found, never only in the conversation or `/tmp`.
 - **Shared and production data are read-only,** and read only when the author allows it.

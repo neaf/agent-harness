@@ -126,7 +126,7 @@ class InstallTest(unittest.TestCase):
         self.assertEqual(link.resolve(), (REPO / "skills" / "ai-notes").resolve())
         self.assertTrue(other.is_dir())
 
-    # Defects fixed in Phase 3. Each test name carries its requirement ID.
+    # Defects fixed by the rewrite. Each test name carries its requirement ID (docs/requirements.md).
 
     def test_FR_INST_11_description_with_colon_is_quoted(self):
         self.install()

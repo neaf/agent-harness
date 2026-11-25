@@ -14,10 +14,13 @@ class GitError(Exception):
 
 
 class Conflict(Exception):
-    """`merge-tree` found conflicts. `files` lists the conflicted paths; it can be empty (git.md)."""
+    """`merge-tree` found conflicts. `files` lists the conflicted paths; it can be empty (git.md).
 
-    def __init__(self, files, messages=()):
-        self.files, self.messages = list(files), list(messages)
+    `head` is the branch being merged, when the caller knows it: `merge_tree` sees only commits.
+    """
+
+    def __init__(self, files, messages=(), head=None):
+        self.files, self.messages, self.head = list(files), list(messages), head
         super().__init__(", ".join(self.files) or "a conflict with no conflicted file")
 
 

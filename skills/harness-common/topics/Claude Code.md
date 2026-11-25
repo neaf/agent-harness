@@ -20,7 +20,7 @@ Code: `claude_code.py:19-26` writes `name`, `description` and `tools`, then the 
 
 ### Quirk: unquoted `: ` in a description
 
-- Symptom: a description such as `Audits one aspect of a project for the rearchitect skill: reads every assigned file` is not valid YAML as a plain scalar. The docs say a file whose YAML does not parse is skipped, with the error in the `--debug` log. Yet the installed `rearch-auditor` agent, which has this description, loaded and ran the Stage 2 audits of this run (`.rearch/STATE.md`).
+- Symptom: a description such as `Audits one aspect of a project for the rearchitect skill: reads every assigned file` is not valid YAML as a plain scalar. The docs say a file whose YAML does not parse is skipped, with the error in the `--debug` log. Yet an installed `rearch-auditor` agent with this description, unquoted, loaded and ran a full set of audits.
 - Cause: unknown. The loader may be more lenient than strict YAML. `unverified`.
 - Workaround: write every description as a double-quoted YAML string (FR-INST-11).
 - Code: `claude_code.py:24` (`json.dumps`, a JSON string is a valid double-quoted YAML scalar).
@@ -31,7 +31,7 @@ Code: `claude_code.py:19-26` writes `name`, `description` and `tools`, then the 
 |---|---|
 | The model of a spawn is the first of: the Agent tool's per-call `model` parameter, the agent file's `model`, `CLAUDE_CODE_SUBAGENT_MODEL`, the parent conversation's model. | Subagents doc, "Choose a model" |
 | The Agent tool's `model` parameter takes an alias only, not a full model id and not `inherit`. | Subagents doc |
-| The allowed values of `model` are listed in the Agent tool's definition in the session. The orchestrator reads them there. | This run: `.rearch/baseline.md` "Models for this run", every spawn passed `model` |
+| The allowed values of `model` are listed in the Agent tool's definition in the session. The orchestrator reads them there. | Observed: a rearchitect run whose every spawn passed `model` from its `Models for this run` table |
 | A resumed subagent keeps the alias it started with. | Subagents doc |
 
 Code: `skills/harness-common/references/model-tiers.md` "The gate" and "Every spawn passes its tier's model".
@@ -85,7 +85,7 @@ Code: `install.py:98-106` copies `instructions/global.md` to `~/.claude/CLAUDE.m
 
 | Fact | Source |
 |---|---|
-| A prompt that starts with `!` runs the rest as a shell command in the session, and its output joins the conversation. | [Interactive mode](https://code.claude.com/docs/en/interactive-mode), "Quick commands"; used by the user in this run (FR-GLB-12). Doc page not re-read on 2026-11-25. |
+| A prompt that starts with `!` runs the rest as a shell command in the session, and its output joins the conversation. | [Interactive mode](https://code.claude.com/docs/en/interactive-mode), "Quick commands"; used by the maintainer (FR-GLB-12). |
 
 Code: `instructions/global.md` (the `!` prefix rule), `skills/rearchitect/SKILL.md` (commands suggested to the user).
 

@@ -7,7 +7,7 @@ SKILL = Path(__file__).resolve().parent.parent
 SKELETON = SKILL / "references" / "skeleton.html"
 sys.path.insert(0, str(SKILL / "scripts"))
 import shoot  # noqa: E402
-from shoot import find_chrome, page_height, page_url  # noqa: E402
+from shoot import find_chrome, page_url, shot_height  # noqa: E402
 
 ARCH = "arm64" if platform.machine() == "arm64" else "x64"
 OTHER_ARCH = "x64" if ARCH == "arm64" else "arm64"
@@ -49,10 +49,10 @@ class FakeChrome:
 
 class ShootTest(unittest.TestCase):
     def test_height_from_data_h(self):
-        self.assertEqual(page_height('<html lang="en" data-theme="dark" data-h="3048"><head>', 6000), 3048)
+        self.assertEqual(shot_height('<html lang="en" data-theme="dark" data-h="3048"><head>', 6000), (3048, ""))
 
     def test_height_fallback(self):
-        self.assertEqual(page_height("<html><head>", 6000), 6000)
+        self.assertEqual(shot_height("<html><head>", 6000), (6000, " (no data-h, used --height)"))
 
     def test_url_has_theme(self):
         url = page_url("/tmp/x/topic-storyboard.html", "dark")
@@ -96,7 +96,7 @@ class ShootTest(unittest.TestCase):
                 os.chmod(exe, 0o755)
             self.assertIsNone(find_chrome({"PATH": bin_dir}, home=home))
 
-    # Defects fixed in Phase 8.
+    # Defects fixed by the rewrite.
 
     def test_FR_SB_10_playwright_browsers_path_is_honoured(self):
         with tempfile.TemporaryDirectory() as home, tempfile.TemporaryDirectory() as cache:
@@ -137,9 +137,7 @@ class MainTest(unittest.TestCase):
             try:
                 shoot.main()
             except SystemExit as stop:
-                code = stop.code if isinstance(stop.code, int) or stop.code is None else 1
-                if isinstance(stop.code, str):
-                    err.write(stop.code + "\n")
+                code = stop.code
             finally:
                 for patch in reversed(patches):
                     patch.stop()
@@ -236,7 +234,7 @@ class SkeletonTest(unittest.TestCase):
 
 
 class RealShellTest(unittest.TestCase):
-    """The skeleton through the real headless shell. Skipped when none is installed (SB-Q11)."""
+    """The skeleton through the real headless shell. Skipped when none is installed."""
 
     def test_skeleton_renders_in_both_themes(self):
         if not find_chrome():

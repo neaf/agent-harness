@@ -6,7 +6,7 @@ The plan is executable when an AI, given one task and the pinned code, opens a p
 
 - M1 onward are the delivery slices the author approved in the product solution: same order, same content. Changing them reopens the `delivery` section.
 - A foundation milestone (M0) holds the shared plumbing two or more slices need: the flag, shared helpers, the guard that keeps every later endpoint closed by default. It ships nothing users see.
-- When the slice order is still open with product, recommend the most complex slice first, so its surprises show early.
+- When the slice order is still open with product, recommend the most complex slice first, so its unknowns show early.
 - Each milestone ends with a QA step on a review app (named personas, the checks they run) and a release step.
 
 ## Split for review in isolation
@@ -94,4 +94,4 @@ Write these once, in the technical solution:
 - **Environment:** the commands an implementer runs after switching branches (code generation, test database migrations), the lint and type-check commands, and fixed-date rules for tests (no current date near a year boundary, no random flags).
 - **Seeds and QA data:** how a review app gets the personas and the data each QA check needs, idempotent on a second run.
 - **Merge policy:** bottom-up for stacks. Branches follow the default branch by merging it into the bottom of each stack, then up; never rebase or force-push.
-- **Human-only gates:** the steps an agent stops at and hands to a person: re-running CI, posting review replies (including replies to review bots), triaging security alerts, merging, enabling the flag for real customers.
+- **Human-only gates:** the steps an agent stops at and hands to a person: re-running CI, replying to or resolving review threads a person started, triaging security alerts, merging, enabling the flag for real customers. Threads a review bot started are the agent's: it fixes or replies, then resolves them.

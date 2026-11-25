@@ -22,7 +22,8 @@ Stage: 6 (final cleanup), not started
 - Phase 7 Markdown parser and attack-plan-create: harness-common markdown.py, gate.py v2 gates (multi-pair, migrates v1), reopen fix, task-block schema (check_draft --tasks), per-milestone task tables; 277 tests, 14 expected failures, 5b21f35
 - Phase 8 qa-session and storyboard: QA page = collapsed setup, scenarios, empty Findings; check_page on markdown.py with --live; shoot.py FAIL lines, timeouts, 200000 px cap; 290 tests, 2 expected failures, 562a2b5
 - Phase 9 git adapter and milestone-execute: harness-common git.py, review_threads.py (resolves bot threads only), integration unchanged/conflict/failed events, exit goal and --until bots; 330 tests, 0 expected failures; live read-only thread listing on cli/cli passed. bot REPLY threads decided, 46df652
-- Phase 10 rearchitect: Stage 0 gates (tree, branch/tag, models, manual checks), Stage 6 order fixed, run lessons in the skill, FR-GLB-12 in global.md, no model names left in the repo; 331 tests
+- Phase 10 rearchitect: Stage 0 gates (tree, branch/tag, models, manual checks), Stage 6 order fixed, run lessons in the skill, FR-GLB-12 in global.md, no model names left in the repo; 331 tests, a830a73
+- Stage 6 final audits: 6 reports, 216 of 222 requirements mapped; Phase 11 Final fixes: FR-APE-15 built (review_threads.py reply), every finding fixed or skipped with a reason, docs/requirements.md and docs/architecture.md written; 342 tests
 
 ## Decisions
 - 2026-11-25: target is agent-harness itself, user call.

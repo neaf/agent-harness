@@ -175,6 +175,17 @@ class RepoAndResolveTest(unittest.TestCase):
         self.assertIn("resolveReviewThread", fake.query(0))
         self.assertEqual(fake.variables(0), {"id": ("-f", "T1")})
 
+    def test_reply_to_thread(self):
+        url = "https://github.com/o/r/pull/1#discussion_r9"
+        fake = Fake({"data": {"addPullRequestReviewThreadReply": {"comment": {"url": url}}}})
+        self.assertEqual(Gh(fake).reply_to_thread("T1", "@x no change: a.rb:3\nline two"), url)
+        self.assertIn("addPullRequestReviewThreadReply", fake.query(0))
+        self.assertEqual(fake.variables(0), {"id": ("-f", "T1"), "body": ("-f", "@x no change: a.rb:3\nline two")})
+
+    def test_reply_with_an_unexpected_answer_raises(self):
+        with self.assertRaisesRegex(GhError, "^unexpected GraphQL answer replying to T1$"):
+            Gh(Fake({"data": {"addPullRequestReviewThreadReply": None}})).reply_to_thread("T1", "ok")
+
 
 class ThreadTest(unittest.TestCase):
     def node(self, kind="Bot", resolved=False):

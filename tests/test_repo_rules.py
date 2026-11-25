@@ -20,7 +20,9 @@ RUN_STATE = (".rearch/", ".attack-plan/", ".ai-notes/")
 
 
 def tracked_files():
-    done = subprocess.run(["git", "-C", str(REPO), "ls-files", "-z"], capture_output=True, text=True)
+    """Tracked files plus untracked ones git does not ignore, so a new file is checked before its commit."""
+    done = subprocess.run(["git", "-C", str(REPO), "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+                          capture_output=True, text=True)
     if done.returncode:
         raise unittest.SkipTest("not a git checkout")
     return [name for name in done.stdout.split("\0") if name and (REPO / name).is_file()]
@@ -116,6 +118,7 @@ class ModelNameTest(unittest.TestCase):
         folders = {d.name for d in (REPO / "skills").iterdir() if d.is_dir()}
         self.assertEqual(sorted(folders - scanned), [])
         self.assertIn("skills/storyboard/references/skeleton.html", self.files)
+        self.assertIn("docs/requirements.md", self.files)
 
     def test_the_pattern_finds_names_and_ids(self):
         for text in (codecs.decode("zbqry: bchf", "rot13"), codecs.decode("qrrcfrrx/qrrcfrrx-synfu", "rot13"),

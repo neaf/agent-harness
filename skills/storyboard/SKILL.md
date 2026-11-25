@@ -71,7 +71,7 @@ The full layout and the writing of captions and options are in `references/page.
 - **One way to do each thing** in the recommendation. Two paths to the same result is a losing option, not a feature.
 - **Light and dark.** The page follows the system appearance, has one button to switch, and reads `?theme=light` or `?theme=dark` for screenshots. Every frame works in both themes.
 - **Shape carries meaning.** When marks or icons are part of the choice, add a greyscale row so each is told apart without colour, and a reduced-motion preview when anything moves. The system's reduced-motion setting stops every animation, as the preview does.
-- **Headless checks only.** Verify with `shoot.py`: it runs `chrome-headless-shell` only, with its own temporary profile. Never launch a browser app (Google Chrome.app, Chromium.app), not even with `--headless`: on macOS it registers as an app and takes the author's focus. Without the shell, install it with `npx playwright install chromium-headless-shell`.
+- **Headless checks only.** Verify with `shoot.py`: it runs `chrome-headless-shell` only, with its own temporary profile. Never launch a browser app (Google Chrome.app, Chromium.app), not even with `--headless`: on macOS it registers as an app and takes the author's focus. Without the shell, install it with `npx playwright install --only-shell`.
 - **The project's own rules come first.** When `AGENTS.md` or the design rules say more (no ALL CAPS, 1px lines, motion rules), the storyboard follows them, in every option, including the losing ones.
 
 ## Where the file lives

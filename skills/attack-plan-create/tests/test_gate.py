@@ -187,7 +187,7 @@ class GateTest(unittest.TestCase):
 
 
 class LegacyGatesTest(unittest.TestCase):
-    """gates.json written by the gate.py before Phase 7: one file and heading, fence-blind hashes."""
+    """gates.json in the v1 format: one file and heading, fence-blind hashes."""
 
     def setUp(self):
         self.folder = Path(tempfile.mkdtemp())

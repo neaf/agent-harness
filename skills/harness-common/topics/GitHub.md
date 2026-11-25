@@ -1,6 +1,6 @@
 # GitHub
 
-Facts about GitHub (`gh`, REST, GraphQL, Actions) that the skills depend on. Vendor docs were read on 2026-11-25: [GraphQL schema](https://docs.github.com/public/fpt/schema.docs.graphql), [GraphQL limits](https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api), [REST pulls](https://docs.github.com/en/rest/pulls/pulls), [REST workflow jobs](https://docs.github.com/en/rest/actions/workflow-jobs), [Events that trigger workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows). No live `gh` call was made for this doc.
+Facts about GitHub (`gh`, REST, GraphQL, Actions) that the skills depend on. Vendor docs were read on 2026-11-25: [GraphQL schema](https://docs.github.com/public/fpt/schema.docs.graphql), [GraphQL limits](https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api), [REST pulls](https://docs.github.com/en/rest/pulls/pulls), [REST workflow jobs](https://docs.github.com/en/rest/actions/workflow-jobs), [Events that trigger workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows). Read-only `gh` runs against `cli/cli` checked the snapshot query (`watch.py pr 15111 15157 --repo cli/cli --once`) and the thread listing with its bot or human split (`review_threads.py list --pr 15111 --repo cli/cli`). The mutations (`resolveReviewThread`, `addPullRequestReviewThreadReply`) and `node(id:)` were not run against GitHub.
 
 Adapter: `skills/harness-common/scripts/github.py` (`run`, `Gh`, `GhError`). It is the only code that runs `gh`. `skills/feedback-watch/scripts/watch.py` reads its snapshots.
 
@@ -48,7 +48,7 @@ Code: `github.py` `check_item` (one dict shape per kind), `watch.py` `FAILING_CO
 
 - Symptom: a run cancelled by a workflow's concurrency group shows as `CANCELLED` beside the run that replaced it.
 - Cause: concurrency cancels the older run.
-- Workaround: a cancelled run loses to any other run of the same check. A check whose only run is cancelled is failing, labelled `<name> (cancelled)` (Q24).
+- Workaround: a cancelled run loses to any other run of the same check. A check whose only run is cancelled is failing, labelled `<name> (cancelled)`.
 - Code: `watch.py` `latest_checks`, `checks`. Tests: `test_watch.py` `test_cancelled_run_beside_another_run_is_superseded`, `test_FR_FW_03_a_sole_cancelled_run_is_failing`.
 
 ### Quirk: a queued run has no start time
@@ -62,7 +62,7 @@ Code: `github.py` `check_item` (one dict shape per kind), `watch.py` `FAILING_CO
 
 - Symptom: right after a push the rollup is empty, or holds only the checks that registered first, which reads as done.
 - Cause: checks appear a few seconds after the push, one workflow at a time.
-- Workaround: an empty rollup counts as pending, unless `--allow-no-checks` is given. Done needs two rounds in a row with the same state (Q25), one `--interval` apart.
+- Workaround: an empty rollup counts as pending, unless `--allow-no-checks` is given. Done needs two rounds in a row with the same state, one `--interval` apart.
 - Code: `watch.py` `pr_state`, `run_pr`. Tests: `test_watch.py` `test_empty_rollup_is_pending_until_allowed`, `test_FR_FW_04_one_done_round_is_not_enough`.
 
 ## Reviews and threads
@@ -75,9 +75,10 @@ Code: `github.py` `check_item` (one dict shape per kind), `watch.py` `FAILING_CO
 | `PullRequestReviewThread` has `id`, `isResolved`, `path`, `line` (nullable) and `comments`. The thread has no author or URL of its own; the first comment's author started it. | GraphQL schema |
 | A deleted account's `author` is null; GitHub shows it as `ghost`. | Schema (nullable); the name is `unverified` |
 | The mutation `resolveReviewThread(input: {threadId})` resolves a thread. | GraphQL schema |
+| The mutation `addPullRequestReviewThreadReply(input: {pullRequestReviewThreadId, body})` posts a reply in a thread as the authenticated user and returns the new `comment { url }`. | GraphQL schema; not run against GitHub (`unverified`) |
 | `node(id:)` with `... on PullRequestReviewThread` reads one thread by the id the snapshot gives: `isResolved`, `path`, `line`, `pullRequest { number }`, its first comment's `body` and author. | GraphQL schema; not run against GitHub (`unverified`) |
 
-Code: `github.py` `REVIEWS`, `THREADS`, `THREAD`, `actor`, `review_item`, `thread_item`, `Gh.thread`, `Gh.resolve_thread`; `watch.py` `REVIEWED_STATES`, `pr_state`; `review_threads.py` (bot threads only, Q17). Tests: `test_github.py` `test_one_call_reads_state_head_rollup_reviews_and_threads`, `test_deleted_author_is_ghost_and_not_a_bot`; `test_watch.py` `test_changes_requested_counts_as_reviewed_dismissed_does_not`.
+Code: `github.py` `REVIEWS`, `THREADS`, `THREAD`, `actor`, `review_item`, `thread_item`, `Gh.thread`, `Gh.reply_to_thread`, `Gh.resolve_thread`; `watch.py` `REVIEWED_STATES`, `pr_state`; `skills/attack-plan-milestone-execute/scripts/review_threads.py` (replies to and resolves bot threads only). Tests: `test_github.py` `test_one_call_reads_state_head_rollup_reviews_and_threads`, `test_deleted_author_is_ghost_and_not_a_bot`; `test_watch.py` `test_changes_requested_counts_as_reviewed_dismissed_does_not`.
 
 ### Quirk: bot logins differ between REST and GraphQL
 
@@ -98,9 +99,9 @@ Code: `github.py` `REVIEWS`, `THREADS`, `THREAD`, `actor`, `review_item`, `threa
 | Fact | Source |
 |---|---|
 | REST lists pull requests by `created`, newest first, unless `sort` and `direction` say otherwise. | REST pulls doc, "List pull requests" |
-| The search `is:pr label:<label> sort:created-asc` lists the oldest first. | `skills/attack-plan-milestone-execute/SKILL.md:54`, `unverified` |
+| The search `is:pr label:<label> sort:created-asc` lists the oldest first. | `skills/attack-plan-milestone-execute/SKILL.md` Step 4, `unverified` |
 
-Workaround in use: open a milestone's PRs in number order, so newest-first reads as one sequence. Code: `skills/attack-plan-milestone-execute/SKILL.md:54`, `skills/attack-plan-create/references/executable-plan.md:26`.
+Workaround in use: open a milestone's PRs in number order, so newest-first reads as one sequence. Code: `skills/attack-plan-milestone-execute/SKILL.md` Step 4, `skills/attack-plan-create/references/executable-plan.md` "Split for review in isolation".
 
 ## Stacked branches and CI
 
@@ -108,14 +109,14 @@ Workaround in use: open a milestone's PRs in number order, so newest-first reads
 |---|---|
 | A `pull_request` workflow runs on the merge ref `refs/pull/<n>/merge`. | Events doc, `pull_request` |
 | `pull_request` workflows do not run while the PR has a merge conflict; `pull_request_target` workflows do. | Events doc |
-| `gh stack` is an optional `gh` extension. Without it each PR targets the branch below. | `skills/attack-plan-milestone-execute/SKILL.md:19` |
+| `gh stack` is an optional `gh` extension. Without it each PR targets the branch below. | `skills/attack-plan-milestone-execute/SKILL.md` "Context" |
 
 ### Quirk: a stack behind the default branch goes red together
 
 - Symptom: every PR of a stack fails at once, in jobs its code does not touch (a change detector firing on files only the default branch changed, a missing task, a tool version mismatch).
 - Cause: the branches are behind the default branch. The skill text says CI runs the default branch's workflows against the old branch files. For `pull_request` the docs say the run uses the PR's merge ref; the exact mechanism is `unverified`.
 - Workaround: merge the default branch into the bottom of each stack and merge up.
-- Code: `skills/attack-plan-milestone-execute/SKILL.md:78`, `skills/feedback-watch/SKILL.md` "Reading a failure".
+- Code: `skills/attack-plan-milestone-execute/SKILL.md` Step 7, `skills/feedback-watch/SKILL.md` "Reading a failure".
 
 ## Job logs and failures
 

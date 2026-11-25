@@ -16,8 +16,8 @@ Code: `skills/storyboard/scripts/shoot.py`.
 | Fact | Source |
 |---|---|
 | Playwright ships a separate Chromium headless shell for headless runs, beside its regular Chromium build. | Playwright docs, "Chromium: headless shell" |
-| `npx playwright install --only-shell` installs the shell without the full Chromium. | Playwright docs |
-| `npx playwright install chromium-headless-shell` also installs it. | `shoot.py:14`, `unverified` as a command (the shell on this Mac exists, the command that installed it is not recorded) |
+| `npx playwright install --only-shell` installs the shell without the full Chromium. `shoot.py:14` and `skills/storyboard/SKILL.md` give this command. | Playwright docs |
+| `npx playwright install chromium-headless-shell` also installs it. | `unverified` |
 | The shell is not on `PATH` after a Playwright install. | Scripted check (`which chrome-headless-shell`) |
 
 ## Where Playwright puts it
@@ -36,12 +36,12 @@ Code: `shoot.py:13` (`SHELL` glob), `:34-35` (`host_arch`), `:38-55` (`find_chro
 
 | Fact | Source |
 |---|---|
-| `--dump-dom` with `--virtual-time-budget=3000` prints the DOM after the page's scripts and `document.fonts.ready` ran, so the `data-h` attribute the skeleton sets is in the output. | `shoot.py` on `skeleton.html`, both themes 1440x3048 (`.rearch/architecture.md` "Verification") |
+| `--dump-dom` with `--virtual-time-budget=3000` prints the DOM after the page's scripts and `document.fonts.ready` ran, so the `data-h` attribute the skeleton sets is in the output. | `shoot.py` on `skeleton.html`, both themes 1440x3048 (scripted check) |
 | `matchMedia` listeners, `document.fonts.ready` and the `?theme=` query work headless. | Same run |
 | `--force-prefers-reduced-motion` makes `@media (prefers-reduced-motion: reduce)` match. With it the skeleton's `.run` mark computes `animation-name: none`, without it `spin`. | Scripted check, 2026-11-25, `--dump-dom` of a probe copy of `skeleton.html` |
-| The dump runs in a 900 px tall window, so `data-h` (`scrollHeight`) is the content height only when the content is taller than 900 px. | `shoot.py:16`, `:109`; code reasoning |
+| The dump runs in a 900 px tall window, so `data-h` (`scrollHeight`) is the content height only when the content is taller than 900 px. | `shoot.py:16`, `:103`; code reasoning |
 
-Code: `shoot.py:84-93` (`run`, a timeout or a start failure becomes one `FAIL` line), `:105-117`. The page side: `skills/storyboard/references/skeleton.html:280-283`.
+Code: `shoot.py:79-88` (`run`, a timeout or a start failure becomes one `FAIL` line), `:101-111` (the per-theme loop). The page side: `skills/storyboard/references/skeleton.html:280-283`.
 
 ## Tall screenshots
 
@@ -52,7 +52,7 @@ Code: `shoot.py:84-93` (`run`, a timeout or a start failure becomes one `FAIL` l
 | The 16384 px limit often cited for GPU contexts does not apply to this shell with `--disable-gpu`. No limit was found up to 200000 px. Above that: `unverified`. | Scripted check |
 | A 200000 px shot took 6.6 s and wrote 3.5 MB. | Scripted check |
 
-Code: `shoot.py:17` (`MAX_HEIGHT`), `:67-76` (`shot_height`): a taller page is shot at 200000, the largest height measured, and its line ends `(clipped from <H>)` (SB-Q7).
+Code: `shoot.py:17` (`MAX_HEIGHT`), `:62-71` (`shot_height`): a taller page is shot at 200000, the largest height measured, and its line ends `(clipped from <H>)`.
 
 ## Fonts from `file://`
 

@@ -243,8 +243,8 @@ def check_tasks(path, milestone=None):
         results.append(("FAIL", name, f"task titles use more than one project code: {', '.join(sorted(codes))}"))
     order = {}
     for position, index, level, title in tasks:
-        task_id = "M{1}-{2}".format(*TASK_TITLE.fullmatch(title).groups())
         _, number, k = TASK_TITLE.fullmatch(title).groups()
+        task_id = f"M{number}-{k}"
         order.setdefault(int(number), []).append(int(k))
         end = next((i for i, lvl, _ in found[position + 1:] if lvl <= level), len(lines))
         subs = [(i, lvl, t) for i, lvl, t in found[position + 1:] if i < end]

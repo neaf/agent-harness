@@ -25,7 +25,7 @@ Write `.ai-notes/<area>/review-pass-<YYYY-MM-DD>.md`:
 ```markdown
 # Review pass, <date>
 
-FIX = change the PR that owns the code. REPLY = no change, the user posts the text.
+FIX = change the PR that owns the code. REPLY = no change, a reply with the evidence: this session posts it on a bot thread, the user on a human thread.
 
 | # | PR | thread | by | finding | decision |
 |---|---|---|---|---|---|
@@ -49,7 +49,7 @@ Reply texts:
 2. Check each fix: it does what the row says and nothing more. Drop extra changes, such as a second guard for a case already covered.
 3. Merge each fixed branch up its stack before fixing the next PR (Step 8 of the skill).
 4. Once a fix is pushed, resolve its threads if a bot started them: `review_threads.py resolve --thread <id> <id> ...`. It prints `RESOLVED <id>` per thread and refuses a human thread with `REFUSED: <id> human thread (<login>), the user resolves it`, exit 1. Threads a human started stay open for the user, FIX or REPLY: list them in the notes `README.md` pending items with the fix commit.
-5. A bot thread decided REPLY: the user posts the reply text. Once the user says it is posted, resolve the thread with the same command.
+5. A bot thread decided REPLY: write its text to a file and post it, which also resolves the thread: `review_threads.py reply --thread <id> --body-file <file>`. It prints `REPLIED <id> <url>` and `RESOLVED <id>`. It refuses a human thread (`REFUSED: <id> human thread (<login>), the user replies`) and a resolved one, so a text is never posted twice. After `FAIL <id>: replied, not resolved`, run `resolve` for that thread, not `reply`.
 6. Rebuild the integration branch if there is one.
-7. Fill the "Status" section, and list the reply texts in the notes `README.md` pending items for the user. The user posts them: never post a reply as the user.
-8. Run `review_threads.py list` again. The pass is done when every line left is `human`, or a bot REPLY whose text waits for the user.
+7. Fill the "Status" section, and list the reply texts for human threads in the notes `README.md` pending items for the user. The user posts them: never reply to or resolve a thread a person started.
+8. Run `review_threads.py list` again. The pass is done when every line left is `human`.

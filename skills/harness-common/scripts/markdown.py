@@ -1,7 +1,7 @@
 """Markdown structure shared by the harness scripts: fences, ATX headings, sections, section hashes.
 
 Library only, no CLI. Pure functions over lists of lines (with or without line ends).
-Used by attack-plan-create's gate.py and check_draft.py.
+Used by attack-plan-create's gate.py and check_draft.py, and qa-session's check_page.py.
 
 Rules, a subset of CommonMark:
 - A fence opens on a line of 3 or more backticks or tildes, after any indentation. It closes on a

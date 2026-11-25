@@ -55,7 +55,7 @@ Confirmed by the user on <date> in <tool>.
 Stage 4, section step-2, loop step 4: ask question 3 of 5.
 ```
 
-Gate status lives in `gates.json`, not in STATE: run `/usr/bin/python3 -I <skill>/scripts/gate.py status <work folder>`. Never edit `gates.json` by hand. A `gates.json` from an older `gate.py` (one `file` and `heading` per gate, no `version`) still loads; the next command that writes it moves it to the current format and keeps every approval.
+Gate status lives in `gates.json`, not in STATE: run `/usr/bin/python3 -I <skill>/scripts/gate.py status <work folder>`. Never edit `gates.json` by hand. A gate opened without a file and heading has no hash, so no drift check covers it: its approval stands until it is reopened. A `gates.json` from an older `gate.py` (one `file` and `heading` per gate, no `version`) still loads; the next command that writes it moves it to the current format and keeps every approval.
 
 ## Section ids
 

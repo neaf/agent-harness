@@ -94,7 +94,7 @@
   /* a running mark: always moving, linear and infinite, with a reduced-motion fallback that keeps the shape */
   .run { width: 10px; height: 10px; flex: none; border: 1.5px solid var(--side-ink-2); border-top-color: var(--green); border-radius: 50%; animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .reduced .run, .reduced * { animation: none !important; }
+  .reduced * { animation: none !important; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
 
   @media (max-width: 900px) { .sum, .opts, .opts.two, .flow { grid-template-columns: minmax(0, 1fr); } }

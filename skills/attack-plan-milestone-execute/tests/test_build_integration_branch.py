@@ -118,7 +118,7 @@ class BuildIntegrationBranchTest(unittest.TestCase):
 
         self.assertEqual(self.remote_file("qa", "backend.txt"), "backend\n")
 
-    # FR-APE-08 fixes (Phase 9).
+    # FR-APE-08 fixes.
 
     def test_FR_APE_08_merging_a_head_already_in_the_target_adds_no_commit(self):
         self.assertTrue(self.build(heads=["backend"], push=True))

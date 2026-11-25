@@ -197,3 +197,26 @@
 - The `!` prefix in opencode (`unverified` in `topics/opencode.md`). The Claude Code doc page was not re-read in this phase.
 - opencode `apply-tiers --state .rearch/baseline.md --general default` and `clear-tiers`: opencode is not installed here; the table parser ran on the documented example only.
 - Real home: `install.py --check` prints 20 changes until the orchestrator runs `install.py`. Throwaway HOME: 34 applied, then 0; 12 agent frontmatters parse with Ruby `YAML.safe_load`; 18 skill links resolve; both global files hold the `!` rule.
+
+## Phase 11 (2026-11-25)
+
+1. FR-APE-15 is one command: `review_threads.py reply --thread ID --body-file FILE|-` posts the text through the GraphQL mutation `addPullRequestReviewThreadReply` (new `Gh.reply_to_thread` in `github.py`), then resolves the thread. It refuses a human thread and an already resolved one (no text posted twice); a failed resolve after the post prints `FAIL <id>: replied, not resolved: <cause>` and the orchestrator runs `resolve`, not `reply`. An empty or unreadable body file is a usage error, exit 2.
+2. NFR-12 reworded in `docs/requirements.md`: scripts write to a remote only where a skill rule allows it (integration push with `--push`, `review_threads.py resolve` and `reply` on bot threads only). execute SKILL.md now says `build_integration_branch.py` is the only script that pushes, not the only one that writes.
+3. `docs/requirements.md` is a rewrite, not a copy: Status and Evidence lines, Known defects, Refuted findings, Open questions and the answer lists are gone; each area names its code files instead of line numbers. IDs are kept, so code, tests and topic docs that cite FR, NFR and CON IDs stay valid. Q, A, SB-Q and phase IDs were removed from code, tests and topic docs. FR-APC-18 and -19 are listed as retired IDs.
+4. New FR-NOTES-08 for the ai-notes "Handing off to a new session" section (audit 3c): kept as built, since it is working behavior and dropping it is a behavior change. README's ai-notes row mentions it. If the user wants it dropped, delete the section, FR-NOTES-08 and the README phrase.
+5. `docs/architecture.md`: Phase columns, the old-to-new mapping, the deleted list, the audit-bug table and the run's verification notes are gone; a Tests table is added. Interfaces and the CLI table follow the code (git `Git(cwd, runner)` and every method, `opencode.py` flags, `review_threads.py` with `reply`, `gate.py open <work> <stage> <section>`, `check_page.py --live`, `check_draft.py --milestone`, watch exits incl. 2).
+6. `tests/test_repo_rules.py` scans tracked plus untracked, non-ignored files (`git ls-files --cached --others --exclude-standard`), so `docs/` is checked before its commit; the test pins `docs/requirements.md` in the scanned set. Once committed, it is tracked anyway.
+7. storyboard install command: `shoot.py` and SKILL.md now give the documented `npx playwright install --only-shell`; the older `chromium-headless-shell` form stays in the Chrome topic doc as `unverified`.
+8. Optional findings skipped: opencode.py's own `git()` helper (two calls, its own error text, and opencode.py is imported by install.py), the `test_repo_rules.py` one-line wrappers, the NFR-09 rule repeats across the three attack-plan agent bodies (each subagent loads only its own body, so no prompt carries two copies). Not done because outside this phase's file rules: `.rearch/baseline.md` test counts (now 342 in 7 suites).
+9. docs-plan: no deletion is open besides `.rearch/` (Stage 6). `AGENTS.md` and the one-line `CLAUDE.md` that docs-plan lists as targets are Stage 6 step 5, not written here.
+10. Counts: execute 36 (was 27), harness-common 83 (was 81). 7 suites, 342 tests, all OK.
+
+## Not verified in Phase 11
+
+- `addPullRequestReviewThreadReply` against GitHub: the mutation name, its input fields and `comment { url }` are from the GraphQL schema docs (`unverified` in `topics/GitHub.md`), and ran only against a fake `gh`. No live post, no live resolve.
+- That the reply appears under the user's account: `gh` authenticates as the user; not observed.
+- `npx playwright install --only-shell` was not run.
+- A live milestone run with a bot REPLY thread: prose and fakes only.
+- Real home: `install.py --check` prints 20 changes, unchanged; the orchestrator's `install.py` run applies them. Throwaway HOME: 34 applied, then 0; 12 agent frontmatters parse with Ruby `YAML.safe_load`; 18 skill links resolve.
+
+- Orchestrator schema check after Phase 11 (read-only introspection): GitHub has `addPullRequestReviewThreadReply` with input fields pullRequestReviewThreadId and body, and payload field comment, which match github.py REPLY. `resolveReviewThread` exists.

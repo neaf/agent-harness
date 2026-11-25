@@ -2,7 +2,7 @@
 
 Facts about git that the skills depend on. Checked on 2026-11-25 with git 2.56.0, in throwaway repositories under `mktemp -d` with no user or system config (`GIT_CONFIG_GLOBAL=/dev/null`, `GIT_CONFIG_NOSYSTEM=1`).
 
-Adapter: `skills/harness-common/scripts/git.py` (`Git`, `GitError`, `Conflict`). Used by `skills/attack-plan-milestone-execute/scripts/build_integration_branch.py`. Tests: `skills/harness-common/tests/test_git.py`, `skills/attack-plan-milestone-execute/tests/test_build_integration_branch.py`. Both run git with `GIT_CONFIG_GLOBAL=/dev/null`, `GIT_CONFIG_NOSYSTEM=1`, and `gc.auto=0`, `maintenance.auto=false` through `GIT_CONFIG_COUNT`: an automatic gc left running after a fetch or push removed `maintenance.lock` while the test deleted its folder (seen once, Phase 9).
+Adapter: `skills/harness-common/scripts/git.py` (`Git`, `GitError`, `Conflict`). Used by `skills/attack-plan-milestone-execute/scripts/build_integration_branch.py`. Tests: `skills/harness-common/tests/test_git.py`, `skills/attack-plan-milestone-execute/tests/test_build_integration_branch.py`. Both run git with `GIT_CONFIG_GLOBAL=/dev/null`, `GIT_CONFIG_NOSYSTEM=1`, and `gc.auto=0`, `maintenance.auto=false` through `GIT_CONFIG_COUNT`: an automatic gc left running after a fetch or push removed `maintenance.lock` while the test deleted its folder (seen once).
 
 ## `merge-tree --write-tree`
 
@@ -15,7 +15,7 @@ Adapter: `skills/harness-common/scripts/git.py` (`Git`, `GitError`, `Conflict`).
 | A merge can conflict with no conflicted file (some directory renames), so the path list can be empty. | `man git-merge-tree` "MISTAKES TO AVOID" |
 | Two commits with no common history exit 128 with `fatal: refusing to merge unrelated histories`. | `test_build_integration_branch.py` `test_FR_APE_08_a_git_failure_that_is_no_conflict_is_not_reported_as_one` |
 | `--name-only` exists in git 2.38. | `unverified`, only 2.56.0 was run |
-| Merging a head already contained in the base still succeeds with the base's tree, and `commit-tree` makes an empty two-parent commit from it. `merge-base --is-ancestor <head> <base>` (exit 0 yes, 1 no) tells it first. | audit B3; `test_FR_APE_08_merging_a_head_already_in_the_target_adds_no_commit` |
+| Merging a head already contained in the base still succeeds with the base's tree, and `commit-tree` makes an empty two-parent commit from it. `merge-base --is-ancestor <head> <base>` (exit 0 yes, 1 no) tells it first. | `test_FR_APE_08_merging_a_head_already_in_the_target_adds_no_commit` |
 
 ### Quirk: old git reports a conflict
 
@@ -38,7 +38,7 @@ Adapter: `skills/harness-common/scripts/git.py` (`Git`, `GitError`, `Conflict`).
 | A default clone has the fetch refspec `+refs/heads/*:refs/remotes/origin/*`, so `git fetch origin <branch>` updates `origin/<branch>`. | Scripted check, full clone |
 | A `--single-branch` clone has the refspec `+refs/heads/<branch>:refs/remotes/origin/<branch>` only. | Scripted check |
 | `git ls-remote --heads origin <branch>` finds a remote branch whatever the refspec. | Scripted check |
-| A failed `ls-remote` or `fetch` (unreachable remote) is not the same as a missing branch: read the exit code, never infer absence from a failure. | audit B5; `test_FR_APE_08_a_failed_target_lookup_is_not_read_as_absent` |
+| A failed `ls-remote` or `fetch` (unreachable remote) is not the same as a missing branch: read the exit code, never infer absence from a failure. | `test_FR_APE_08_a_failed_target_lookup_is_not_read_as_absent` |
 
 ### Quirk: fetch does not update the remote-tracking ref in a single-branch clone
 
@@ -52,7 +52,7 @@ Adapter: `skills/harness-common/scripts/git.py` (`Git`, `GitError`, `Conflict`).
 - Symptom: `git tag <name>` fails and asks for a tag message.
 - Cause: a global config with `tag.gpgSign=true` makes every tag an annotated, signed tag.
 - Workaround: `git tag -a <name> -m "<message>"`.
-- Code: rearchitect Stage 0 tags the base (`skills/rearchitect/SKILL.md`). Source: observed when this run created `rearch-base` (rearchitect audit X1).
+- Code: rearchitect Stage 0 tags the base (`skills/rearchitect/SKILL.md`). Source: observed when a rearchitect run tagged `rearch-base` on a machine with `tag.gpgSign=true`.
 
 ## `.git/info/exclude` and worktrees
 

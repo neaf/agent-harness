@@ -23,7 +23,7 @@ Turns an exploratory codebase (reverse engineering notes, proofs of concept, wor
 | `rearch-architect` | `strong` | requirements, architecture and phase plan, amendments |
 | `rearch-phase` | `default` | one phase, fresh each time |
 
-- Models: run the tier gate in [model-tiers.md](../harness-common/references/model-tiers.md) at Stage 0 and on resume. The table goes into `.rearch/baseline.md` under `Models for this run`, in the format of [state.md](../harness-common/references/state.md): the backticked cell is the exact value the tool takes. Every spawn passes the model of its tier. On opencode run `opencode.py apply-tiers --state .rearch/baseline.md --general default` after the gate and on every resume.
+- Models: run the tier gate in [model-tiers.md](../harness-common/references/model-tiers.md) at Stage 0 and on resume. The table goes into `.rearch/baseline.md` under `Models for this run`, in the format of [state.md](../harness-common/references/state.md): the backticked cell is the exact value the tool takes. Every spawn passes the model of its tier. On opencode run `/usr/bin/python3 -I <harness-common>/scripts/opencode.py apply-tiers --state .rearch/baseline.md --general default` after the gate and on every resume. `<harness-common>` is the [harness-common](../harness-common/SKILL.md) skill folder, a sibling of this one.
 - Briefs follow [subagents.md](../harness-common/references/subagents.md). An installed agent carries [preamble.md](../harness-common/references/preamble.md) already. A missing agent: follow "Missing agent" there.
 - Only this session spawns. Subagents never spawn subagents, so Stage 6 runs here.
 
@@ -109,10 +109,10 @@ This session never reads source files or full audits during Stage 5. It works fr
 1. Read `.rearch/baseline.md` first: the commands, the manual checks and the models table. Everything below needs them.
 2. Spawn one `rearch-auditor` per new module in final mode, all in one batch. Brief: module name, its files, the requirement IDs `architecture.md` maps to it, the path of `requirements.md`, output `.rearch/audit/final-<module>.md`. Each reports every FR it cannot find in code, leftovers, stale comments and dead code.
 3. Findings that need code changes: append an extra phase to `phases.md` and run it as in Stage 5.
-4. Move `requirements.md` and `architecture.md` into `docs/`. Delete every exploratory doc that `docs-plan.md` marks for deletion. Git history and the base tag keep them.
+4. Move `requirements.md` and `architecture.md` into `docs/`. On the way, apply every item of `deviations.md` that changed a requirement, an interface or a CLI, drop the open questions, answers and run history, and write both as current design in present tense. Remove every model name and id: the repo rules hold for `docs/` too. Delete every exploratory doc that `docs-plan.md` marks for deletion. Git history and the base tag keep them.
 5. Update `README.md` and `CLAUDE.md` or `AGENTS.md` to point at the new docs.
 6. Run the full baseline, and the manual checks when there are any. List what stays "not verified".
-7. On opencode, run `opencode.py clear-tiers` from the project.
+7. On opencode, run `/usr/bin/python3 -I <harness-common>/scripts/opencode.py clear-tiers` from the project.
 8. Delete `.rearch/` last. Commit `rearch: complete`.
 9. Ask before merging the branch or deleting the tag (default: leave both).
 

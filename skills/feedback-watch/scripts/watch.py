@@ -27,7 +27,7 @@ SKIP_DIRS = {
 FAILING_CONCLUSIONS = {"FAILURE", "TIMED_OUT", "STARTUP_FAILURE"}
 FAILING_STATES = {"FAILURE", "ERROR"}
 PENDING_STATES = {"PENDING", "EXPECTED"}
-# Review states that count as a review of the head commit (Q26): a dismissed review does not.
+# Review states that count as a review of the head commit: a dismissed review does not.
 REVIEWED_STATES = {"APPROVED", "CHANGES_REQUESTED", "COMMENTED"}
 NEWEST = "\uffff"  # sorts after every timestamp
 DONE_LINES = {"all": "ALL DONE", "ci": "CI DONE", "bots": "BOTS DONE"}
@@ -68,7 +68,7 @@ def latest_checks(rollup):
 def checks(rollup):
     """Returns (pending, failing): whether a check still runs, and the sorted labels of the failing ones.
 
-    A check whose only run is cancelled is failing, labelled `<name> (cancelled)` (Q24).
+    A check whose only run is cancelled is failing, labelled `<name> (cancelled)`.
     """
     pending, failing = False, set()
     for item in latest_checks(rollup):
@@ -146,7 +146,7 @@ def report_changes(previous, current, reviewers):
 
 
 def run_pr(numbers, repo, reviewers, until, interval, timeout, allow_no_checks, once, gh, sleep, clock, emit):
-    """Poll until done. Done needs two identical rounds in a row (Q25), except with --once."""
+    """Poll until done. Done needs two identical rounds in a row, except with --once."""
     active, printed, last_round, failures, started = list(numbers), {}, None, {}, clock()
     while True:
         current, closed = {}, []
@@ -222,7 +222,7 @@ def tail(output, lines=TAIL_LINES):
 
 
 def outcome(code, output):
-    """What a rerun is compared on: pass, or the exit code and the output tail of a failure (Q27)."""
+    """What a rerun is compared on: pass, or the exit code and the output tail of a failure."""
     return "pass" if code == 0 else (code, tuple(tail(output)))
 
 

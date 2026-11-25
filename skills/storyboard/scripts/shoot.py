@@ -11,7 +11,7 @@ import argparse, os, platform, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 SHELL = "chromium_headless_shell-*/chrome-headless-shell-mac-{arch}/chrome-headless-shell"
-INSTALL = "install it with: npx playwright install chromium-headless-shell"
+INSTALL = "install it with: npx playwright install --only-shell"
 HEIGHT = re.compile(r'<html[^>]*\bdata-h="(\d+)"')
 DUMP_HEIGHT = 900
 MAX_HEIGHT = 200000  # the tallest screenshot measured whole (topic doc, "Tall screenshots")
@@ -59,11 +59,6 @@ def page_url(page, theme):
     return Path(page).resolve().as_uri() + f"?theme={theme}"
 
 
-def page_height(dom, fallback):
-    m = HEIGHT.search(dom)
-    return int(m.group(1)) if m else fallback
-
-
 def shot_height(dom, fallback):
     """(height to shoot, note for the output line or '')."""
     m = HEIGHT.search(dom)
@@ -102,7 +97,6 @@ def shoot(a):
     os.makedirs(a.out, exist_ok=True)
     stem = Path(a.page).stem
     themes = ("light", "dark") if a.theme == "both" else (a.theme,)
-    lines = []
     with tempfile.TemporaryDirectory() as profile:
         for theme in themes:
             url = page_url(a.page, theme)
@@ -114,9 +108,7 @@ def shoot(a):
             r = run(chrome, profile, a.width, height, f"--screenshot={shot}", url)
             if r.returncode or not os.path.isfile(shot):
                 raise Fail(f"{theme}: {reason(r.stderr, 'no screenshot')}")
-            lines.append(f"{shot}  {a.width}x{height}{note}")
-            print(lines[-1], flush=True)
-    return lines
+            print(f"{shot}  {a.width}x{height}{note}", flush=True)
 
 
 def main():

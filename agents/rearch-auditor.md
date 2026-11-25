@@ -76,6 +76,12 @@ Status: implemented | partial | missing. Partial and missing rows say what is ab
 ## Leftovers
 - L1: file:line, <dead code, stale comment, unused file, a doc that describes old behavior>.
 
+## Doc and code mismatches
+- D1: doc file:line says <claim>; code file:line does <behavior>. Names which side changes.
+
+## Model names
+- N1: file:line, <a model name or id the repo rules forbid>. "none" when the grep finds none.
+
 ## Bugs
 - B1 [high|medium|low]: <defect>. file:line. Scenario: <input or state -> wrong result>.
 ```
