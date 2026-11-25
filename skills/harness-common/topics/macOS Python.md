@@ -26,7 +26,7 @@ Used by: `install.py` and every `skills/*/scripts/*.py` (shebang `#!/usr/bin/pyt
 - Symptom: `import <sibling>` fails with `ModuleNotFoundError` when the script runs as `/usr/bin/python3 -I script.py`.
 - Cause: `-I` drops the script's folder from `sys.path`.
 - Workaround: one bootstrap line before the import, `sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "harness-common" / "scripts"))`. `resolve()` follows the skill symlink into the checkout.
-- Code: none yet; every script that imports shared code adds it from Phase 3 on (`.rearch/architecture.md`).
+- Code: `install.py:15`, which sits at the repo root and inserts `skills/harness-common/scripts` instead. Every skill script that imports shared code adds the line above.
 
 ## Bytecode files
 

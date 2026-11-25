@@ -2,7 +2,7 @@
 
 Facts about Claude Code that the installer and the skills depend on. Vendor docs were read on 2026-11-25: [Subagents](https://code.claude.com/docs/en/sub-agents), [Tools reference](https://code.claude.com/docs/en/tools-reference), [Skills](https://code.claude.com/docs/en/skills), [Memory](https://code.claude.com/docs/en/memory).
 
-Adapter: `install.py` (`render_claude`). From Phase 3 on: `skills/harness-common/scripts/claude_code.py`.
+Adapter: `skills/harness-common/scripts/claude_code.py`, called by `install.py`.
 
 ## Agent files
 
@@ -16,14 +16,14 @@ Adapter: `install.py` (`render_claude`). From Phase 3 on: `skills/harness-common
 | Claude Code watches `~/.claude/agents/` and `.claude/agents/`. A changed file is used by the next spawn, with no restart. | Subagents doc |
 | The body after the closing `---` is the agent's system prompt. | Subagents doc |
 
-Code: `install.py:24-27` writes `name`, `description`, `model`, `tools`.
+Code: `claude_code.py:19-26` writes `name`, `description` and `tools`, then the preamble and the body. It writes no `model` line (FR-AGT-02). `install.py:48-70` rejects an agent source whose `tools` lists `Agent` or `Task`.
 
 ### Quirk: unquoted `: ` in a description
 
 - Symptom: a description such as `Audits one aspect of a project for the rearchitect skill: reads every assigned file` is not valid YAML as a plain scalar. The docs say a file whose YAML does not parse is skipped, with the error in the `--debug` log. Yet the installed `rearch-auditor` agent, which has this description, loaded and ran the Stage 2 audits of this run (`.rearch/STATE.md`).
 - Cause: unknown. The loader may be more lenient than strict YAML. `unverified`.
 - Workaround: write every description as a double-quoted YAML string (FR-INST-11).
-- Code: `install.py:26` (unquoted today; Phase 3 quotes it).
+- Code: `claude_code.py:24` (`json.dumps`, a JSON string is a valid double-quoted YAML scalar).
 
 ## Model per spawn
 
@@ -46,8 +46,8 @@ Code: `install.py:24-27` writes `name`, `description`, `model`, `tools`.
 
 - Symptom: a `general-purpose` subagent has the Agent tool and can start a third layer. The harness allows two layers at most (NFR-13).
 - Cause: nesting is on by default, up to three layers.
-- Workaround: every harness agent lists `tools` without `Agent`, and install rejects an agent that lists it (Phase 3). A brief for a `general-purpose` spawn carries the preamble rule "never spawn a subagent". The harness does not change the user's `settings.json`.
-- Code: `agents/*.md` `tools` lines; from Phase 3 on, `skills/harness-common/references/preamble.md`.
+- Workaround: every harness agent lists `tools` without `Agent`, and install rejects an agent that lists `Agent` or `Task`. The preamble says "You never spawn subagents". A brief for a `general-purpose` spawn carries the preamble rule "never spawn a subagent". The harness does not change the user's `settings.json`.
+- Code: `agents/*.md` `tools` lines; `claude_code.py:11` (`SPAWN_TOOLS`), checked in `install.py:62-64`; `skills/harness-common/references/preamble.md`.
 
 ## Subagent environment
 
@@ -77,7 +77,7 @@ Code: `skills/feedback-watch/SKILL.md:58-61` arms `watch.py` with `timeout_ms` 1
 | `~/.claude/CLAUDE.md` holds the user's instructions for every project. | Memory doc |
 | A `CLAUDE.md` line `@path` imports that file. Relative paths resolve from the importing file. Imports nest four hops deep. An `@path` inside backticks or a code block is not imported. | Memory doc, "Import additional files" |
 
-Code: `install.py:46-51` copies `instructions/global.md` to `~/.claude/CLAUDE.md` and links every skill folder into `~/.claude/skills/`.
+Code: `install.py:98-106` copies `instructions/global.md` to `~/.claude/CLAUDE.md` and links every skill folder into `~/.claude/skills/`; paths in `claude_code.py:14-16`.
 
 ## Plugin skills
 

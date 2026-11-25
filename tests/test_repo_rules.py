@@ -1,9 +1,11 @@
 """Rules over the whole repository: no model names, ignored caches, well-formed skills and agents."""
-import codecs, re, subprocess, unittest
+import codecs, re, subprocess, sys, unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 FIXTURES = REPO / "tests" / "fixtures"
+sys.path.insert(0, str(REPO))
+import install  # noqa: E402  (one frontmatter parser: install.py's)
 
 # Model names, families and id prefixes, ROT13-encoded so this file holds none (FR-AGT-08).
 WORDS = ["fbaarg", "bchf", "unvxh", "qrrcfrrx", "trzvav", "yynzn", "zvfgeny", "djra", "xvzv"]
@@ -15,10 +17,8 @@ MODEL_NAME = re.compile(
 )
 # Run state records the model mapping the user confirmed (FR-AGT-07), so it is not scanned.
 RUN_STATE = (".rearch/", ".attack-plan/", ".ai-notes/")
-# Files that still name models. Phase 3 drops targets/models.json, Phase 10 empties the set.
-ALLOWED = {"targets/models.json", "skills/rearchitect/SKILL.md"}
-TIERS = {"fast", "default", "strong"}
-AGENT_KEYS = {"name", "description", "tier", "tools"}
+# Files that still name models. Phase 10 empties the set.
+ALLOWED = {"skills/rearchitect/SKILL.md"}
 
 
 def tracked_files():
@@ -29,31 +29,11 @@ def tracked_files():
 
 
 def frontmatter(text):
-    """The `key: value` pairs between the opening and closing `---` lines. ValueError names the problem."""
-    lines = text.splitlines()
-    if not lines or lines[0] != "---":
-        raise ValueError("no opening --- fence")
-    if "---" not in lines[1:]:
-        raise ValueError("no closing --- fence")
-    meta = {}
-    for line in lines[1:lines.index("---", 1)]:
-        key, sep, value = line.partition(": ")
-        if not sep or not key or not value:
-            raise ValueError(f"not a 'key: value' line: {line!r}")
-        meta[key] = value
-    return meta
+    return install.frontmatter(text)[0]
 
 
 def check_agent(path):
-    meta = frontmatter(path.read_text())
-    missing = AGENT_KEYS - set(meta)
-    if missing:
-        raise ValueError(f"missing key(s): {', '.join(sorted(missing))}")
-    if meta["name"] != path.stem:
-        raise ValueError(f"name {meta['name']} differs from the file name")
-    if meta["tier"] not in TIERS:
-        raise ValueError(f"unknown tier {meta['tier']}")
-    return meta
+    return install.parse_agent(path)[0]
 
 
 class ModelNameTest(unittest.TestCase):

@@ -4,7 +4,7 @@ Facts about opencode that the installer and the skills depend on. Vendor docs we
 
 opencode is not installed on the maintainer's Mac, so nothing here was checked against a running opencode. Every fact below is from the docs only, and none is checked live. A fact the docs leave open says `unverified`.
 
-Adapter: `install.py` (`render_opencode`). From Phase 3 on: `skills/harness-common/scripts/opencode.py`.
+Adapter: `skills/harness-common/scripts/opencode.py`, called by `install.py`.
 
 ## Agent files
 
@@ -19,14 +19,14 @@ Adapter: `install.py` (`render_opencode`). From Phase 3 on: `skills/harness-comm
 | A subagent with no `model` runs on the parent session's model. | Agents doc, "Model" |
 | A built-in agent (`build`, `plan`, `general`, `explore`) is overridden by an agent with the same id. | Agents doc, "Built-ins" |
 
-Code: `install.py:30-35` writes `description`, `mode: subagent` and, when the tier has one, `model`. All three keys are valid in both formats below.
+Code: `opencode.py:39-48` writes `description`, `mode: subagent` and `permissions`, then the preamble, the sandbox line and the body. It writes no `model` line: the agent runs on the session model until a run applies tiers ("Model per spawn").
 
 ### Quirk: V1 and V2 frontmatter
 
 - Symptom: keys in an agent file are ignored, with only a warning in the log.
 - Cause: a file that uses any of `permissions`, `request`, `system` or `disabled` is read as V2, and its V1 keys (`name`, `tools`, `permission`, `temperature`) are dropped. A file without them is read as V1 and translated.
 - Workaround: write only V2 keys. Express tool limits as `permissions` rules, never as `tools`.
-- Code: `install.py:30-35` (writes no tool limits today; Phase 3 adds `permissions`).
+- Code: `opencode.py:39-48` writes `permissions` and never `tools`, `permission` or `name`.
 
 ## Permissions
 
@@ -52,6 +52,15 @@ Actions the harness maps tools to:
 | none | `execute`, `question`, `external_directory` | Permissions doc |
 
 V1 names map as `bash` to `shell`, `task` to `subagent`, `write` and `patch` to `edit` (Migrate doc, "Permissions and tools").
+
+How the harness renders `tools` (`opencode.py:25-36`): one `deny` rule with resource `*` for every action in the table above that the agent's `tools` do not cover, then `{action: subagent, resource: "*", effect: deny}`. Allowed actions get no rule, so they keep the defaults and the user's global rules, `.env` ask included. `execute`, `question` and `external_directory` get no rule. An agent's skill references sit outside the project, so a deny on `external_directory` would cut it off from them. Whether these rules take effect in a running opencode is `unverified`.
+
+### Quirk: Write and Edit are one action
+
+- Symptom: an agent whose `tools` list `Write` but not `Edit` (attack-plan-critic, -designer, -reader, rearch-auditor) can still edit files on opencode. On Claude Code it cannot.
+- Cause: opencode's `edit` action covers writing, editing and patching. There is no write-only action.
+- Workaround: none in the permissions. The read-only stance stays in the agent's role text (FR-AGT-04).
+- Code: `opencode.py:10-13` maps both to `edit`.
 
 ## The `subagent` tool
 
@@ -103,7 +112,7 @@ Answer: override files. At the tier gate, `opencode.py apply-tiers` writes one `
 | `execute` runs JavaScript that calls other tools. It has no filesystem access, no imports and no timers; it has `fetch`. | Tools doc, "Execute" |
 | Denying `execute` with resource `*` removes Code Mode; its tools are then listed directly. | Tools doc; Permissions doc |
 
-Code: the `execute` sentence in `agents/rearch-*.md` (moves to the preamble in Phase 3).
+Code: `opencode.py:16-17` (`SANDBOX_LINE`), added to opencode agents only (FR-AGT-06).
 
 ## Skills and global instructions
 
@@ -120,4 +129,4 @@ Code: the `execute` sentence in `agents/rearch-*.md` (moves to the preamble in P
 - Symptom: each harness skill exists in `~/.claude/skills/` and in `~/.config/opencode/skills/`.
 - Cause: opencode reads both folders, and install links every skill into both.
 - Workaround: none needed. Both links point at the same folder in this checkout, and the opencode one wins.
-- Code: `install.py:48-51`.
+- Code: `install.py:104-105`.

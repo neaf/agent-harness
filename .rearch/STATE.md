@@ -4,7 +4,7 @@ Project: agent-harness, one source of skills, subagents and global instructions 
 Branch: rearch/2026-11-25
 Base tag: rearch-base (d4b56d4)
 Stage: 5 (phase execution)
-Phase: 3 of 10 (Installer and agent sources), not started
+Phase: 4 of 10 (Shared conventions and model tiers), not started
 
 ## Done
 - Stage 0 setup, 7f686cb
@@ -14,7 +14,8 @@ Phase: 3 of 10 (Installer and agent sources), not started
 - Stage 4 architecture, 61d78ce, 22 modules, 10 phases
 - Storyboard added: commit 96ecd40 (cherry-pick of ec14673 from skill/storyboard), audit/storyboard.md, FR-SB-01..16, folded into phases 1, 2, 4, 8; 24 modules
 - Phase 1 Topic docs: 7 topic docs in skills/harness-common/topics/, Q37 = override files (opencode subagent tool has no model input), 7 deviations in deviations.md, 178f980
-- Phase 2 Test harness: 151 tests in 6 suites, 26 expected failures; root tests/ with install and repo-rule tests
+- Phase 2 Test harness: 151 tests in 6 suites, 26 expected failures; root tests/ with install and repo-rule tests, 71255b6
+- Phase 3 Installer and agent sources: install.py rewritten (quote, prune by manifest, backup, no model lines, exit 0-4), models.json deleted, harness-common adapters and preamble; 169 tests in 7 suites. Real home needs one install.py run (18 changes), not run yet
 
 ## Decisions
 - 2026-11-25: target is agent-harness itself, user call.
@@ -33,4 +34,4 @@ Phase: 3 of 10 (Installer and agent sources), not started
 
 ## Next prompt
     Use the rearchitect skill. Continue from .rearch/STATE.md.
-    Next: Phase 3 (Installer and agent sources).
+    Next: Phase 4 (Shared conventions and model tiers).

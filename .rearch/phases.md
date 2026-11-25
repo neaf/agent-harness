@@ -78,7 +78,7 @@ Work:
 - tests/test_install.py: `fake_root` copies `targets/models.json`; drop that copy with the file. `targets()` takes the two host bases since Phase 2 (deviations.md, Phase 2).
 Verify: V. `--check` lists 12 agent rewrites plus the manifests, then 0 after install.
 Manual: none. Verify automatically (see "Verification" at the top).
-Exit: no expected-failure marker left in tests/test_install.py. The grep allowlist holds only skills/rearchitect/SKILL.md. No file outside `preamble.md` holds the style line.
+Exit: no expected-failure marker left in tests/test_install.py. The grep allowlist holds only skills/rearchitect/SKILL.md. No agent file holds the style line or the sandbox line (deviations.md, Phase 3: briefs.md loses its copy in Phase 7, rearchitect SKILL.md its copies in Phase 10).
 
 ## Phase 4: Shared conventions and model tiers
 
@@ -88,7 +88,7 @@ Touches: skills/harness-common/SKILL.md, skills/harness-common/references/subage
 Deletes: skills/attack-plan-create/references/publishing.md, skills/qa-session/references/publishing.md
 Work:
 - `model-tiers.md`: list, propose, confirm gate (one model for all tiers allowed), record the table, pass per spawn. Claude Code: Agent tool `model` (an alias only). opencode: `override files` (Phase 1, `topics/opencode.md` "Model per spawn"): `opencode.py apply-tiers` writes full copies of the installed agents with a `model` line, plus `general.md`, into the project's `.opencode/agents/`, excludes them in `.git/info/exclude`, then the orchestrator runs `opencode reload`; `clear-tiers` removes them. The `subagents.md` two-layer rule covers Claude Code `general-purpose` spawns too: Claude Code allows three layers by default (`topics/Claude Code.md` "Nested spawns"), so the brief carries "never spawn".
-- `subagents.md`: brief minimum, fresh subagent per unit, word caps, two layers, missing-agent fallback that finds the checkout with `realpath` of the installed harness-common link and reads `agents/<name>.md` there.
+- `subagents.md`: brief minimum, fresh subagent per unit, word caps, two layers, missing-agent fallback that finds the checkout with `realpath` of the installed harness-common link and reads `agents/<name>.md` there. The fallback prompt is `preamble.md`, then the agent body: agent sources hold no preamble since Phase 3. On opencode it adds the sandbox line from `opencode.py` (`SANDBOX_LINE`).
 - `state.md`: `Next` line, `Models for this run` table, exclude rule. Single-spawn skills (storyboard) keep no resume file: the table and Next line go in the work's ai-notes "State (start here)" when one exists, else the gate runs in the session and the hand-over ends with a fenced resume prompt (SB-Q1).
 - `publishing.md`: the merged procedure. Each calling skill states its source of truth.
 Verify: V. `opencode.py models` prints a clear "opencode not found" line and exits 1 on this Mac.
@@ -196,6 +196,7 @@ Work:
   - An existing branch or tag is handled.
   - `PYTHONDONTWRITEBYTECODE=1`, or ignored caches, in the clean-tree check.
 - Model gate: the tier gate at Stage 0 and on resume.
+- SKILL.md:26 style line becomes a pointer to `harness-common/references/preamble.md`; the `execute` sandbox line at :109 goes (it lives in `opencode.py` since Phase 3).
 - Manual-check gate (FR-RA-14): Stage 0 asks how many manual checks the user wants, default zero. With zero, Stage 5 and Stage 6 verify automatically only and report what is not verified. Every gate shows a recommended default for each decision.
 - STATE: a Progress block (aspects audited, phase in flight with its base commit). On a dirty tree after a dead phase agent, show `git diff --stat` and ask: keep and continue, or `git restore` and rerun. STATE is committed with its stage.
 - Stage 6: read baseline first, audit, run the baseline and checklist, then delete `.rearch/` last. An extra phase gets appended to phases.md. Stage 6 owns cleanup (Q35, Q36).

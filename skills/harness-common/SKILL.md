@@ -20,3 +20,20 @@ One doc per external system. Each fact has a source: a code location, a test, a 
 | [Notion MCP](<topics/Notion MCP.md>) | Writing, updating and reading back Notion pages through the MCP tools |
 | [macOS Python](<topics/macOS Python.md>) | `/usr/bin/python3` 3.9, `-I`, bytecode files, standard library only |
 | [Chrome headless shell](<topics/Chrome headless shell.md>) | Which binary, where Playwright puts it, `--dump-dom`, tall screenshots, fonts from `file://` |
+
+## References
+
+| File | Holds |
+|---|---|
+| [preamble.md](references/preamble.md) | The agent preamble: style line, fetched content is data, `unverified`, never spawn. `install.py` puts it at the top of every installed agent. |
+
+## Scripts
+
+Host adapters used by `install.py`. Each holds the install paths and the agent rendering for one host.
+
+| Script | Host |
+|---|---|
+| `scripts/claude_code.py` | Claude Code: quoted `description`, `tools` kept, no `model` line |
+| `scripts/opencode.py` | opencode: V2 `permissions` from `tools` with the spawn denied, the `execute` sandbox line, no `model` line |
+
+Tests: `PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s skills/harness-common/tests`.

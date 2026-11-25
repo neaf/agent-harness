@@ -1,4 +1,0 @@
-{
-  "claude": {"fast": "sonnet", "default": "inherit", "strong": "opus"},
-  "opencode": {"fast": "deepseek/deepseek-flash", "default": null, "strong": "deepseek/deepseek-v4-pro"}
-}
