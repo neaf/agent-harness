@@ -57,7 +57,7 @@ Shared files (README, global.md) are counted in every aspect they join.
 | Aspect | Files | Lines | Scope |
 |---|---|---|---|
 | install-and-config | 5 | 169 | install.py, model tiers, global instructions, README, ignore rules |
-| attack-plan | 21 | 1,925 | both attack-plan skills, their 3 agents, scripts and tests |
+| attack-plan | 21 | 1,736 | both attack-plan skills, their 3 agents, scripts and tests |
 | feedback-watch | 5 | 859 | skill, watcher script, tests |
 | qa-session | 8 | 589 | skill, references, page checker, tests |
 | rearchitect | 7 | 418 | skill, references, 3 rearch agents |
