@@ -3,8 +3,7 @@
 Project: agent-harness, one source of skills, subagents and global instructions for Claude Code and opencode, installed by install.py.
 Branch: rearch/2026-11-25
 Base tag: rearch-base (d4b56d4)
-Stage: 5 (phase execution)
-Phase: 10 of 10 (rearchitect), not started
+Stage: 6 (final cleanup), not started
 
 ## Done
 - Stage 0 setup, 7f686cb
@@ -22,7 +21,8 @@ Phase: 10 of 10 (rearchitect), not started
 - Phase 6 GitHub adapter and feedback-watch: harness-common github.py (one paginated GraphQL snapshot), watcher fixes, --until bots; 230 tests, 17 expected failures; live read-only check on cli/cli passed, 7dfddc7
 - Phase 7 Markdown parser and attack-plan-create: harness-common markdown.py, gate.py v2 gates (multi-pair, migrates v1), reopen fix, task-block schema (check_draft --tasks), per-milestone task tables; 277 tests, 14 expected failures, 5b21f35
 - Phase 8 qa-session and storyboard: QA page = collapsed setup, scenarios, empty Findings; check_page on markdown.py with --live; shoot.py FAIL lines, timeouts, 200000 px cap; 290 tests, 2 expected failures, 562a2b5
-- Phase 9 git adapter and milestone-execute: harness-common git.py, review_threads.py (resolves bot threads only), integration unchanged/conflict/failed events, exit goal and --until bots; 330 tests, 0 expected failures; live read-only thread listing on cli/cli passed. Open: bot REPLY threads (ask user)
+- Phase 9 git adapter and milestone-execute: harness-common git.py, review_threads.py (resolves bot threads only), integration unchanged/conflict/failed events, exit goal and --until bots; 330 tests, 0 expected failures; live read-only thread listing on cli/cli passed. bot REPLY threads decided, 46df652
+- Phase 10 rearchitect: Stage 0 gates (tree, branch/tag, models, manual checks), Stage 6 order fixed, run lessons in the skill, FR-GLB-12 in global.md, no model names left in the repo; 331 tests
 
 ## Decisions
 - 2026-11-25: target is agent-harness itself, user call.
@@ -39,8 +39,9 @@ Phase: 10 of 10 (rearchitect), not started
 - 2026-11-25: include the storyboard skill from ~/dev/agent-harness-storyboard; its questions SB-Q1..Q11 settled with defaults (end of requirements.md), user call.
 - 2026-11-25: a commit from another session swept in Phase 3 files; history split into 5519633 (qa-session) and b70bcae (Phase 3), user call. The user does no more harness work today, so the run handles that change now: Phase 8 keeps the rules.
 - 2026-11-25: new global rule FR-GLB-12: shell commands suggested for the user to run are written with the `!` prefix (for example `! open <file>`). Added to requirements.md and the Phase 10 Work list, user call.
+- 2026-11-25: execute posts replies on bot REPLY threads and resolves them itself; human threads never touched. Phase 9 built 'resolve after the user posts', so Stage 6 runs an extra phase (FR-APE-15), user call.
 - 2026-11-25: models for this run: fast Sonnet 5.5, default Opus 5.5, strong Opus 5.5 (baseline.md), user call.
 
 ## Next prompt
     Use the rearchitect skill. Continue from .rearch/STATE.md.
-    Next: Phase 10 (rearchitect).
+    Next: Stage 6 (final cleanup).

@@ -81,6 +81,14 @@ Code: `skills/feedback-watch/SKILL.md` "Arming it" arms `watch.py` with `timeout
 
 Code: `install.py:98-106` copies `instructions/global.md` to `~/.claude/CLAUDE.md` and links every skill folder into `~/.claude/skills/`; paths in `claude_code.py:14-16`.
 
+## Shell commands from the prompt
+
+| Fact | Source |
+|---|---|
+| A prompt that starts with `!` runs the rest as a shell command in the session, and its output joins the conversation. | [Interactive mode](https://code.claude.com/docs/en/interactive-mode), "Quick commands"; used by the user in this run (FR-GLB-12). Doc page not re-read on 2026-11-25. |
+
+Code: `instructions/global.md` (the `!` prefix rule), `skills/rearchitect/SKILL.md` (commands suggested to the user).
+
 ## Plugin skills
 
 | Fact | Source |

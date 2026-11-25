@@ -12,7 +12,7 @@ One source for the skills, subagents and global instructions used by Claude Code
 | Skill | What it does |
 |---|---|
 | [ai-notes](skills/ai-notes/SKILL.md) | Keeps markdown notes per area in `.ai-notes/` when work spans more than one session, subagent or PR, committed by default (`.git/info/exclude` to keep them private in a repo). Each area README has a "State (start here)" section, so one orchestrator session can hand work to fresh subagents and later sessions. |
-| [rearchitect](skills/rearchitect/SKILL.md) | Refactors a working but patched-together project in committed phases. Parallel audits, consolidated requirements, a new architecture, then one fresh subagent per phase. |
+| [rearchitect](skills/rearchitect/SKILL.md) | Refactors a working but patched-together project in committed phases. Parallel audits, consolidated requirements, a new architecture, then one fresh subagent per phase. At the start you confirm a model per tier and the number of manual checks (default zero: phases verify automatically and report what they could not check). Every gate offers recommended defaults. |
 | [attack-plan-create](skills/attack-plan-create/SKILL.md) | Writes an attack plan (tech exploration) one section at a time: product solution first, then technical solution, milestones and tasks an agent can turn into pull requests. Fresh subagents attack each section, the author answers one question at a time and reviews each section. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/attack-plan-create/tests`. |
 | [attack-plan-milestone-execute](skills/attack-plan-milestone-execute/SKILL.md) | Builds one milestone of an attack plan as stacked draft PRs, one fresh subagent per PR: checks the input, audits the tickets against the code, follows CI and reviews until green, keeps the stacks in sync. Resolves only the review threads a bot started; threads a person started stay for the user. `build_integration_branch.py` needs git 2.38 or later. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/attack-plan-milestone-execute/tests`. |
 | [feedback-watch](skills/feedback-watch/SKILL.md) | Watches a session's work in the background: CI, review and unresolved threads on GitHub pull requests (stops on merge or close; `--until bots` leaves human threads to the user), or local checks rerun on file changes, one line per real change. Reads GitHub through `harness-common/scripts/github.py`. Tests: `/usr/bin/python3 -I -m unittest discover -s skills/feedback-watch/tests`. |
@@ -25,8 +25,8 @@ One source for the skills, subagents and global instructions used by Claude Code
 
 Facts about the external systems, each with its source or marked `unverified`. They live in `skills/harness-common/topics/`, so running skills can read them.
 
-- [Claude Code](<skills/harness-common/topics/Claude Code.md>): agent files, the spawn `model` parameter, nested spawns, Monitor, skill and `CLAUDE.md` paths, plugin skills.
-- [opencode](skills/harness-common/topics/opencode.md): agent files and permissions, the `subagent` tool, model per spawn, background shell jobs, skills and `AGENTS.md`.
+- [Claude Code](<skills/harness-common/topics/Claude Code.md>): agent files, the spawn `model` parameter, nested spawns, Monitor, skill and `CLAUDE.md` paths, plugin skills, `!` shell commands.
+- [opencode](skills/harness-common/topics/opencode.md): agent files and permissions, the `subagent` tool, model per spawn, background shell jobs, skills and `AGENTS.md`, `!` shell commands (unverified).
 - [GitHub](skills/harness-common/topics/GitHub.md): check rollups, reviews and threads, pagination, PR order, stacked-branch CI, job logs.
 - [git](skills/harness-common/topics/git.md): `merge-tree --write-tree`, `commit-tree` identity, fetch refspecs, signed tags, `info/exclude`.
 - [Notion MCP](<skills/harness-common/topics/Notion MCP.md>): quirks of writing and updating Notion pages.
@@ -73,7 +73,7 @@ Install puts the shared preamble (`skills/harness-common/references/preamble.md`
 
 ## Tests
 
-`tests/` covers `install.py` (against a throwaway home) and the repo-wide rules: no model names in tracked files, ignored bytecode caches, a `SKILL.md` named after each skill folder, well-formed agent files, and `Spawns` tables that name existing agents with their tier. Each skill with scripts has its own `tests/` folder. Run every suite, one line each:
+`tests/` covers `install.py` (against a throwaway home) and the repo-wide rules: no model names in tracked files, ignored bytecode caches, a `SKILL.md` named after each skill folder, well-formed agent files, a `Spawns` table in every skill that spawns, and `Spawns` rows that name existing agents with their tier. Each skill with scripts has its own `tests/` folder. Run every suite, one line each:
 
 ```sh
 for s in tests skills/*/tests; do printf '%s: ' "$s"; PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s "$s" 2>&1 | tail -1; done

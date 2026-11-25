@@ -18,10 +18,11 @@ The caller gives: phase number, the rearchitect skill directory, and any user an
 3. Implement the phase. Docs follow `references/docs-style.md` in the skill directory.
 4. Delete the files the phase lists under Deletes. Grep to confirm no references remain.
 5. Never delete a workaround whose fact is missing from a topic doc. Add the fact first.
-6. Run every build, test and lint command from `baseline.md`. Fix failures. A phase ends green or reports as blocked.
-7. The plan turns out wrong: append the problem and your change to `.rearch/deviations.md`, and edit the affected later phases in `phases.md`.
-8. A decision only the user can make: stop, leave the tree as is, and report the question. Do not guess on behavior changes.
-9. Do not commit, push, branch or tag. Do not update STATE.
+6. Run every build, test and lint command from `baseline.md`, as written there, so the run leaves no untracked files. Fix failures. A phase ends green or reports as blocked.
+7. Verify by automated means: tests, fixtures, a throwaway install or home folder, grep checks. Do not call live external services: the orchestrator runs the read-only live checks. List what these cannot cover as "not verified" under the phase in `.rearch/deviations.md`; it does not block the phase.
+8. The plan turns out wrong: append the problem and your change to `.rearch/deviations.md`, and edit the affected later phases in `phases.md`.
+9. A decision only the user can make: stop, leave the tree as is, and report the question with a recommended default. Do not guess on behavior changes.
+10. Do not commit, push, branch or tag. Do not update STATE.
 
 ## Reply to the caller
 
@@ -30,6 +31,7 @@ At most 200 words:
 - Files changed, added and deleted (counts, then paths).
 - Requirement IDs implemented.
 - Verification commands and results.
-- Manual checklist items (`M` numbers) this phase can affect, and what to look for.
+- Manual checks (`M` numbers) this phase can affect, and what to look for. `none` when `baseline.md` has none.
+- Not verified: what automated checks could not cover.
 - Deviations recorded, if any.
 - Questions for the user, if blocked.

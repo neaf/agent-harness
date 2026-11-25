@@ -17,8 +17,6 @@ MODEL_NAME = re.compile(
 )
 # Run state records the model mapping the user confirmed (FR-AGT-07), so it is not scanned.
 RUN_STATE = (".rearch/", ".attack-plan/", ".ai-notes/")
-# Files that still name models. Phase 10 empties the set.
-ALLOWED = {"skills/rearchitect/SKILL.md"}
 
 
 def tracked_files():
@@ -78,6 +76,28 @@ def spawns_problems(text, agents):
     return problems
 
 
+def has_spawns_table(text):
+    """True when a heading named `Spawns` is followed by a table with the Spawns header, outside fences."""
+    fenced, section = False, False
+    for line in text.splitlines():
+        s = line.strip()
+        if s.startswith("```") or s.startswith("~~~"):
+            fenced = not fenced
+        elif not fenced and s.startswith("#"):
+            section = s.lstrip("#").strip() == "Spawns"
+        elif not fenced and section and s.startswith("|"):
+            if [c.strip() for c in s.strip("|").split("|")] == SPAWNS_HEADER:
+                return True
+    return False
+
+
+def spawns(text, agents):
+    """True when a SKILL.md delegates: it names an agent from agents/, the host's general-purpose
+    subagent, or links the tier gate (model-tiers.md)."""
+    names = "|".join(re.escape(a) for a in agents)
+    return bool(re.search(r"\b(?:" + names + r")\b|general-purpose|model-tiers\.md", text))
+
+
 class ModelNameTest(unittest.TestCase):
     def setUp(self):
         self.files = [f for f in tracked_files() if not f.startswith(RUN_STATE)]
@@ -88,11 +108,8 @@ class ModelNameTest(unittest.TestCase):
             if found:
                 self.hits[name] = found
 
-    def test_no_model_name_outside_the_allowlist(self):
-        self.assertEqual({name: found for name, found in self.hits.items() if name not in ALLOWED}, {})
-
-    def test_every_allowlisted_file_still_names_a_model(self):
-        self.assertEqual(sorted(ALLOWED - set(self.hits)), [])
+    def test_no_model_name_in_any_tracked_file(self):
+        self.assertEqual(self.hits, {})
 
     def test_every_skill_folder_is_scanned(self):
         scanned = {name.split("/")[1] for name in self.files if name.startswith("skills/") and name.count("/") >= 2}
@@ -136,6 +153,30 @@ class RepoRulesTest(unittest.TestCase):
 
 class SpawnsTableTest(unittest.TestCase):
     AGENTS = {"critic": "strong", "reader": "fast"}
+
+    def test_every_skill_that_spawns_has_a_spawns_table(self):
+        agents = [p.stem for p in (REPO / "agents").glob("*.md")]
+        need = set()
+        for path in sorted((REPO / "skills").glob("*/SKILL.md")):
+            # harness-common defines the convention; it never spawns.
+            if (path.parent / "references" / "model-tiers.md").exists():
+                continue
+            text = path.read_text()
+            if spawns(text, agents):
+                need.add(path.parent.name)
+                with self.subTest(skill=path.parent.name):
+                    self.assertTrue(has_spawns_table(text), "no Spawns table")
+        for name in ("attack-plan-create", "attack-plan-milestone-execute", "qa-session", "rearchitect", "storyboard"):
+            self.assertIn(name, need)
+
+    def test_the_spawn_checks_read_text(self):
+        table = "## Spawns\n\n| Spawn | Tier | Used for |\n|---|---|---|\n| `general` | strong | x |\n"
+        self.assertTrue(has_spawns_table(table))
+        self.assertFalse(has_spawns_table("```\n" + table + "```\n"))
+        self.assertFalse(has_spawns_table("## Other\n\n| Spawn | Tier | Used for |\n"))
+        self.assertTrue(spawns("Spawn `critic` per section.", ["critic"]))
+        self.assertTrue(spawns("run the gate in [model-tiers.md](x)", []))
+        self.assertFalse(spawns("Subagents read the notes. A critical path.", ["critic"]))
 
     def test_every_spawns_table_names_real_agents_with_their_tier(self):
         agents = {p.stem: check_agent(p)["tier"] for p in (REPO / "agents").glob("*.md")}

@@ -54,6 +54,22 @@ In each area:
 - When a session stops, update "State (start here)": where it stopped and the `Next:` line.
 - After a PR merges or a worktree is removed, update the row and tick the to-do.
 
+## Handing off to a new session
+
+When the user asks for a handoff (`/handoff [notes]`, "hand this off", "continue in a new session"), or the work should go on in a fresh session:
+
+1. Write `.ai-notes/<area>/handoff-<slug>.md`, a prompt the new session follows on its own:
+   - Where to read: the area README, the files that matter, with paths.
+   - The facts: what is verified, with ids, PRs, branches and dates. Mark what is inferred.
+   - The task and its stop point: what to do, and where to stop and report.
+   - The user's working rules that apply.
+   - The user's notes from the request, word for word, under their own heading.
+   - Leave out your own conclusions and proposals (people to contact, an order, a design) unless the user asks for them. The new session reaches its own (user decision 2026-11-25).
+2. Update the area README: a `Handoff:` line in "State (start here)" linking the file, dated.
+3. Start the session:
+   - When the tool `mcp__synopia__start_session` is available (the session runs in Synopia), call it with `prompt: "Read .ai-notes/<area>/handoff-<slug>.md and follow it."` and a short `title`. Then say in one line what started.
+   - Otherwise, end the reply with "Start it with:" and that prompt in a code block.
+
 ## Orchestrator and subagents
 
 - A subagent's prompt follows [subagents.md](../harness-common/references/subagents.md) "Brief minimum". It points at the notes (`.ai-notes/README.md`, the area README, the relevant files) instead of retyping them, and states:

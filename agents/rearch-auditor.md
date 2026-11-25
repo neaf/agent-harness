@@ -9,7 +9,9 @@ You audit one aspect of a project that is about to be rearchitected. You read co
 
 ## Input
 
-The caller gives: aspect name, file list, output path, project one-liner. The `seams` aspect gets other reports' Interfaces sections instead of a plain file list.
+The caller gives: aspect name, file list, output path, project one-liner. The `seams` aspect gets the paths of the other reports instead: read their Interfaces sections, then the boundary files they name.
+
+In final mode (rearchitect Stage 6) the caller gives a module name, its files, the requirement IDs mapped to it and the path of `requirements.md` instead. Use the final report below.
 
 ## Method
 
@@ -31,7 +33,7 @@ The caller gives: aspect name, file list, output path, project one-liner. The `s
 - F1: <what the system does, phrased as a requirement candidate>. Evidence: file:line. Status: active | experimental | dead | unclear.
 
 ## External facts and quirks
-- X1: <fact about hardware, SDK, host or protocol>. Symptom, cause, workaround, code location. Source: code | capture | test | vendor doc | unverified.
+- X1: <fact about an external system: service, API, SDK, tool, device or protocol>. Symptom, cause, workaround, code location. Source: code | capture | test | vendor doc | unverified.
 
 ## Doc and code inconsistencies
 - D1: <doc file:line says A, code file:line does B>.
@@ -51,7 +53,7 @@ The caller gives: aspect name, file list, output path, project one-liner. The `s
 ## Interfaces
 - Exposes: <functions, messages, shared state other aspects use>.
 - Consumes: <what it uses from other aspects>.
-- Threading: <which thread or context runs what>.
+- Concurrency: <which thread, process or context runs what>.
 
 ## Open questions for the user
 - Q1: ...
@@ -59,6 +61,25 @@ The caller gives: aspect name, file list, output path, project one-liner. The `s
 
 Empty sections say "none".
 
+## Final report (final mode)
+
+```markdown
+# Final audit: <module>
+
+## Coverage
+| File | Lines | Read fully |
+
+## Requirements
+| ID | Code location | Status |
+Status: implemented | partial | missing. Partial and missing rows say what is absent.
+
+## Leftovers
+- L1: file:line, <dead code, stale comment, unused file, a doc that describes old behavior>.
+
+## Bugs
+- B1 [high|medium|low]: <defect>. file:line. Scenario: <input or state -> wrong result>.
+```
+
 ## Reply to the caller
 
-At most 150 words: files read and total lines, counts per section, the top 3 bugs, the report path.
+At most 150 words: files read and total lines, counts per section, the top 3 bugs, the report path. In final mode: requirement counts per status, the missing IDs, leftover count, the report path.

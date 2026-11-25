@@ -181,3 +181,19 @@
 - Real home: `install.py --check` still prints 20 changes (unchanged by this phase; no agent or skill folder added).
 
 - Orchestrator live check after Phase 9: `review_threads.py list --pr 15111 --repo cli/cli` (read-only) listed 1 unresolved thread, started by copilot-pull-request-reviewer and classified bot. The thread query and the bot/human split work live. Resolve stays untested live.
+
+## Phase 10 (2026-11-25)
+
+1. Files outside Touches: `instructions/global.md` (FR-GLB-12, rule 17), `skills/harness-common/topics/Claude Code.md` and `topics/opencode.md` (new "Shell commands from the prompt" sections: the `!` prefix fact, opencode `unverified`), `skills/harness-common/SKILL.md` (topic rows). 12 files changed, none added or deleted.
+2. This run's `.rearch/baseline.md` models table backticks `model: <alias>`, not the bare value. `opencode.py tier_models` rejects it (`fast model 'model: …' is not a provider/model id`), checked by script. Not edited (phase rule). On Claude Code no `apply-tiers` or `clear-tiers` runs, so Stage 6 of this run skips both. The skill's `references/state.md` example now parses (checked with `tier_models`).
+3. Spawns presence rule: a SKILL.md that names an agent from `agents/`, `general-purpose`, or links `model-tiers.md` must have a `Spawns` table. harness-common is skipped by rule (it holds `references/model-tiers.md`, it never spawns). The test also pins the five spawning skills (create, execute, qa-session, rearchitect, storyboard). ai-notes, writing-craft and feedback-watch need none.
+4. rearchitect SKILL.md: "Model routing" and the fallback paragraph became a `## Spawns` table plus pointers to `model-tiers.md` and `subagents.md`; the style line and the `execute` sandbox line are gone (both live in `preamble.md` and `opencode.py`). New sections: Gates, Amendments, Resuming. Stage 0 gates: dirty tree, existing branch or tag, models, manual checks (default zero). Rules gained the `git log` check before every commit.
+5. Agents: architect gets an `amendment` mode and no cleanup phase; auditor gets a final mode (Stage 6, FR table per module); phase agent lists "not verified" and does not call live services. Installed agent outputs change: the real home's `--check` stays at 20 (these files were already pending `replace`). The orchestrator's `install.py` run applies them.
+6. Counts: tests/ 35 (was 34: allowlist test removed, Spawns presence and its fixture test added). 7 suites, 331 tests, 0 expected failures.
+
+## Not verified in Phase 10
+
+- No live rearchitect run on the new text: Stage 0 gates, the resume rules, amendments and Stage 6 order are prose only. Stage 6 of this run is the first use.
+- The `!` prefix in opencode (`unverified` in `topics/opencode.md`). The Claude Code doc page was not re-read in this phase.
+- opencode `apply-tiers --state .rearch/baseline.md --general default` and `clear-tiers`: opencode is not installed here; the table parser ran on the documented example only.
+- Real home: `install.py --check` prints 20 changes until the orchestrator runs `install.py`. Throwaway HOME: 34 applied, then 0; 12 agent frontmatters parse with Ruby `YAML.safe_load`; 18 skill links resolve; both global files hold the `!` rule.

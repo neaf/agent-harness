@@ -134,6 +134,14 @@ Code:
 
 Code: `opencode.py:23-24` (`SANDBOX_LINE`), added to opencode agents only (FR-AGT-06).
 
+## Shell commands from the prompt
+
+| Fact | Source |
+|---|---|
+| Whether a prompt that starts with `!` runs a shell command and adds its output to the session: `unverified`. Check: type `! echo hi` in the opencode TUI. | none |
+
+Code: `instructions/global.md` (the `!` prefix rule says opencode support is unverified).
+
 ## Skills and global instructions
 
 | Fact | Source |

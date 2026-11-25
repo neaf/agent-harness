@@ -272,6 +272,10 @@ Status values: `kept` (current behavior, stays; a listed fix may apply), `open` 
   Evidence: execute/SKILL.md:19
   Status: kept
 
+- FR-APE-15: A bot review thread whose decision is REPLY (no code change, for example "no change needed, because ...") gets its reply posted by the orchestrator under the user's account, then resolved, so the exit goal is reached without the user. Threads started by a human are never replied to or resolved.
+  Evidence: user decision 2026-11-25. Replaces the Phase 9 behavior "resolve after the user says the reply is posted".
+  Status: kept
+
 ## Feedback watch (FW)
 
 - FR-FW-01: `watch.py pr N... [--repo]` polls every `--interval` s (default 120, must be > 0) and prints one line per PR when (sha7, pending, failing, missing reviewers, unresolved) changes. The first round prints every PR, so a re-armed watcher loses nothing.
