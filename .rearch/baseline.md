@@ -45,3 +45,15 @@ Only the user can verify these. Every phase names the ones it affects.
 - M9: ai-notes live. Notes land in `.ai-notes/<area>/`, and a new session resumes from them.
 - M10: writing-craft. The skill triggers before drafting a page, plan, PR description or long reply, and the output follows its rules.
 - M11: Global instructions. A session follows `instructions/global.md`: skill-first, delegation with `For review: `, linked PR numbers, minimal test output, feedback-watch after push.
+
+## Models for this run
+
+Confirmed by the user on 2026-11-25 in Claude Code (FR-AGT-07). Every spawn passes the model for its tier.
+
+| Tier | Agents | Model |
+|---|---|---|
+| fast | rearch-auditor | Sonnet 5.5 (`model: sonnet`) |
+| default | rearch-phase | Opus 5.5 (`model: opus`) |
+| strong | rearch-architect | Opus 5.5 (`model: opus`) |
+
+Stage 2 audits ran on the installed `fast` agent (Sonnet) and Stage 3 requirements on `strong` (Opus), before this gate existed.
