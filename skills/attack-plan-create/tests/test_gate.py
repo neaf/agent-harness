@@ -1,8 +1,11 @@
-import shutil, sys, tempfile, unittest
+import io, shutil, sys, tempfile, unittest
+from contextlib import redirect_stderr
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-from gate import Gate, Refused  # noqa: E402
+from gate import Gate, Refused, main  # noqa: E402
+
+FIXTURE = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "markdown" / "fenced-headings.md"
 
 PLAN = "# Product solution\n## Glossary\n- **Task:** a to-do.\n## Week widget\n- Shows 3 tasks.\n# Open questions\n"
 
@@ -117,6 +120,30 @@ class GateTest(unittest.TestCase):
         self.gate.skip("week-widget")
         self.assertEqual(Gate(self.folder).status(),
                          "product / glossary: approved by Author\nproduct / week-widget: not reviewed")
+
+    # Known defects. Phase 7 fixes each and removes its marker.
+
+    @unittest.expectedFailure
+    def test_FR_APC_06_open_accepts_a_reopened_gate(self):
+        self.pass_gate("glossary", "product", "Glossary")
+        self.gate.reopen("glossary", "renamed a term")
+        self.assertEqual(self.open_section("glossary", "Glossary"), "opened glossary (product)")
+
+    @unittest.expectedFailure
+    def test_FR_APC_05_section_hash_ignores_a_fenced_heading(self):
+        text = FIXTURE.read_text()
+        self.write(text)
+        self.pass_gate("setup", "product", "Setup")
+        self.write(text.replace("the list shows 3 tasks", "the list shows 5 tasks"))
+        self.assertEqual(self.gate.problems(), ["setup changed after its approval: reopen it"])
+
+    @unittest.expectedFailure
+    def test_FR_APC_08_non_numeric_rounds_is_refused_by_name(self):
+        self.open_section("glossary", "Glossary")
+        with redirect_stderr(io.StringIO()) as err:
+            code = main(["grilled", str(self.folder), "glossary", "--rounds", "abc"])
+        self.assertNotEqual(code, 0)
+        self.assertIn("rounds", err.getvalue())
 
 
 if __name__ == "__main__":

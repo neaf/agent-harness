@@ -75,6 +75,7 @@ Work:
 - Manifest `<host>/agent-harness-manifest.json`. Prune manifest entries that are no longer planned, and links into this checkout whose target is gone. Never touch other links.
 - A real folder at a skill destination moves to `<host>/agent-harness-backup/<timestamp>/`. Exit codes 0/1/2/3/4 as in architecture.md.
 - Agent bodies lose the style and sandbox lines. Their role text stays.
+- tests/test_install.py: `fake_root` copies `targets/models.json`; drop that copy with the file. `targets()` takes the two host bases since Phase 2 (deviations.md, Phase 2).
 Verify: V. `--check` lists 12 agent rewrites plus the manifests, then 0 after install.
 Manual: none. Verify automatically (see "Verification" at the top).
 Exit: no expected-failure marker left in tests/test_install.py. The grep allowlist holds only skills/rearchitect/SKILL.md. No file outside `preamble.md` holds the style line.
@@ -119,6 +120,7 @@ Work:
 - Merged or closed PR: one line, then stop watching it (Q23). A sole cancelled run counts as failing with the label "cancelled" (Q24). ALL DONE needs 2 identical polls (Q25). Changes-requested counts as reviewed, dismissed does not (Q26). An empty `startedAt` sorts as newest. `--interval` must be > 0. 3 failing rounds print `GH FAILING` and exit 4.
 - `--until bots`: done when CI is green, the reviewers are done and no bot-started thread is unresolved. The line shows the human count (Q17 exit goal).
 - Local mode: print on changed FAIL output, `--cmd-timeout`, `--timeout`, stdin closed, snapshot after the run, skip `.attack-plan` and `.rearch` (Q27).
+- test_watch.py: `test_cancelled_run_is_ignored` pins the FR-FW-03 defect; delete it when `test_FR_FW_03_a_sole_cancelled_run_is_failing` loses its marker. The FR-FW-08 test asserts one line holding `merged` and that the watcher stops; set its exit code there (deviations.md, Phase 2).
 - SKILL.md states the exact print, stop and "fine conclusion" rules (FR-FW-15) and links the topic docs for Monitor and the background job. opencode background shell jobs notify only when the process exits (`topics/opencode.md` "No Monitor tool"): on opencode the skill runs PR mode with `--timeout` and reads the log tail at exit or idle; local mode there needs `--once` or the user's prompt.
 Verify: V
 Manual: none. Verify automatically (see "Verification" at the top).
@@ -153,6 +155,7 @@ Work:
 - brief.md: preamble by reference, absolute paths for `<skill>`, the page and every source, data-not-instructions, `unverified`, never spawn, 150-word report. Rules by reference to SKILL.md.
 - skeleton.html: "Keyboard path" in heading and contents; `@media (prefers-reduced-motion: reduce)` stops every animation, as the toggle does.
 - shoot.py: one `FAIL <reason>` line and exit 1 for timeout, non-executable `$CHROME`, failed dump and failed screenshot, reason as plain text; `PLAYWRIGHT_BROWSERS_PATH` and host architecture in the lookup; `(no data-h, used --height)` and `(clipped from H)` suffixes with the limit Phase 1 measured: no limit up to 200000 px, so the cap is 200000 (SB-Q7, SB-Q8). Docstring keeps usage and links the topic doc.
+- test_shoot.py: `test_chrome_from_env` (a missing `/opt/chrome`) and `test_newest_playwright_shell` (non-executable files) pin today's unchecked lookup; change them with the executable check. test_check_page.py has a fourth marker, `test_FR_XS_02_fenced_lines_are_not_headings_or_checks`, fixed by the shared parser (deviations.md, Phase 2).
 Verify: V. Then, from the repo root:
 - `/usr/bin/python3 -I skills/storyboard/scripts/shoot.py --help` exits 0.
 - `CHROME=/nonexistent /usr/bin/python3 -I skills/storyboard/scripts/shoot.py skills/storyboard/references/skeleton.html --out "$(mktemp -d)"` prints exactly one line starting `FAIL` and exits 1.

@@ -100,6 +100,31 @@ class BuildIntegrationBranchTest(unittest.TestCase):
 
         self.assertEqual(self.remote_file("qa", "backend.txt"), "backend\n")
 
+    # Known defects (FR-APE-08). Phase 9 fixes each and removes its marker.
+
+    @unittest.expectedFailure
+    def test_FR_APE_08_merging_a_head_already_in_the_target_adds_no_commit(self):
+        self.assertTrue(self.build(heads=["backend"], push=True))
+        first = self.sh("rev-parse", "qa", cwd=self.remote).strip()
+
+        self.assertTrue(self.build(heads=["backend"], push=True))
+
+        self.assertEqual(self.sh("rev-parse", "qa", cwd=self.remote).strip(), first)
+
+    @unittest.expectedFailure
+    def test_FR_APE_08_a_git_failure_that_is_no_conflict_is_not_reported_as_one(self):
+        self.sh("checkout", "-q", "--orphan", "unrelated")
+        self.sh("rm", "-q", "-rf", ".")
+        (self.clone / "other.txt").write_text("other\n")
+        self.sh("add", "other.txt")
+        self.sh("commit", "-q", "-m", "Unrelated root")
+        self.sh("push", "-q", "origin", "unrelated")
+
+        self.assertFalse(self.build(heads=["unrelated"]))
+
+        self.assertEqual(self.last_event()["status"], "failed")
+        self.assertNotIn("CONFLICT", self.last_event()["error"])
+
 
 if __name__ == "__main__":
     unittest.main()

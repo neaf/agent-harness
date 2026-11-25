@@ -12,7 +12,7 @@ Adapter: `install.py` (`render_claude`). From Phase 3 on: `skills/harness-common
 | Several project `.claude/agents/` folders between the working directory and the repo root: the definition closest to the working directory wins for one `name`. | Subagents doc |
 | Required keys: `name` and `description`. `name` cannot contain `:` or start with `-`. | Subagents doc, "Frontmatter reference" |
 | `tools` is a comma-separated string or a YAML list. It restricts the agent to those tools. Without `tools` the agent inherits every tool available to subagents. `disallowedTools` removes tools. | Subagents doc |
-| `model` takes an alias (`sonnet`, `opus`, `haiku`, `fable`), a full model id, or `inherit`. | Subagents doc, "Choose a model" |
+| `model` takes a family alias, a full model id, or `inherit`. The doc lists the current aliases; the repo names none (FR-AGT-08). | Subagents doc, "Choose a model" |
 | Claude Code watches `~/.claude/agents/` and `.claude/agents/`. A changed file is used by the next spawn, with no restart. | Subagents doc |
 | The body after the closing `---` is the agent's system prompt. | Subagents doc |
 

@@ -2,7 +2,9 @@ import shutil, sys, tempfile, unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-from check_draft import CheckDraft  # noqa: E402
+from check_draft import CheckDraft, headings, section_text  # noqa: E402
+
+FIXTURE = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "markdown" / "fenced-headings.md"
 
 QUESTIONS = """**Q1. Overdue tasks**
 - **Context**
@@ -116,6 +118,11 @@ class CheckDraftTest(unittest.TestCase):
         text = f"# Summary\n# Product solution\n{PRODUCT}# Open questions\n{QUESTIONS}"
         failures = self.messages(self.run_check(text, "product", technical_solution="# Overview\n"), "FAIL")
         self.assertEqual(failures, ["exists before the product solution is approved"])
+
+    def test_fenced_lines_are_not_headings(self):
+        text = FIXTURE.read_text()
+        self.assertEqual([title for _, title, _ in headings(text)], ["product solution", "glossary", "setup", "week widget"])
+        self.assertIn("After the seed, the list shows 3 tasks.", section_text(text, r"\bsetup\b"))
 
 
 if __name__ == "__main__":

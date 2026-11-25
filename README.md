@@ -46,3 +46,13 @@ Needs only `git` and `/usr/bin/python3` (Python 3.9+, standard library only). On
 The script lists every file and link it will create or replace. Replacing anything that already exists (a `CLAUDE.md` you edited, a skill folder copied by hand) needs a `y` at the prompt, or `--yes`. Without a terminal and without `--yes` it stops and changes nothing. `--check` lists the changes and writes nothing.
 
 Skills are symlinks, so `git pull` updates them. Rerun `install.py` after a pull that changes `agents/`, `instructions/` or `targets/`. Force or skip a tool with `--claude 0|1` and `--opencode 0|1`. Change models in `targets/models.json`.
+
+## Tests
+
+`tests/` covers `install.py` (against a throwaway home) and the repo-wide rules: no model names in tracked files, ignored bytecode caches, a `SKILL.md` named after each skill folder, well-formed agent files. Each skill with scripts has its own `tests/` folder. Run every suite, one line each:
+
+```sh
+for s in tests skills/*/tests; do printf '%s: ' "$s"; PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s "$s" 2>&1 | tail -1; done
+```
+
+Tests marked `@unittest.expectedFailure` pin known defects. Their names carry the requirement ID, and the fix removes the marker.

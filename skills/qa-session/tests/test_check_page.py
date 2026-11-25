@@ -4,6 +4,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 from check_page import scan  # noqa: E402
 
+FIXTURE = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "markdown" / "fenced-headings.md"
+
 GOOD = """# QA session: Example (2026-01-05)
 
 > Intro line.
@@ -94,6 +96,35 @@ class CheckPageTest(unittest.TestCase):
     def test_filled_findings_rows_are_counted(self):
         _, counts = self.rules(GOOD + "| 1 | 1. The admin sets the baseline | Menu empty | Reports | Open |\n")
         self.assertEqual(counts["finding_rows"], 1)
+
+    def on_line(self, text, needle):
+        """Findings on the first line that holds needle."""
+        number = next(n for n, line in enumerate(text.splitlines(), 1) if needle in line)
+        return [(level, message) for n, level, message in scan(text.splitlines())[0] if n == number]
+
+    # Known defects. Phase 8 fixes each and removes its marker.
+
+    @unittest.expectedFailure
+    def test_FR_QA_09_backticked_label_is_not_an_internal_id(self):
+        findings, _ = self.rules(GOOD.replace("The menu shows Reports.", "The menu shows `Q4 Budget`."))
+        self.assertFalse(any("internal id" in message for _, message in findings))
+
+    @unittest.expectedFailure
+    def test_FR_QA_09_bracketed_template_placeholder_fails(self):
+        text = GOOD.replace("- [ ] The menu hides Reports.", "- [ ] [Next fact.]")
+        self.assertIn("FAIL", [level for level, _ in self.on_line(text, "[Next fact.]")])
+
+    @unittest.expectedFailure
+    def test_FR_QA_09_malformed_scenario_heading_is_flagged(self):
+        text = GOOD.replace("### 2. The member", "### 2 The member")
+        self.assertTrue(self.on_line(text, "### 2 The member"))
+
+    @unittest.expectedFailure
+    def test_FR_XS_02_fenced_lines_are_not_headings_or_checks(self):
+        text = FIXTURE.read_text()
+        _, counts = self.rules(text)
+        self.assertEqual(counts["checks"], 0)
+        self.assertEqual(self.on_line(text, "# seeds three tasks"), [])
 
 
 if __name__ == "__main__":

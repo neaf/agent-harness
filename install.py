@@ -9,9 +9,6 @@ import argparse, json, shutil, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-HOME = Path.home()
-CLAUDE = HOME / ".claude"
-OPENCODE = HOME / ".config" / "opencode"
 
 
 def parse(path):
@@ -35,7 +32,7 @@ def render_opencode(meta, body, models):
     return "---\n" + "\n".join(lines) + "\n---\n\n" + body
 
 
-def targets(models):
+def targets(models, CLAUDE, OPENCODE):
     """Yields (destination, content) for generated files and (destination, source) for links."""
     files, links = {}, {}
     for f in sorted((ROOT / "agents").glob("*.md")):
@@ -52,19 +49,22 @@ def targets(models):
     return files, links
 
 
-def main():
+def main(argv=None, home=None):
+    HOME = Path(home) if home is not None else Path.home()
+    CLAUDE = HOME / ".claude"
+    OPENCODE = HOME / ".config" / "opencode"
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="report drift, write nothing")
     ap.add_argument("--claude", type=int, choices=(0, 1))
     ap.add_argument("--opencode", type=int, choices=(0, 1))
     ap.add_argument("--yes", action="store_true", help="replace existing files and folders without asking")
-    a = ap.parse_args()
+    a = ap.parse_args(argv)
     use = {
         CLAUDE: a.claude if a.claude is not None else int(CLAUDE.exists() or bool(shutil.which("claude"))),
         OPENCODE: a.opencode if a.opencode is not None else int(OPENCODE.exists() or bool(shutil.which("opencode"))),
     }
     models = json.loads((ROOT / "targets" / "models.json").read_text())
-    files, links = targets(models)
+    files, links = targets(models, CLAUDE, OPENCODE)
     plan = []
     for dest, content in files.items():
         base = CLAUDE if CLAUDE in dest.parents else OPENCODE
@@ -106,4 +106,5 @@ def main():
     return 0
 
 
-sys.exit(main())
+if __name__ == "__main__":
+    sys.exit(main())

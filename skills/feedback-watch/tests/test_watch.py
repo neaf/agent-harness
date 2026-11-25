@@ -58,6 +58,7 @@ class ChecksTest(unittest.TestCase):
         self.assertEqual(watch.checks(rollup), (False, ["e2e", "lint"]))
 
     def test_cancelled_run_is_ignored(self):
+        # Characterizes the defect FR-FW-03 (Q24). Phase 6 replaces it with the marked test below.
         self.assertEqual(watch.checks([run("test", conclusion="CANCELLED")]), (False, []))
 
     def test_newest_rerun_replaces_an_older_failure(self):
@@ -81,6 +82,12 @@ class ChecksTest(unittest.TestCase):
             {"context": "legacy/c", "state": "SUCCESS"},
         ]
         self.assertEqual(watch.checks(rollup), (True, ["legacy/b"]))
+
+    @unittest.expectedFailure
+    def test_FR_FW_03_a_sole_cancelled_run_is_failing(self):
+        pending, failing = watch.checks([run("test", conclusion="CANCELLED")])
+        self.assertFalse(pending)
+        self.assertTrue(any("test" in name for name in failing))
 
 
 class PrStateTest(unittest.TestCase):
@@ -223,6 +230,34 @@ class RunPrTest(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(out[-1], "CI DONE")
 
+    # Known defects. Phase 6 fixes each and removes its marker.
+
+    def run_until_stopped(self, runner, rounds=5):
+        """run_pr with a sleep that ends the loop after `rounds` sleeps, so a watcher that never stops ends."""
+        out, sleeps = [], []
+
+        def sleep(seconds):
+            sleeps.append(seconds)
+            if len(sleeps) >= rounds:
+                raise StopLoop()
+
+        with redirect_stderr(io.StringIO()):
+            code = watch.run_pr([7], "owner/repo", [], "all", 1, 0, False, False, runner, sleep, lambda: 0, out.append)
+        return code, out
+
+    @unittest.expectedFailure
+    def test_FR_FW_08_a_merged_pr_prints_one_line_and_stops(self):
+        pending = run("test", status="IN_PROGRESS", conclusion=None)
+        merged = [ok({**view(pending), "state": "MERGED"}), *pr_answers([pending])[1:]]
+        _, out = self.run_until_stopped(Scripted(*merged * 5))
+        self.assertEqual(sum("merged" in line for line in out), 1)
+
+    @unittest.expectedFailure
+    def test_FR_FW_07_repeated_gh_failure_prints_a_stdout_line_and_exits_4(self):
+        code, out = self.run_until_stopped(Scripted(*[(1, "", "HTTP 502: bad gateway")] * 5))
+        self.assertEqual(code, 4)
+        self.assertTrue(out[-1].startswith("GH FAILING"))
+
 
 class FetchPrTest(unittest.TestCase):
     def test_calls_gh_for_view_reviews_and_threads(self):
@@ -267,6 +302,13 @@ class ResultsTest(unittest.TestCase):
 
     def test_long_commands_are_shortened_in_the_label(self):
         self.assertEqual(len(watch.label("x" * 200)), watch.LABEL_WIDTH)
+
+    @unittest.expectedFailure
+    def test_FR_FW_09_a_failure_with_new_output_prints_again(self):
+        previous, _ = watch.report_results({}, [("pytest -q", 1, "test_a failed\n")])
+        _, lines = watch.report_results(previous, [("pytest -q", 1, "test_b failed\n")])
+        self.assertEqual(lines[:1], ["FAIL pytest -q (exit 1)"])
+        self.assertIn("    test_b failed", lines)
 
 
 class SnapshotTest(unittest.TestCase):

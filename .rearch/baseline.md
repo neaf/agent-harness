@@ -25,12 +25,14 @@ No build step. Scripts are standard-library Python 3.9+, run with `/usr/bin/pyth
 | qa-session | `... -s skills/qa-session/tests` | 9 OK |
 | storyboard | `... -s skills/storyboard/tests` | 6 OK (added 2026-11-25 with commit 96ecd40) |
 
-Total 102 tests, all pass (96 at rearch-base, plus 6 storyboard). Lint: none configured.
+Total 102 tests, all pass (96 at rearch-base, plus 6 storyboard).
+
+After Phase 2: 6 suites (root `tests/` added), 151 tests, all OK, 26 of them expected failures for defects that later phases fix. Root suite: `PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s tests`. Lint: none configured.
 
 One-shot run, prints one line per suite:
 
 ```sh
-for s in skills/*/tests; do printf '%s: ' "$s"; PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s "$s" 2>&1 | tail -1; done
+for s in tests skills/*/tests; do printf '%s: ' "$s"; PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s "$s" 2>&1 | tail -1; done
 ```
 
 ## Manual checklist

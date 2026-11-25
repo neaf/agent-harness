@@ -18,3 +18,18 @@
 - Notion MCP: every quirk stays `unverified`.
 - Claude Code: why an agent with an unquoted `: ` in its description loads although the docs say unparseable YAML is skipped. `frontend-design` on opencode.
 - Chrome: CON-CHROME-01 (focus theft), not reproduced on purpose. x64 cache folder name. Fonts from `file://` in a desktop browser. Heights above 200000 px. The install command `npx playwright install chromium-headless-shell` (docs show `--only-shell`).
+
+## Phase 2 (2026-11-25)
+
+1. Expected-failure count is 26, not 25: 18 plus 8 storyboard. check_page.py reads the shared fixture too, and it is not fence-aware (audit/qa-session.md B4, FR-XS-02), so its fixture test is a fourth qa marker, `test_FR_XS_02_fenced_lines_are_not_headings_or_checks`. Phase 8 removes it with the shared parser; its Exit already demands no qa marker. Phase 8 Work notes it.
+2. Phase 1 put model aliases into `skills/harness-common/topics/Claude Code.md:15`. FR-AGT-08 allows none, and the allowlist does not hold that file. The row now says the doc lists the current aliases and the repo names none. The fact (alias, full id, or `inherit`) stays. File outside Phase 2's Touches.
+3. Characterization tests that pin a defect stay until the fixing phase: `test_cancelled_run_is_ignored` (FR-FW-03, Phase 6), `test_chrome_from_env` and `test_newest_playwright_shell` (FR-SB-10, Phase 8). Phases 6 and 8 Work name them.
+4. install.py: besides `main(argv=None, home=None)` and the `__main__` guard, `targets()` takes the two host bases, since `HOME`, `CLAUDE` and `OPENCODE` are no longer module globals. No behavior change: `--check` output is the same. tests/test_install.py patches `install.ROOT` for its fake checkout and copies `targets/models.json`; Phase 3 Work notes the copy.
+5. `gate.py --help` and `check_draft.py --help` print the usage and exit 1 (pre-existing). Phase 7 owns their CLI errors (FR-APC-08); not changed here.
+6. baseline.md still lists 102 tests. Now 151 tests in 6 suites, 26 expected failures: tests 21 (5), attack-plan-create 37 (3), attack-plan-milestone-execute 8 (2), feedback-watch 52 (4), qa-session 13 (4), storyboard 20 (8). The suite loop in V now starts with `tests`, as V already shows. The next baseline run updates baseline.md.
+
+## Not verified in Phase 2
+
+- `install.py --check` on the real home prints `4 change(s) needed` (storyboard and harness-common links on both hosts). The 0 in the Exit line needs the orchestrator's `install.py` run. A throwaway-HOME install printed 32 applied, then `0 change(s) needed`; 12 agent files have `key: value` frontmatter, 18 skill links resolve to a `SKILL.md`.
+- The expected-failure tests pin the target behavior from architecture.md where it names it (install exits 3 and 4 are asserted only as "not 0 or 1" and "differs from drift"; `GH FAILING` and exit 4; event status `failed` for a non-conflict). Exact message texts are left to the fixing phases.
+- The skeleton render ran through the real Playwright shell (build 1248, arm64). No x64 shell, so the host-architecture test runs only the arm64 branch.
