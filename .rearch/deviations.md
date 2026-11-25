@@ -52,3 +52,7 @@
 - opencode: that it loads the rendered V2 file (flow-style `permissions` list), that the deny rules block the tools and the `subagent` spawn, and that an agent without `model` runs on the session model. opencode is not installed here.
 - Claude Code: that it loads the double-quoted descriptions and the new body order (preamble, then role text). The rendered frontmatter of all 12 files parses with Ruby's `YAML.safe_load` in a throwaway HOME; no live load.
 - The real home is not installed: `--check` there prints 18 changes (12 agent replaces, 2 manifest creates, 4 skill links pending since Phase 1). The orchestrator's `install.py` run makes it 0.
+
+## Orchestrator, between Phase 3 and Phase 4
+
+- Commit 5519633 (user, from another session): qa-session setup-checklist.md gains two Environment rules, deploy confirmed before seeding and browser headers for script probes. That session's commit had swept in 17 uncommitted Phase 3 files, so the orchestrator split the history: 5519633 holds the qa-session change alone, and b70bcae holds all of Phase 3. The tree is unchanged. Phase 8 keeps both rules.

@@ -15,7 +15,8 @@ Phase: 4 of 10 (Shared conventions and model tiers), not started
 - Storyboard added: commit 96ecd40 (cherry-pick of ec14673 from skill/storyboard), audit/storyboard.md, FR-SB-01..16, folded into phases 1, 2, 4, 8; 24 modules
 - Phase 1 Topic docs: 7 topic docs in skills/harness-common/topics/, Q37 = override files (opencode subagent tool has no model input), 7 deviations in deviations.md, 178f980
 - Phase 2 Test harness: 151 tests in 6 suites, 26 expected failures; root tests/ with install and repo-rule tests, 71255b6
-- Phase 3 Installer and agent sources: install.py rewritten (quote, prune by manifest, backup, no model lines, exit 0-4), models.json deleted, harness-common adapters and preamble; 169 tests in 7 suites. Real home needs one install.py run (18 changes), not run yet
+- Phase 3 Installer and agent sources: install.py rewritten (quote, prune by manifest, backup, no model lines, exit 0-4), models.json deleted, harness-common adapters and preamble; 169 tests in 7 suites. Real home needs one install.py run (18 changes), not run yet, b70bcae
+- User commit 5519633: two qa-session setup rules, kept by Phase 8
 
 ## Decisions
 - 2026-11-25: target is agent-harness itself, user call.
@@ -30,6 +31,7 @@ Phase: 4 of 10 (Shared conventions and model tiers), not started
 - 2026-11-25: manual checklist M1..M11 recorded, then dropped: zero manual checks for this run; phases verify automatically and report what is not verified. The rearchitect skill gets FR-RA-14 (ask how many manual checks, default zero; defaults at every gate), user call.
 - 2026-11-25: Stage 4 architect questions A1-A4 plus A5 settled with the recommended defaults, per the user's preference for defaults (end of requirements.md).
 - 2026-11-25: include the storyboard skill from ~/dev/agent-harness-storyboard; its questions SB-Q1..Q11 settled with defaults (end of requirements.md), user call.
+- 2026-11-25: a commit from another session swept in Phase 3 files; history split into 5519633 (qa-session) and b70bcae (Phase 3), user call. The user does no more harness work today, so the run handles that change now: Phase 8 keeps the rules.
 - 2026-11-25: models for this run: fast Sonnet 5.5, default Opus 5.5, strong Opus 5.5 (baseline.md), user call.
 
 ## Next prompt
