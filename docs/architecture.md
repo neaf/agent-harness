@@ -192,7 +192,7 @@ Every script runs as `/usr/bin/python3 -I <path>`. The owning `SKILL.md` documen
 | FR-AGT-06 | P1 `preamble.md`, C3 sandbox line |
 | FR-AGT-07 | P1 `model-tiers.md`, C3; `Spawns` tables in P7, P8, P9, P10, P11 |
 | FR-AGT-08 | `tests/test_repo_rules.py` over every tracked or untracked, non-ignored file |
-| FR-GLB-01..13 | P2 (installed by C1) |
+| FR-GLB-01..14 | P2 (installed by C1) |
 | FR-NOTES-01..08 | P4 |
 | FR-NOTES-09 | P12 (steps in P4) |
 | FR-WRIT-01..07 | P5; citations in P7, P8, P9, P11 |

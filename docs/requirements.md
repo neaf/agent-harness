@@ -60,6 +60,7 @@ Code: `instructions/global.md`.
 - FR-GLB-11: Every rule reads right in both tools: the file names no tool where the rule is general.
 - FR-GLB-12: A shell command suggested for the user to run is written with the `!` prefix, for example `! open prototype/storyboard.html`, so it runs in the session and its output joins the conversation. Commands the agent runs itself are unaffected. opencode support for the prefix is `unverified`.
 - FR-GLB-13: A reply that leaves anything waiting on the user or on the agent follows the `open-items` skill (FR-OI-01).
+- FR-GLB-14: Parallel subagents that change files work in their own worktrees: the project's worktree tool or convention when it has one, else the host's subagent worktree isolation inside the repository, never a worktree outside it; the folder is kept out of git with `.git/info/exclude`, never with a commit to the project.
 
 ## Notes (NOTES, skill ai-notes)
 
