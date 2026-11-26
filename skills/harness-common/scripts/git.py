@@ -126,10 +126,17 @@ class Git:
         blank = body.index("") if "" in body else len(body)
         raise Conflict(body[:blank], [line for line in body[blank + 1:] if line.strip()])
 
+    def signs_commits(self):
+        """`commit-tree` ignores commit.gpgsign (git.md "`commit-tree` does not sign"), so read it here."""
+        code, out = self.call("config", "--bool", "commit.gpgsign", ok=(0, 1))
+        return code == 0 and out.strip() == "true"
+
     def commit_tree(self, tree, parents, message):
         args = ["commit-tree", tree]
         for parent in parents:
             args += ["-p", parent]
+        if self.signs_commits():
+            args.append("-S")
         return self.out(*args, "-m", message)
 
     def push(self, remote, commit, branch):

@@ -24,6 +24,12 @@ Adapter: `skills/harness-common/scripts/git.py` (`Git`, `GitError`, `Conflict`).
 - Workaround: check `git --version` first and stop with `needs git 2.38 or later, found <version>`. Read only exit 1 as a conflict.
 - Code: `git.py` `Git.require`, `Git.merge_tree`; `build_integration_branch.py` `MIN_GIT`. Test: `test_FR_APE_08_an_old_git_stops_before_any_fetch`.
 
+## `commit-tree` does not sign
+
+- Symptom: merge commits built with `git commit-tree` show as unsigned on GitHub ("Commits must have verified signatures" blocks the merge), although `commit.gpgsign` is true.
+- Cause: `commit-tree` never reads `commit.gpgsign`; only `git commit` and `git merge` do.
+- Fix: pass `-S` when `git config --bool commit.gpgsign` is true. `Git.commit_tree` does this.
+
 ## `commit-tree` needs an identity
 
 - Symptom: `git commit-tree` fails with `Author identity unknown`.

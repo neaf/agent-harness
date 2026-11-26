@@ -149,6 +149,22 @@ class RepositoryTest(unittest.TestCase):
         self.assertFalse(self.git.is_ancestor(merged, a))
         self.assertEqual(self.sh("show", f"{merged}:b.txt"), "b")
 
+    def test_commit_tree_signs_when_commit_gpgsign_is_on(self):
+        key = self.tmp / "signing_key"
+        subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", str(key)], check=True)
+        self.sh("config", "gpg.format", "ssh")
+        self.sh("config", "user.signingkey", str(key))
+        a = self.commit("a.txt", "a\n", branch="a")
+        b = self.commit("b.txt", "b\n", branch="b")
+        tree = self.git.merge_tree(a, b)
+
+        unsigned = self.git.commit_tree(tree, [a, b], "Merge b")
+        self.sh("config", "commit.gpgsign", "true")
+        signed = self.git.commit_tree(tree, [a, b], "Merge b")
+
+        self.assertNotIn("gpgsig", self.sh("cat-file", "-p", unsigned))
+        self.assertIn("gpgsig", self.sh("cat-file", "-p", signed))
+
     def test_real_conflict(self):
         a = self.commit("base.txt", "a\n", branch="a")
         b = self.commit("base.txt", "b\n", branch="b")

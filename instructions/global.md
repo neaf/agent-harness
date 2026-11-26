@@ -18,3 +18,4 @@
 - In replies to the user, write every pull request, issue or ticket number as a markdown link to it (for example `[#123](https://github.com/<owner>/<repo>/pull/123)`), not as bare text.
 - When a reply suggests a shell command for the user to run (open a file, log in, clean up), write it with the `!` prefix, for example `! open prototype/storyboard.html`, so it runs in the session and its output lands in the conversation. Commands you run yourself are unaffected. Claude Code supports the prefix; in opencode it is unverified.
 - Before writing any text a human will read and act on (pages, QA scripts, runbooks, plans, PR descriptions, ticket text, longer replies), follow the `writing-craft` skill.
+- Every commit is signed. Never pass `--no-gpg-sign` or `-c commit.gpgsign=false`. `git commit-tree` ignores `commit.gpgsign`: pass `-S` when it is on. If signing fails (no key, agent unreachable from a sandbox), stop and report the error instead of committing unsigned.
