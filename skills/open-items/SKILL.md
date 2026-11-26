@@ -1,11 +1,11 @@
 ---
 name: open-items
-description: Keeps the loose ends of a session in one ledger, `.ai-notes/<area>/open-items.md`, so nothing waiting on the user or on the agent drops out of sight across turns, sessions and handoffs. Every turn the agent closes what the user's message answered, opens what its reply leaves open (decisions, the user's tasks, follow-ups, defaults that go ahead, results to review), re-checks due follow-ups, and ends the reply with the "Waiting on you" block printed from the ledger. Use whenever a reply leaves anything waiting on the user or on the agent, and when a session starts in an area that has a ledger.
+description: Keeps the loose ends of a session in one ledger, `.ai-notes/<area>/open-items.md`, so nothing waiting on the user or on the agent drops out of sight across turns, sessions and handoffs. Every turn the agent closes what the user's message answered, opens what its reply leaves open (decisions, the user's tasks, follow-ups, defaults that go ahead, results to review), re-checks due follow-ups, all without showing the list: the "Waiting on you" block is printed from the ledger only when the user asks what is open. Use whenever a reply leaves anything waiting on the user or on the agent, and when a session starts in an area that has a ledger.
 ---
 
 # Open items
 
-A long session leaves loose ends on both sides: a decision you need, a task only the user can do, something you will check again later, a proposal that goes ahead unless the user objects. This skill keeps them in one file per area, the ledger, so the reply's "Waiting on you" list is printed from it instead of retyped, and nothing falls out between turns or sessions.
+A long session leaves loose ends on both sides: a decision you need, a task only the user can do, something you will check again later, a proposal that goes ahead unless the user objects. This skill keeps them in one file per area, the ledger, and nothing falls out between turns or sessions. The ledger works in the background: the conversation stays on its topic, and the list shows only when the user asks for it.
 
 The user never maintains the list. You find the items in the conversation, the user's words and yours, and close them when they are answered or done, from plain prose.
 
@@ -48,7 +48,7 @@ At the end:
 
 5. Open what the reply leaves open: each question you ask, each proposal you will act on unless told otherwise, each "I'll check after…". Not a question the same reply answers.
 6. Close what the turn did: a decision you acted on, a follow-up you checked, a default that went ahead.
-7. Write the ledger. Stamp this turn's changes with one time, `date '+%Y-%m-%d %H:%M'`, in each new `from` field and closed line. Run `ledger.py check`, then end the reply with the block.
+7. Write the ledger. Stamp this turn's changes with one time, `date '+%Y-%m-%d %H:%M'`, in each new `from` field and closed line. Run `ledger.py check`. Don't add the block to the reply: a question you need answered is asked in the reply's prose, as usual.
 
 ## Answering
 
@@ -66,9 +66,9 @@ Plain prose is the main path; ids are a shortcut.
 
 An answer that could mean two items is asked about, never guessed. A wrong close costs more than one short question. When the user says a close was wrong ("Y2 isn't done"), reopen it.
 
-## The reply's block
+## Showing the list
 
-The reply ends with one block, printed by `ledger.py block <file> --since "<this turn's time>"` after the ledger is written, and pasted as it is. For the ledger in [references/format.md](references/format.md), at 15:10 with `--show A1`:
+The reply never ends with the list by default: it would repeat the same items on every turn and pull the conversation off its topic. The user asks when they want it, in any words: "what's on the table?", "what's open?", "what do you need from me?". Then the reply is the block, printed by `ledger.py block <file> --since "<when the list was last shown>"` after the ledger is written, and pasted as it is. For the ledger in [references/format.md](references/format.md), at 15:10 with `--show A1`:
 
 ```markdown
 **Waiting on you** (4)
@@ -83,10 +83,10 @@ The reply ends with one block, printed by `ledger.py block <file> --since "<this
 Closed this turn: Y6 (dropped: #818 was closed); Y7 (superseded by Y5).
 ```
 
-- Every open `Y` item is listed, in id order, every turn. Items opened at or after `--since` say "(new)"; lines closed at or after it go in "Closed this turn".
+- Every open `Y` item is listed, in id order. With `--since` the time of the last time the list was shown, items opened since then say "(new)"; lines closed at or after it go in "Closed this turn".
 - `A` items are listed only when new, due, or named with `--show A1,A2` because they changed this turn.
 - With nothing open, the block is one line: "Nothing waits on you."
-- Above the block, write the reply as usual. Don't retype items in it.
+- Outside the block, never list the open items. A reply mentions an item only where the topic needs it: the question it asks, the follow-up it acts on now.
 
 ## Subagents
 
@@ -99,7 +99,7 @@ Only you, the main agent, and Synopia's reader write the ledger. A subagent neve
 
 ## A new session and a handoff
 
-- A new session in the area reads `open-items.md` with the area README. Its first reply that touches the work ends with the block.
+- A new session in the area reads `open-items.md` with the area README. It shows the block only when the user asks for it.
 - A handoff (ai-notes "Handing off to a new session") lists `open-items.md` first under "Where to read". The old session's last reply says which ids moved: "Handed off: Y1, Y2, Y4, Y5 and A1 are in <new session's title>". The ids stay as they are. `ledger.py check` prints the open ids.
 - Before a handoff, drop a `Y` item untouched for 3 sessions, with a closed line saying so.
 
