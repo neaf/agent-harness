@@ -1,5 +1,5 @@
 """Rules over the whole repository: no model names, ignored caches, well-formed skills, agents and Spawns tables."""
-import codecs, re, subprocess, sys, unittest
+import codecs, json, re, subprocess, sys, unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -140,6 +140,19 @@ class RepoRulesTest(unittest.TestCase):
                 meta = frontmatter((folder / "SKILL.md").read_text())
                 self.assertEqual(meta.get("name"), folder.name)
                 self.assertTrue(meta.get("description"))
+
+    def test_FR_PLG_01_the_root_is_a_plugin_whose_agents_are_the_rendered_sources(self):
+        manifest = json.loads((REPO / ".claude-plugin" / "plugin.json").read_text())
+        self.assertEqual(manifest["name"], "agent-harness")
+        agents = [(p.name, None, None) for p in sorted((REPO / "agents").glob("*.md"))]
+        self.assertEqual(manifest["agents"], install.plugin_agent_paths(agents))
+        self.assertNotIn("skills", manifest)  # the default skills/ scan loads every skill folder
+        done = subprocess.run(["git", "-C", str(REPO), "check-ignore", "-q", "build/agents/x.md"])
+        self.assertEqual(done.returncode, 0)
+
+    def test_FR_PLG_02_harness_common_is_hidden_from_the_slash_menu(self):
+        meta = frontmatter((REPO / "skills" / "harness-common" / "SKILL.md").read_text())
+        self.assertEqual(meta.get("user-invocable"), "false")
 
     def test_every_agent_parses(self):
         agents = sorted((REPO / "agents").glob("*.md"))

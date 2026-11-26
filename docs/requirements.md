@@ -21,6 +21,15 @@ Code: `install.py`, `skills/harness-common/scripts/claude_code.py`, `skills/harn
 - FR-INST-13: A real folder where a skill link goes moves to `agent-harness-backup/<timestamp>/` in the tool's config folder. It is never deleted.
 - FR-INST-14: A missing `agents/` or `skills/` folder, or a missing source file, exits 4 with the path named, not a traceback.
 
+## Plugin (PLG)
+
+Code: `.claude-plugin/plugin.json`, `install.py` (`--plugin`), `skills/harness-common/SKILL.md`. Tests: `tests/test_repo_rules.py`, `tests/test_install.py`. Facts: [Claude Code](<../skills/harness-common/topics/Claude Code.md>) "Plugins".
+
+- FR-PLG-01: The checkout root is one Claude Code plugin named `agent-harness`: `.claude-plugin/plugin.json`, every skill from the default `skills/` scan, the agents from `build/agents/`. Its skills run as `/agent-harness:<skill>`, its agents spawn as `agent-harness:<agent>`. `instructions/global.md` is not part of the plugin; a host that loads the plugin passes it itself.
+- FR-PLG-02: `harness-common` is not user-invocable (`user-invocable: false`): it is in no Claude Code `/` menu, as a plugin or installed. Claude can still load it. That opencode ignores the key is `unverified`.
+- FR-PLG-03: `install.py --plugin` renders one Claude Code agent per `agents/*.md` into `build/agents/` (gitignored), the same text FR-INST-01 installs, and removes files there whose source is gone. It writes nothing else and asks nothing. `--plugin --check` prints the plan and exits 1 on drift. A `plugin.json` whose `agents` list differs from one `./build/agents/<file>` per source, in file order, exits 4.
+- FR-PLG-04: Open: skills spawn agents by their bare names, so in a session that has only the plugin, a spawn of a harness agent falls back to FR-AGT-05.
+
 ## Agents and tiers (AGT)
 
 Code: `agents/*.md`, `install.py`, `skills/harness-common/references/model-tiers.md`, `skills/harness-common/scripts/opencode.py`. Tests: `tests/test_repo_rules.py`.
@@ -237,7 +246,8 @@ Each constraint is a fact in a topic doc under `skills/harness-common/topics/`, 
 - CON-CC-01: Claude Code agent frontmatter holds `name`, `description`, `tools` (a restriction list) and an optional `model` (a family alias, a full id, or `inherit`). [Claude Code](<../skills/harness-common/topics/Claude Code.md>) "Agent files".
 - CON-CC-02: The Monitor tool turns each stdout line of a command into a notification; `timeout_ms` is at most 1800000. "Monitor tool".
 - CON-CC-03: A Claude Code subagent can spawn subagents unless its `tools` leave out `Agent`. The harness agents leave it out, and briefs for `general-purpose` spawns say never spawn. "Nested spawns".
-- CON-CC-04: `frontend-design` is a Claude Code plugin skill under `~/.claude/plugins/cache/`; the harness neither ships nor installs it. "Plugin skills".
+- CON-CC-04: `frontend-design` is a Claude Code plugin skill under `~/.claude/plugins/cache/`; the harness neither ships nor installs it. "Other plugins".
+- CON-CC-05: A plugin's manifest is `.claude-plugin/plugin.json`; its skills and agents are namespaced `<plugin>:<name>`, so a plugin skill never replaces a personal skill of the same name: both load and bare `/<name>` runs the personal one. The `agents` key replaces the `agents/` scan and takes file paths only. "Plugins".
 - CON-OC-01: opencode agent files use V2 frontmatter: `description`, `mode`, `permissions`, an optional `model` as `provider/model`; the name comes from the file name. A file with `permissions` drops V1 keys such as `tools`. [opencode](<../skills/harness-common/topics/opencode.md>).
 - CON-OC-02: opencode has no Monitor tool; a background shell job notifies the session only when it exits. "No Monitor tool".
 - CON-GH-01: A check rollup mixes `CheckRun` (`name`, `status`, `conclusion`) and `StatusContext` (`context`, `state`). [GitHub](../skills/harness-common/topics/GitHub.md) "Check rollup".

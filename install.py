@@ -4,7 +4,9 @@
 Skills are symlinked. Agents are rendered from agents/*.md with the shared preamble
 (skills/harness-common/references/preamble.md). Instructions are copied. A manifest per host
 lists what this script owns, so a later run removes what is no longer planned.
-Usage: install.py [--check] [--claude 0|1] [--opencode 0|1] [--yes]
+--plugin renders the Claude Code agents into build/agents/ of this checkout instead, the files
+.claude-plugin/plugin.json names, so the checkout loads as one plugin (FR-PLG-03).
+Usage: install.py [--check] [--claude 0|1] [--opencode 0|1] [--yes] | install.py --plugin [--check]
 Exit: 0 done or clean, 1 drift (--check), 2 needs --yes without a terminal, 3 declined, 4 invalid source.
 """
 import argparse, json, os, shutil, sys, time
@@ -19,6 +21,8 @@ TIERS = ("fast", "default", "strong")
 AGENT_KEYS = ("name", "description", "tier", "tools")
 MANIFEST = "agent-harness-manifest.json"
 BACKUP = "agent-harness-backup"
+PLUGIN_MANIFEST = Path(".claude-plugin") / "plugin.json"
+PLUGIN_AGENTS = Path("build") / "agents"  # generated, gitignored
 
 
 class InvalidSource(Exception):
@@ -104,6 +108,38 @@ def desired(p, adapter, agents, instructions, preamble, skills):
     for d in skills:
         items[p["skills"] / d.name] = ("link", d)
     return items
+
+
+def plugin_agent_paths(agents):
+    """The `agents` list plugin.json must hold: one rendered file per agent source (FR-PLG-03)."""
+    return [f"./{(PLUGIN_AGENTS / filename).as_posix()}" for filename, _, _ in agents]
+
+
+def plan_plugin(agents, preamble):
+    """Plan entries that bring build/agents/ to one rendered Claude Code agent per source.
+
+    The folder is generated and owned by this script, so stale files are removed and nothing asks.
+    Raises InvalidSource when plugin.json is missing or its `agents` list differs from the sources.
+    """
+    manifest = ROOT / PLUGIN_MANIFEST
+    want = plugin_agent_paths(agents)
+    try:
+        listed = json.loads(manifest.read_text()).get("agents")
+    except (OSError, ValueError, AttributeError) as e:
+        raise InvalidSource(f"{PLUGIN_MANIFEST}: {e}") from None
+    if listed != want:
+        raise InvalidSource(f"{PLUGIN_MANIFEST}: agents: {listed!r}, want {want!r}")
+    out = ROOT / PLUGIN_AGENTS
+    items = {out / filename: claude_code.render_agent(meta, body, preamble) for filename, meta, body in agents}
+    plan = []
+    for dest, content in items.items():
+        if dest.is_file() and not dest.is_symlink() and dest.read_text() == content:
+            continue
+        exists = dest.exists() or dest.is_symlink()
+        plan.append(("replace" if exists else "create", dest, "write", content))
+    if out.is_dir():
+        plan += [("remove", d, "remove", None) for d in sorted(out.iterdir()) if d not in items and not d.is_dir()]
+    return plan
 
 
 def is_real_dir(path):
@@ -213,13 +249,26 @@ def main(argv=None, home=None):
     ap.add_argument("--claude", type=int, choices=(0, 1))
     ap.add_argument("--opencode", type=int, choices=(0, 1))
     ap.add_argument("--yes", action="store_true", help="replace, move aside or remove existing items without asking")
+    ap.add_argument("--plugin", action="store_true", help="render the plugin's agents into build/agents/ only")
     a = ap.parse_args(argv)
     try:
         agents, instructions, preamble, skills = sources()
+        if a.plugin:
+            plan = plan_plugin(agents, preamble)
     except InvalidSource as e:
         for line in str(e).splitlines():
             print(f"install.py: {line}", file=sys.stderr)
         return 4
+    if a.plugin:
+        for entry in plan:
+            print(describe(entry))
+        if a.check:
+            print(f"{len(plan)} change(s) needed")
+            return 1 if plan else 0
+        for entry in plan:
+            apply(entry)
+        print(f"{len(plan)} change(s) applied")
+        return 0
     stamp = time.strftime("%Y%m%d-%H%M%S")
     plan = []
     for adapter, flag in ((claude_code, a.claude), (opencode, a.opencode)):

@@ -8,6 +8,7 @@ One source for the skills, subagents and global instructions used by Claude Code
 | `agents/` | Neutral subagent files (format below), rendered for each tool |
 | `instructions/global.md` | Copied to `~/.claude/CLAUDE.md` and `~/.config/opencode/AGENTS.md` |
 | `install.py` | Writes the global config of each tool found. `--check` lists drift and exits 1 |
+| `.claude-plugin/plugin.json` | Makes the checkout one Claude Code plugin, `agent-harness` (below) |
 
 | Skill | What it does |
 |---|---|
@@ -32,7 +33,7 @@ One source for the skills, subagents and global instructions used by Claude Code
 
 Facts about the external systems, each with its source or marked `unverified`. They live in `skills/harness-common/topics/`, so running skills can read them.
 
-- [Claude Code](<skills/harness-common/topics/Claude Code.md>): agent files, the spawn `model` parameter, nested spawns, Monitor, skill and `CLAUDE.md` paths, skill arguments, plugin skills, `!` shell commands.
+- [Claude Code](<skills/harness-common/topics/Claude Code.md>): agent files, the spawn `model` parameter, nested spawns, Monitor, skill and `CLAUDE.md` paths, skill arguments, plugins and their namespacing, `!` shell commands.
 - [opencode](skills/harness-common/topics/opencode.md): agent files and permissions, the `subagent` tool, model per spawn, background shell jobs, skills and `AGENTS.md`, skill arguments and `!` shell commands (both unverified).
 - [GitHub](skills/harness-common/topics/GitHub.md): check rollups, reviews and threads, pagination, PR order, stacked-branch CI, job logs.
 - [git](skills/harness-common/topics/git.md): `merge-tree --write-tree`, `commit-tree` identity, fetch refspecs, signed tags, `info/exclude`.
@@ -64,6 +65,15 @@ The script lists every item it will `create`, `replace`, `backup` or `remove`, o
 | 4 | Invalid source: a missing folder or file, or a bad agent file (the file and the key are named) |
 
 Skills are symlinks, so `git pull` updates them. Rerun `install.py` after a pull that changes `agents/`, `instructions/` or `skills/harness-common/references/preamble.md`, or adds, renames or removes a skill folder. Force or skip a tool with `--claude 0|1` and `--opencode 0|1`.
+
+## As a Claude Code plugin
+
+The checkout root is also a plugin named `agent-harness`. Its skills come from `skills/`; its agents from `build/agents/`, which `install.py --plugin` renders from `agents/` (the same text as the installed agents). Run it once after a clone and after each agent change; `--plugin --check` lists drift. Then load the plugin, for example `claude --plugin-dir ~/dev/agent-harness`, or an Agent SDK host's `plugins: [{type: 'local', path}]`.
+
+- Everything is namespaced: `/agent-harness:handoff`, agent `agent-harness:rearch-auditor`. A personal skill of the same name still answers to the bare `/handoff`.
+- `harness-common` is hidden from the `/` menu.
+- `instructions/global.md` is not part of the plugin.
+- Skills spawn agents by their bare names, so with the plugin alone a spawn falls back to a general-purpose subagent with the agent's prompt.
 
 ## Agent format
 
