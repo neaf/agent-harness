@@ -63,6 +63,7 @@ Code: `skills/ai-notes/SKILL.md`, `skills/harness-common/references/state.md`.
 - FR-NOTES-06: Lifecycle: update as the work moves, one ticket per workstream, the stop point recorded when a session stops, rows ticked after a merge.
 - FR-NOTES-07: One orchestrator owns the notes. Subagents get self-contained prompts that point at the notes. A subagent in a worktree returns text and the orchestrator writes it. Reports are claims to check.
 - FR-NOTES-08: Handoff to a new session: on request (`/handoff`, "hand this off", "continue in a new session"), write `.ai-notes/<area>/handoff-<slug>.md` as a prompt the new session follows alone (where to read, verified facts, the task and its stop point, the user's rules, the user's notes word for word, no own conclusions), link it from "State (start here)", and start the session through the host's session tool when one is available, else print the prompt.
+- FR-NOTES-09: `/handoff [notes]` is the skill `skills/handoff/`, the one source of that command (no `~/.claude/commands/handoff.md`). Its body points at the ai-notes handoff steps without repeating them, and passes the user's notes word for word: `$ARGUMENTS` in Claude Code; where a host leaves the placeholder unreplaced (opencode, `unverified`), the notes are the user's words in the request.
 
 ## Writing (WRIT, skill writing-craft)
 

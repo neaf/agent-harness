@@ -12,6 +12,7 @@ One source for the skills, subagents and global instructions used by Claude Code
 | Skill | What it does |
 |---|---|
 | [ai-notes](skills/ai-notes/SKILL.md) | Keeps markdown notes per area in `.ai-notes/` when work spans more than one session, subagent or PR, committed by default (`.git/info/exclude` to keep them private in a repo). Each area README has a "State (start here)" section, so one orchestrator session can hand work to fresh subagents and later sessions, and a handoff file starts a new session on request. |
+| [handoff](skills/handoff/SKILL.md) | `/handoff [notes]`: hands the work off to a new session through the ai-notes handoff steps, with your notes copied word for word into the handoff file. |
 | [rearchitect](skills/rearchitect/SKILL.md) | Refactors a working but patched-together project in committed phases. Parallel audits, consolidated requirements, a new architecture, then one fresh subagent per phase. At the start you confirm a model per tier and the number of manual checks (default zero: phases verify automatically and report what they could not check). Every gate offers recommended defaults. |
 | [attack-plan-create](skills/attack-plan-create/SKILL.md) | Writes an attack plan (tech exploration) one section at a time: product solution first, then technical solution, milestones and tasks an agent can turn into pull requests. Fresh subagents attack each section, the author answers one question at a time and reviews each section. Tests: `PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s skills/attack-plan-create/tests`. |
 | [attack-plan-milestone-execute](skills/attack-plan-milestone-execute/SKILL.md) | Builds one milestone of an attack plan as stacked draft PRs, one fresh subagent per PR: checks the input, audits the tickets against the code, follows CI and reviews until green, keeps the stacks in sync. Fixes or replies to the review threads a bot started and resolves them; threads a person started are never replied to or resolved, they stay for the user. `build_integration_branch.py` needs git 2.38 or later. Tests: `PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s skills/attack-plan-milestone-execute/tests`. |
@@ -31,8 +32,8 @@ One source for the skills, subagents and global instructions used by Claude Code
 
 Facts about the external systems, each with its source or marked `unverified`. They live in `skills/harness-common/topics/`, so running skills can read them.
 
-- [Claude Code](<skills/harness-common/topics/Claude Code.md>): agent files, the spawn `model` parameter, nested spawns, Monitor, skill and `CLAUDE.md` paths, plugin skills, `!` shell commands.
-- [opencode](skills/harness-common/topics/opencode.md): agent files and permissions, the `subagent` tool, model per spawn, background shell jobs, skills and `AGENTS.md`, `!` shell commands (unverified).
+- [Claude Code](<skills/harness-common/topics/Claude Code.md>): agent files, the spawn `model` parameter, nested spawns, Monitor, skill and `CLAUDE.md` paths, skill arguments, plugin skills, `!` shell commands.
+- [opencode](skills/harness-common/topics/opencode.md): agent files and permissions, the `subagent` tool, model per spawn, background shell jobs, skills and `AGENTS.md`, skill arguments and `!` shell commands (both unverified).
 - [GitHub](skills/harness-common/topics/GitHub.md): check rollups, reviews and threads, pagination, PR order, stacked-branch CI, job logs.
 - [git](skills/harness-common/topics/git.md): `merge-tree --write-tree`, `commit-tree` identity, fetch refspecs, signed tags, `info/exclude`.
 - [Notion MCP](<skills/harness-common/topics/Notion MCP.md>): quirks of writing and updating Notion pages.

@@ -41,7 +41,7 @@ Document tools (Notion and others) are reached through the host's MCP tools by t
 
 ## Modules
 
-24 modules, 13 code and 11 prompt, one responsibility each.
+25 modules, 13 code and 12 prompt, one responsibility each.
 
 ### Code
 
@@ -76,6 +76,7 @@ Document tools (Notion and others) are reached through the host's MCP tools by t
 | P9 | `skills/qa-session/` | QA page procedure, briefs, page template, setup checklist. |
 | P10 | `skills/rearchitect/` | Rearchitect stages, state formats, docs style. |
 | P11 | `skills/storyboard/` (SKILL.md, `references/brief.md`, `page.md`, `skeleton.html`) | Storyboard procedure: frame, one Builder spawn (`general`, `strong`), check with C13, hand over, record the decisions in the requirements doc. No resume file of its own. Commits only when the user asks. |
+| P12 | `skills/handoff/` | The `/handoff [notes]` entry point: a pointer to the P4 handoff steps plus the user's notes (`$ARGUMENTS`). No steps of its own. |
 
 ## Model tiers
 
@@ -179,6 +180,7 @@ Every script runs as `/usr/bin/python3 -I <path>`. The owning `SKILL.md` documen
 | FR-AGT-08 | `tests/test_repo_rules.py` over every tracked or untracked, non-ignored file |
 | FR-GLB-01..12 | P2 (installed by C1) |
 | FR-NOTES-01..08 | P4 |
+| FR-NOTES-09 | P12 (steps in P4) |
 | FR-WRIT-01..07 | P5; citations in P7, P8, P9, P11 |
 | FR-APC-01..04, -06..-17, -20 | P7, C8, C9 |
 | FR-APC-05 | C8 on C6 |

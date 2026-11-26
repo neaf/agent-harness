@@ -76,10 +76,13 @@ Code: `skills/feedback-watch/SKILL.md` "Arming it" arms `watch.py` with `timeout
 | Personal skills live in `~/.claude/skills/<name>/SKILL.md`. The folder can be a symlink; Claude Code reads `SKILL.md` from the target. | Skills doc, "Choose where skills load" |
 | A personal skill wins over a project skill of the same name. | Skills doc |
 | Edits to `SKILL.md` text are picked up live. | Skills doc, "Live change detection" |
+| A personal skill runs as `/<name>`, where `<name>` is the frontmatter `name` or the folder name. Custom commands (`~/.claude/commands/<name>.md`) have been merged into skills and keep working, so a command and a skill with one name give two sources for one `/<name>`. | Skills doc, intro note and "How a skill gets its command name" (read 2026-11-26) |
+| `$ARGUMENTS` in a skill body is replaced with the full argument string as typed after `/<name>`. When the body holds no placeholder, Claude Code appends `ARGUMENTS: <value>` instead. `$N` and the named `arguments` frontmatter give positional access. | Skills doc, "Available string substitutions" and "Pass arguments to skills" (read 2026-11-26) |
+| `argument-hint` is a Claude Code extension; claude.ai uploads and the Skills API reject it as an unexpected key. The harness skills leave it out. | Skills doc, "Using skill frontmatter outside Claude Code" |
 | `~/.claude/CLAUDE.md` holds the user's instructions for every project. | Memory doc |
 | A `CLAUDE.md` line `@path` imports that file. Relative paths resolve from the importing file. Imports nest four hops deep. An `@path` inside backticks or a code block is not imported. | Memory doc, "Import additional files" |
 
-Code: `install.py:98-106` copies `instructions/global.md` to `~/.claude/CLAUDE.md` and links every skill folder into `~/.claude/skills/`; paths in `claude_code.py:14-16`.
+Code: `skills/handoff/SKILL.md` (`$ARGUMENTS`). `install.py:98-106` copies `instructions/global.md` to `~/.claude/CLAUDE.md` and links every skill folder into `~/.claude/skills/`; paths in `claude_code.py:14-16`.
 
 ## Shell commands from the prompt
 
