@@ -30,6 +30,13 @@ Adapter: `skills/harness-common/scripts/git.py` (`Git`, `GitError`, `Conflict`).
 - Cause: `commit-tree` never reads `commit.gpgsign`; only `git commit` and `git merge` do.
 - Fix: pass `-S` when `git config --bool commit.gpgsign` is true. `Git.commit_tree` does this.
 
+## A re-signed copy needs you as committer
+
+- Symptom: after re-signing history, GitHub still marks some copies as unverified with reason `unknown_key`, although `git log --format=%G?` shows `G` locally.
+- Cause: GitHub verifies a signature against the committer's account. Copies that kept a foreign committer, such as `GitHub <noreply@github.com>` on an "Update branch" merge or a colleague's commit, carry your signature under someone else's name.
+- Fix: when copying a commit whose committer email is not `git config user.email`, set `GIT_COMMITTER_NAME` and `GIT_COMMITTER_EMAIL` to yours. Keep the author and the dates.
+- Also: a branch merged from a local copy that still holds the old commits brings them back. After a forced rewrite, every clone resets to the new remote heads before working again.
+
 ## `commit-tree` needs an identity
 
 - Symptom: `git commit-tree` fails with `Author identity unknown`.
