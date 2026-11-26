@@ -25,10 +25,10 @@ Code: `install.py`, `skills/harness-common/scripts/claude_code.py`, `skills/harn
 
 Code: `.claude-plugin/plugin.json`, `install.py` (`--plugin`), `skills/harness-common/SKILL.md`. Tests: `tests/test_repo_rules.py`, `tests/test_install.py`. Facts: [Claude Code](<../skills/harness-common/topics/Claude Code.md>) "Plugins".
 
-- FR-PLG-01: The checkout root is one Claude Code plugin named `agent-harness`: `.claude-plugin/plugin.json`, every skill from the default `skills/` scan, the agents from `build/agents/`. Its skills run as `/agent-harness:<skill>`, its agents spawn as `agent-harness:<agent>`. `instructions/global.md` is not part of the plugin; a host that loads the plugin passes it itself.
+- FR-PLG-01: The checkout root is one Claude Code plugin named `harness`: `.claude-plugin/plugin.json`, every skill from the default `skills/` scan, the agents from `build/agents/`. Its skills run as `/harness:<skill>`, its agents spawn as `harness:<agent>`. `instructions/global.md` is not part of the plugin; a host that loads the plugin passes it itself.
 - FR-PLG-02: `harness-common` is not user-invocable (`user-invocable: false`): it is in no Claude Code `/` menu, as a plugin or installed. Claude can still load it. That opencode ignores the key is `unverified`.
 - FR-PLG-03: `install.py --plugin` renders one Claude Code agent per `agents/*.md` into `build/agents/` (gitignored), the same text FR-INST-01 installs, and removes files there whose source is gone. It writes nothing else and asks nothing. `--plugin --check` prints the plan and exits 1 on drift. A `plugin.json` whose `agents` list differs from one `./build/agents/<file>` per source, in file order, exits 4.
-- FR-PLG-04: Open: skills spawn agents by their bare names, so in a session that has only the plugin, a spawn of a harness agent falls back to FR-AGT-05.
+- FR-PLG-04: Skills and Spawns tables name agents by bare name. A spawn uses the name the session lists: the bare name if listed, else `harness:<name>`. A bare name that is not listed is never silently replaced by a general-purpose spawn; FR-AGT-05 applies only when neither name is listed (`subagents.md` "Agent names").
 
 ## Agents and tiers (AGT)
 

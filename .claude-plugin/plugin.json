@@ -1,5 +1,5 @@
 {
-  "name": "agent-harness",
+  "name": "harness",
   "description": "The agent-harness skills and subagents as one Claude Code plugin. Run install.py --plugin first: it renders the agents into build/agents/.",
   "agents": [
     "./build/agents/attack-plan-critic.md",

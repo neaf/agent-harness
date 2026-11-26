@@ -6,7 +6,7 @@ How agent-harness is built: modules, data flow, interfaces. Requirement IDs refe
 
 - `skills/harness-common/` holds everything two or more skills share: Python adapters and the Markdown parser (`scripts/`), runtime conventions (`references/`) and the facts about external systems (`topics/`). It is installed like every other skill: only skill folders reach a running session, and sibling skill folders stay siblings in the checkout and under both tools' `skills/`, so `../harness-common/...` resolves everywhere.
 - Scripts import the shared code with one bootstrap line: `sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "harness-common" / "scripts"))`. `-I` drops the script's folder from `sys.path`, and `resolve()` follows the skill link into the checkout ([macOS Python](<../skills/harness-common/topics/macOS Python.md>)).
-- The checkout root is also a Claude Code plugin. Agents need rendering (the preamble, a quoted description, no `tier`), and the manifest's `agents` key replaces the `agents/` scan, so it names generated files in `build/agents/` rather than the sources; the neutral sources stay the one copy (FR-PLG-01, -03).
+- The checkout root is also a Claude Code plugin. Agents need rendering (the preamble, a quoted description, no `tier`), and the manifest's `agents` key replaces the `agents/` scan, so it names generated files in `build/agents/` rather than the sources; the neutral sources stay the one copy (FR-PLG-01, -03). Skills keep bare agent names; the orchestrator resolves each to the listed name, bare or `harness:`-prefixed, at spawn time (FR-PLG-04).
 - No model name or id in the repo. Tiers are resolved per run through `harness-common/references/model-tiers.md`, the one place every tiered spawn goes through (FR-AGT-07, -08).
 - Two layers. Only the orchestrator session spawns. A skill that uses another skill (execute uses qa-session and feedback-watch) runs it in the orchestrator, never in a subagent. Installed agents get no spawn tool on either host (NFR-13).
 - External skills the repo does not ship (`frontend-design`, REA) are named "when available", and each skill that names one says what to do without it.
@@ -184,7 +184,7 @@ Every script runs as `/usr/bin/python3 -I <path>`. The owning `SKILL.md` documen
 | FR-PLG-01 | `.claude-plugin/plugin.json`, C1 |
 | FR-PLG-02 | P1 `SKILL.md` frontmatter |
 | FR-PLG-03 | C1 `plan_plugin`, C2 |
-| FR-PLG-04 | open; P1 `subagents.md` "Missing agent" |
+| FR-PLG-04 | P1 `subagents.md` "Agent names" |
 | FR-AGT-01, -03 | P3, C1 validation |
 | FR-AGT-02 | C1, C2, C3 |
 | FR-AGT-04 | C2 `tools`, C3 permission map |

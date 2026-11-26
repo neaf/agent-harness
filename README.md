@@ -8,7 +8,7 @@ One source for the skills, subagents and global instructions used by Claude Code
 | `agents/` | Neutral subagent files (format below), rendered for each tool |
 | `instructions/global.md` | Copied to `~/.claude/CLAUDE.md` and `~/.config/opencode/AGENTS.md` |
 | `install.py` | Writes the global config of each tool found. `--check` lists drift and exits 1 |
-| `.claude-plugin/plugin.json` | Makes the checkout one Claude Code plugin, `agent-harness` (below) |
+| `.claude-plugin/plugin.json` | Makes the checkout one Claude Code plugin, `harness` (below) |
 
 | Skill | What it does |
 |---|---|
@@ -69,12 +69,12 @@ Skills are symlinks, so `git pull` updates them. Rerun `install.py` after a pull
 
 ## As a Claude Code plugin
 
-The checkout root is also a plugin named `agent-harness`. Its skills come from `skills/`; its agents from `build/agents/`, which `install.py --plugin` renders from `agents/` (the same text as the installed agents). Run it once after a clone and after each agent change; `--plugin --check` lists drift. Then load the plugin, for example `claude --plugin-dir ~/dev/agent-harness`, or an Agent SDK host's `plugins: [{type: 'local', path}]`.
+The checkout root is also a plugin named `harness`. Its skills come from `skills/`; its agents from `build/agents/`, which `install.py --plugin` renders from `agents/` (the same text as the installed agents). Run it once after a clone and after each agent change; `--plugin --check` lists drift. Then load the plugin, for example `claude --plugin-dir ~/dev/agent-harness`, or an Agent SDK host's `plugins: [{type: 'local', path}]`.
 
-- Everything is namespaced: `/agent-harness:handoff`, agent `agent-harness:rearch-auditor`. A personal skill of the same name still answers to the bare `/handoff`.
+- Everything is namespaced: `/harness:handoff`, agent `harness:rearch-auditor`. A personal skill of the same name still answers to the bare `/handoff`.
 - `harness-common` is hidden from the `/` menu.
 - `instructions/global.md` is not part of the plugin.
-- Skills spawn agents by their bare names, so with the plugin alone a spawn falls back to a general-purpose subagent with the agent's prompt.
+- Skills name agents by their bare names. With the plugin alone, the session lists `harness:rearch-auditor`, and the skill spawns that name.
 
 ## Agent format
 

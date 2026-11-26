@@ -34,9 +34,17 @@ Never add the conversation, a draft the subagent is to check, or the orchestrato
 - Caps: 150 words for a status report, 300 for findings the orchestrator acts on. A skill may set its own cap per brief.
 - The orchestrator reads the summary, and opens an output file only for the part it needs next.
 
+## Agent names
+
+Spawns tables and skills name harness agents by bare name, such as `rearch-auditor`. Loaded as a plugin, the same agent is listed as `harness:rearch-auditor`. Before a spawn, look up the name in the agents the session lists:
+
+1. The bare name is listed: spawn it.
+2. Only `harness:<name>` is listed: spawn `harness:<name>`.
+3. Neither is listed: follow "Missing agent". Never spawn general-purpose in its place without saying so.
+
 ## Missing agent
 
-When a spawn fails because the named agent is not installed:
+When neither name is listed, or a spawn fails because the agent is not installed:
 
 1. Find the harness checkout: `dirname "$(dirname "$(realpath <harness-common>)")"`, where `<harness-common>` is this skill's installed folder (`~/.claude/skills/harness-common` or `~/.config/opencode/skills/harness-common`).
 2. Read `<checkout>/agents/<name>.md`. Its `tier` line gives the model; the text after the closing `---` is the role.

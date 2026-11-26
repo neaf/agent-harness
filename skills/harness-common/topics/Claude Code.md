@@ -130,10 +130,10 @@ Code: `.claude-plugin/plugin.json`; `install.py` `plan_plugin` renders the `agen
 
 ### Quirk: plugin agents are namespaced
 
-- Symptom: loaded as a plugin, the harness agents are `agent-harness:rearch-auditor` and so on. A skill that spawns `rearch-auditor` finds no such agent unless `install.py` also put it in `~/.claude/agents/`.
+- Symptom: loaded as a plugin, the harness agents are `harness:rearch-auditor` and so on. A skill that spawns `rearch-auditor` finds no such agent unless `install.py` also put it in `~/.claude/agents/`.
 - Cause: every plugin component is namespaced under the plugin name.
-- Workaround: none yet. Skills fall back to a general-purpose spawn with the preamble and the agent body (FR-AGT-05). Open item for the plugin build (FR-PLG-04).
-- Code: Spawns tables in `skills/*/SKILL.md`; `references/subagents.md` "Missing agent".
+- Workaround: skills keep bare names; the orchestrator spawns the name the session lists, `harness:rearch-auditor` when only that is listed (FR-PLG-04). The general-purpose fallback (FR-AGT-05) is only for an agent listed under neither name.
+- Code: Spawns tables in `skills/*/SKILL.md`; `references/subagents.md` "Agent names".
 
 ### Other plugins
 

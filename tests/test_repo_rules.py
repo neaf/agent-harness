@@ -143,7 +143,7 @@ class RepoRulesTest(unittest.TestCase):
 
     def test_FR_PLG_01_the_root_is_a_plugin_whose_agents_are_the_rendered_sources(self):
         manifest = json.loads((REPO / ".claude-plugin" / "plugin.json").read_text())
-        self.assertEqual(manifest["name"], "agent-harness")
+        self.assertEqual(manifest["name"], "harness")
         agents = [(p.name, None, None) for p in sorted((REPO / "agents").glob("*.md"))]
         self.assertEqual(manifest["agents"], install.plugin_agent_paths(agents))
         self.assertNotIn("skills", manifest)  # the default skills/ scan loads every skill folder
