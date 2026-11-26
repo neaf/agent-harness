@@ -103,7 +103,39 @@ Code: `skills/open-items/SKILL.md` "Task tools are not the ledger" (the ledger i
 
 Code: `instructions/global.md` (the `!` prefix rule), `skills/rearchitect/SKILL.md` (commands suggested to the user).
 
-## Plugin skills
+## Plugins
+
+Docs read on 2026-11-26: [Plugin manifest reference](https://code.claude.com/docs/en/plugins-reference), [Add components to a plugin](https://code.claude.com/docs/en/plugins/components), [Plugins in the SDK](https://code.claude.com/docs/en/agent-sdk/plugins), [Skills](https://code.claude.com/docs/en/skills), [Subagents](https://code.claude.com/docs/en/sub-agents); Agent SDK typings 0.3.330 (`sdk.d.ts` `Options.plugins`, `SdkPluginConfig`, `Options.skills`, `Options.systemPrompt`, `SDKSystemMessage`). Live: Synopia `docs/Agent SDK.md`, "Live run PL-1" (CLI 2.1.330).
+
+| Fact | Source |
+|---|---|
+| The manifest is `.claude-plugin/plugin.json` under the plugin root, and it is optional. Without it the components in the standard layout load, named after the directory. Every other file sits at the plugin root, not in `.claude-plugin/`. | Manifest reference, "Manifest file" |
+| `name` is the only required key: kebab-case, no spaces, `@` or `:`. Every component is namespaced under it. Names starting `claude-`, `anthropic-` or `cc-plugin-` are reserved. Unknown top-level keys are stripped with a validate warning. | Manifest reference, "Fields", "`name`" |
+| Default folders: `skills/<name>/SKILL.md`, `commands/*.md` (older format), `agents/*.md` (subfolders join the name with `:`), `hooks/hooks.json`, `.mcp.json`, `bin/`. A `CLAUDE.md` at the plugin root is not loaded; `claude plugin validate` warns. | Manifest reference, "Standard layout" |
+| `skills` adds folders to the `skills/` scan. `agents` and `commands` replace their default scan. `agents` takes `.md` file paths only, never a folder. Every path starts with `./`, stays inside the root and must exist, else that component does not load. | Manifest reference, "How each key combines with its default location", "Path rules" |
+| A plugin skill runs as `/<plugin>:<skill>`; a frontmatter `name` replaces only the last segment. A plugin agent is `<plugin>:<name>` (`@agent-<plugin>:<name>`), and is the subagent type to spawn. | Components doc, "Skills", "Agents" |
+| Plugin agents ignore `permissionMode`, `hooks`, `mcpServers` and `initialPrompt`. | Components doc, "Frontmatter fields in plugin agents"; Subagents doc |
+| `${CLAUDE_PLUGIN_ROOT}` is substituted in skill, command and agent bodies; it is not in the Bash tool's environment. | Manifest reference, "Environment variables" |
+| Name clashes: a plugin skill and a personal or project skill of one name both load, as the plugin one is namespaced. Bare `/<name>` runs the personal one. For agents the plugin is the lowest scope, but its names carry the prefix too. | Skills doc, "Resolve skills that share a name"; Subagents doc, scopes table |
+| `user-invocable: false` hides a skill from the `/` menu, and typing `/<name>` is refused; Claude can still load it. `disable-model-invocation: true` is the reverse. | Skills doc, "Control who invokes a skill" |
+| The SDK loads a plugin with `plugins: [{type: 'local', path}]` (absolute, or relative to `cwd`; no `~`). A missing path is skipped silently. `system/init` lists `plugins` (`name`, `path`, `source`), `plugin_errors` when any, the namespaced `skills` and `slash_commands`, and `agents`. `Options.skills` (`'all'` or names, `plugin:skill` for plugin skills) filters what the model sees. | SDK plugins doc; typings |
+| `claude plugin validate <dir>` checks a plugin; it warns on a missing `version` or `author`, and lists what the plugin provides. | Manifest reference, "Validate the manifest"; run on this repo 2026-11-26 |
+
+Observed in PL-1 (an invented plugin with skill `greet`, a user-invocable-false skill and agent `helper`, plus a personal skill `greet`):
+- Both `greet` rows appear in `skills`, `slash_commands` and `supportedCommands()`, with no `builtin` flag. The personal row's description ends `(user)`; the plugin row's starts `(<plugin>)`. The hidden skill is in none of the three lists. The agent is in `init.agents` and `supportedAgents()` as `<plugin>:helper`.
+- `/greet` and a Skill tool call with `greet` ran the personal skill. `/<plugin>:greet` ran the plugin skill. Typing the hidden skill's name gave a local refusal ("can only be invoked by Claude"), with no model call.
+- Whether the model can load a `user-invocable: false` plugin skill through the Skill tool: `unverified` live (docs say yes).
+
+Code: `.claude-plugin/plugin.json`; `install.py` `plan_plugin` renders the `agents` files (FR-PLG-03). Test: `tests/test_repo_rules.py`, `tests/test_install.py`.
+
+### Quirk: plugin agents are namespaced
+
+- Symptom: loaded as a plugin, the harness agents are `agent-harness:rearch-auditor` and so on. A skill that spawns `rearch-auditor` finds no such agent unless `install.py` also put it in `~/.claude/agents/`.
+- Cause: every plugin component is namespaced under the plugin name.
+- Workaround: none yet. Skills fall back to a general-purpose spawn with the preamble and the agent body (FR-AGT-05). Open item for the plugin build (FR-PLG-04).
+- Code: Spawns tables in `skills/*/SKILL.md`; `references/subagents.md` "Missing agent".
+
+### Other plugins
 
 | Fact | Source |
 |---|---|

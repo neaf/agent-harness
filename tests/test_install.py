@@ -1,5 +1,5 @@
 """install.py against a throwaway home. Never touches the real ~/.claude or ~/.config."""
-import io, shutil, sys, tempfile, unittest
+import io, json, shutil, sys, tempfile, unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest import mock
@@ -9,6 +9,7 @@ FIXTURES = REPO / "tests" / "fixtures"
 PREAMBLE = REPO / "skills" / "harness-common" / "references" / "preamble.md"
 sys.path.insert(0, str(REPO))
 import install  # noqa: E402
+import claude_code  # noqa: E402  (install.py put harness-common/scripts on sys.path)
 
 
 class Tty(io.StringIO):
@@ -171,6 +172,39 @@ class InstallTest(unittest.TestCase):
         declined = self.install(stdin=Tty(), answer="n")[0]
         self.assertEqual(drift, 1)
         self.assertNotEqual(declined, drift)
+
+    def plugin_root(self, agents):
+        """A fake checkout with a plugin.json whose `agents` list matches the given agent files."""
+        root = self.fake_root(agents)
+        (root / ".claude-plugin").mkdir()
+        listed = [f"./build/agents/{Path(a).name}" for a in sorted(agents, key=lambda a: Path(a).name)]
+        (root / ".claude-plugin" / "plugin.json").write_text(json.dumps({"name": "x", "agents": listed}))
+        return root
+
+    def test_FR_PLG_03_plugin_renders_claude_agents_into_build_and_nothing_else(self):
+        root = self.plugin_root([REPO / "agents" / "rearch-auditor.md", REPO / "agents" / "rearch-phase.md"])
+        with mock.patch.object(install, "ROOT", root):
+            self.assertEqual(self.install("--plugin", "--check")[0], 1)
+            self.assertFalse((root / "build").exists())
+            code, lines, _ = self.install("--plugin")
+            self.assertEqual((code, lines[-1]), (0, "2 change(s) applied"))
+            rendered = (root / "build" / "agents" / "rearch-auditor.md").read_text()
+            meta, body = install.parse_agent(root / "agents" / "rearch-auditor.md")
+            self.assertEqual(rendered, claude_code.render_agent(meta, body, PREAMBLE.read_text()))
+            self.assertEqual(self.install("--plugin", "--check")[:2], (0, ["0 change(s) needed"]))
+            (root / "build" / "agents" / "gone.md").write_text("old\n")
+            self.assertEqual(self.install("--plugin")[1][0].split()[0], "remove")
+            self.assertFalse((root / "build" / "agents" / "gone.md").exists())
+        self.assertEqual(sorted(p.name for p in self.home.iterdir()), ["checkout"])
+
+    def test_FR_PLG_03_manifest_that_lists_other_agents_exits_4(self):
+        root = self.plugin_root([REPO / "agents" / "rearch-auditor.md"])
+        shutil.copy(REPO / "agents" / "rearch-phase.md", root / "agents" / "rearch-phase.md")
+        with mock.patch.object(install, "ROOT", root):
+            code, _, err = self.install("--plugin")
+        self.assertEqual(code, 4)
+        self.assertIn("plugin.json: agents", err)
+        self.assertFalse((root / "build").exists())
 
     def test_FR_AGT_02_no_model_line_on_either_host(self):
         self.install()

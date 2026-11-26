@@ -10,7 +10,8 @@ This repo is the single source of the skills, subagents and global instructions 
 | `skills/harness-common/` | The shared library: adapters (`scripts/`), conventions (`references/`) and one topic doc per external system (`topics/`). Never invoked on its own. |
 | `agents/*.md` | Neutral subagent sources: `name`, `description`, `tier`, `tools`, then the body. `install.py` renders them for each tool. |
 | `instructions/global.md` | The user's global rules, copied to `~/.claude/CLAUDE.md` and `~/.config/opencode/AGENTS.md`. |
-| `install.py` | Installs into both tools. `--check` lists drift and writes nothing. |
+| `install.py` | Installs into both tools. `--check` lists drift and writes nothing. `--plugin` renders the plugin's agents into `build/agents/`. |
+| `.claude-plugin/plugin.json` | Makes the checkout root a Claude Code plugin: skills from `skills/`, agents from the generated `build/agents/`. |
 | `tests/` | Repo-wide tests: install, and repo rules such as no model names and Spawns tables. |
 | `docs/` | `requirements.md` (one ID per requirement) and `architecture.md` (modules, interfaces, traceability). |
 
@@ -21,6 +22,7 @@ Run from the repo root. Each suite prints one line.
 ```sh
 for s in tests skills/*/tests; do printf '%s: ' "$s"; PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s "$s" 2>&1 | tail -1; done
 /usr/bin/python3 -I install.py --check
+/usr/bin/python3 -I install.py --plugin --check
 ```
 
 - Parse checks use `compile()`, never `py_compile`, which writes `__pycache__`.
@@ -32,4 +34,4 @@ for s in tests skills/*/tests; do printf '%s: ' "$s"; PYTHONDONTWRITEBYTECODE=1 
 - A skill that spawns subagents has a Spawns table (spawn, tier, use) and follows `skills/harness-common/references/subagents.md`. There are two layers at most: subagents never spawn subagents.
 - Facts about external systems live in `skills/harness-common/topics/`, with evidence or marked `unverified`.
 - A behavior change updates `docs/requirements.md` and `docs/architecture.md` in the same commit.
-- After editing `agents/` or `instructions/`, run `install.py`. Skill edits apply at once through the symlinks.
+- After editing `agents/` or `instructions/`, run `install.py`; after editing or adding an agent, also `install.py --plugin`, and list a new agent in `.claude-plugin/plugin.json`. Skill edits apply at once through the symlinks.

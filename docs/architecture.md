@@ -6,6 +6,7 @@ How agent-harness is built: modules, data flow, interfaces. Requirement IDs refe
 
 - `skills/harness-common/` holds everything two or more skills share: Python adapters and the Markdown parser (`scripts/`), runtime conventions (`references/`) and the facts about external systems (`topics/`). It is installed like every other skill: only skill folders reach a running session, and sibling skill folders stay siblings in the checkout and under both tools' `skills/`, so `../harness-common/...` resolves everywhere.
 - Scripts import the shared code with one bootstrap line: `sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "harness-common" / "scripts"))`. `-I` drops the script's folder from `sys.path`, and `resolve()` follows the skill link into the checkout ([macOS Python](<../skills/harness-common/topics/macOS Python.md>)).
+- The checkout root is also a Claude Code plugin. Agents need rendering (the preamble, a quoted description, no `tier`), and the manifest's `agents` key replaces the `agents/` scan, so it names generated files in `build/agents/` rather than the sources; the neutral sources stay the one copy (FR-PLG-01, -03).
 - No model name or id in the repo. Tiers are resolved per run through `harness-common/references/model-tiers.md`, the one place every tiered spawn goes through (FR-AGT-07, -08).
 - Two layers. Only the orchestrator session spawns. A skill that uses another skill (execute uses qa-session and feedback-watch) runs it in the orchestrator, never in a subagent. Installed agents get no spawn tool on either host (NFR-13).
 - External skills the repo does not ship (`frontend-design`, REA) are named "when available", and each skill that names one says what to do without it.
@@ -48,7 +49,7 @@ Document tools (Notion and others) are reached through the host's MCP tools by t
 
 | # | Module | Responsibility |
 |---|---|---|
-| C1 | `install.py` | Read and validate agent sources, plan writes, links and prunes, confirm, apply with backup, keep a manifest. Planning is pure and separate from the apply step. |
+| C1 | `install.py` | Read and validate agent sources, plan writes, links and prunes, confirm, apply with backup, keep a manifest. Planning is pure and separate from the apply step. `--plugin` plans and applies only the plugin's rendered agents in `build/agents/`. |
 | C2 | `skills/harness-common/scripts/claude_code.py` | Claude Code adapter: install paths, agent rendering (quoted `description`, `tools` without any spawn tool, no `model` line). |
 | C3 | `skills/harness-common/scripts/opencode.py` | opencode adapter: install paths, agent rendering (`mode: subagent`, V2 `permissions` from `tools` with the `subagent` action denied, the `execute` sandbox line), model listing, and the per-run tier overrides (`apply-tiers`, `clear-tiers`). |
 | C4 | `skills/harness-common/scripts/github.py` | GitHub adapter over `gh`: one runner, `GhError`, one paginated GraphQL PR snapshot, one thread by id, reply to a thread, resolve a thread. |
@@ -96,6 +97,7 @@ The procedure lives only in `harness-common/references/model-tiers.md`:
 ## Data flow
 
 - Install: `agents/*.md` and `preamble.md` -> C1 validates -> C2 and C3 render -> plan (write, link, prune, backup) -> `--check` prints the plan, or apply after confirmation -> `<host config>/agent-harness-manifest.json` lists what C1 owns, so a later run can prune it. Links into the checkout are also pruned when their target is gone. Links pointing elsewhere are never touched.
+- Plugin: `agents/*.md` and `preamble.md` -> C1 validates and checks the `agents` list of `.claude-plugin/plugin.json` -> C2 renders -> `build/agents/` (gitignored). A host loads the checkout root as a plugin: skills straight from `skills/`, agents from `build/agents/`. One source: the rendered files are generated, and the manifest's list is checked against `agents/` by C1 and by a repo test (FR-PLG-03).
 - Plan to code: attack-plan-create writes drafts under `.attack-plan/<slug>/draft/`. Task blocks follow the schema in `references/executable-plan.md`, checked by `check_draft.py --tasks`. Execute gates its input on `gate.py status` when `gates.json` exists, else grades by hand, then runs `check_draft.py --tasks --milestone <n>`. Each block's "Context for an outside reviewer" opens its PR description.
 - CI and review: after a push the orchestrator arms feedback-watch (C7) with `--until bots`. C7 polls C4 snapshots and prints change lines. In the review pass, `review_threads.py list` feeds the FIX/REPLY table. A pushed FIX on a bot thread is closed with `review_threads.py resolve`; a bot thread decided REPLY gets its text posted and the thread resolved with `review_threads.py reply`. Human threads go to the user, with the fix commit or the reply text (FR-APE-15).
 - QA: execute Step 9 runs the qa-session skill in the orchestrator. qa-session spawns Builder and Verifier (`general`, `strong`), runs C12 and publishes through `publishing.md`.
@@ -129,7 +131,7 @@ Every script runs as `/usr/bin/python3 -I <path>`. The owning `SKILL.md` documen
 
 | Script | Signature | Output | Exit |
 |---|---|---|---|
-| install.py | `[--check] [--claude 0\|1] [--opencode 0\|1] [--yes]` | one line per planned item (`create`, `replace`, `backup`, `remove`), a summary line | 0 done or clean, 1 drift with `--check`, 2 needs `--yes` without a terminal, 3 declined, 4 invalid source (file and key named) |
+| install.py | `[--check] [--claude 0\|1] [--opencode 0\|1] [--yes]`, or `--plugin [--check]` | one line per planned item (`create`, `replace`, `backup`, `remove`), a summary line | 0 done or clean, 1 drift with `--check`, 2 needs `--yes` without a terminal, 3 declined, 4 invalid source (file and key named) |
 | watch.py pr | `N... [--repo OWNER/NAME] [--reviewer LOGIN]... [--interval S] [--until all\|ci\|bots] [--timeout MIN] [--allow-no-checks] [--once]` | `#N <sha> \| CI running\|done \| failing: ... \| reviewed\|waiting for review: ... \| unresolved threads: N (human M)`, `#N merged\|closed, stopped watching`; `skipped #N this round: <cause>` on stderr; last line `ALL DONE`, `CI DONE`, `BOTS DONE`, `NOT DONE`, `TIMEOUT` or `GH FAILING: <cause>` | 0, 1 not done, 2 bad arguments, 3 timeout, 4 gh failing |
 | watch.py local | `--cmd C... [--path P]... [--interval 2] [--debounce 1] [--cmd-timeout 600] [--timeout MIN] [--once]` | `PASS <cmd>`, `FAIL <cmd> (exit N)` or `(timed out)` with the last 15 lines; with `--once` last line `ALL PASS` or `FAILED: <cmds>`; `TIMEOUT` | 0, 1, 2 bad arguments, 3 timeout |
 | gate.py | `open <work> <stage> <section> [--file F [--heading H]]...`, `grilled <work> <section> --rounds N --open-findings N`, `approve <work> <section> --by NAME`, `skip`, `reopen <work> <section> --reason TEXT`, `status <work>`, `verify <work>` | status table on stdout, `REFUSED: <reason>` on stderr | 0, 1 refused or verify problems, 2 bad command line |
@@ -172,13 +174,17 @@ Every script runs as `/usr/bin/python3 -I <path>`. The owning `SKILL.md` documen
 | Notion MCP | none (prompt only, through `publishing.md`) | [Notion MCP](<../skills/harness-common/topics/Notion MCP.md>) |
 | macOS system Python | the bootstrap line in each script | [macOS Python](<../skills/harness-common/topics/macOS Python.md>) |
 | Chrome headless shell (Playwright cache) | `skills/storyboard/scripts/shoot.py` | [Chrome headless shell](<../skills/harness-common/topics/Chrome headless shell.md>) |
-| `frontend-design` (Claude Code plugin) | none, named "when available" in P2 and P11 | [Claude Code](<../skills/harness-common/topics/Claude Code.md>) "Plugin skills" |
+| `frontend-design` (Claude Code plugin) | none, named "when available" in P2 and P11 | [Claude Code](<../skills/harness-common/topics/Claude Code.md>) "Other plugins" |
 
 ## Requirement to module traceability
 
 | Requirement | Module |
 |---|---|
 | FR-INST-01..14 | C1, C2, C3 |
+| FR-PLG-01 | `.claude-plugin/plugin.json`, C1 |
+| FR-PLG-02 | P1 `SKILL.md` frontmatter |
+| FR-PLG-03 | C1 `plan_plugin`, C2 |
+| FR-PLG-04 | open; P1 `subagents.md` "Missing agent" |
 | FR-AGT-01, -03 | P3, C1 validation |
 | FR-AGT-02 | C1, C2, C3 |
 | FR-AGT-04 | C2 `tools`, C3 permission map |
@@ -227,7 +233,7 @@ Every script runs as `/usr/bin/python3 -I <path>`. The owning `SKILL.md` documen
 
 | Suite | Covers |
 |---|---|
-| `tests/` | `install.py` against a throwaway home; repo rules: no model names, ignored caches, one `SKILL.md` per skill folder, well-formed agents, `Spawns` tables |
+| `tests/` | `install.py` against a throwaway home, `--plugin` against a fake checkout; repo rules: the plugin manifest, no model names, ignored caches, one `SKILL.md` per skill folder, well-formed agents, `Spawns` tables |
 | `skills/harness-common/tests/` | C2, C3, C4, C5, C6 (fake runners, temp git repositories) |
 | `skills/attack-plan-create/tests/` | C8, C9 |
 | `skills/attack-plan-milestone-execute/tests/` | C10 on temp repositories, C11 with a fake `gh`, the skill text rules |

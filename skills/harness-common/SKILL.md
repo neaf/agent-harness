@@ -1,6 +1,7 @@
 ---
 name: harness-common
 description: Shared library of the agent-harness skills, never invoked on its own. Load a file from it only when another harness skill links to it. It holds the shared conventions (subagents, model tiers, run state, publishing) and the facts about the external systems the skills use (Claude Code, opencode, GitHub, git, Notion MCP, macOS Python, Chrome headless shell).
+user-invocable: false
 ---
 
 # harness-common
@@ -13,7 +14,7 @@ One doc per external system. Each fact has a source: a code location, a test, a 
 
 | Topic | Covers |
 |---|---|
-| [Claude Code](<topics/Claude Code.md>) | Agent files and `tools`, the spawn `model` parameter, nested spawns, Monitor, task tools, skills and `CLAUDE.md` paths, plugin skills, `!` shell commands |
+| [Claude Code](<topics/Claude Code.md>) | Agent files and `tools`, the spawn `model` parameter, nested spawns, Monitor, task tools, skills and `CLAUDE.md` paths, plugins and their namespacing, `!` shell commands |
 | [opencode](topics/opencode.md) | Agent files and `permissions`, the `subagent` tool, model per spawn, no Monitor, background shell jobs, `execute`, `!` shell commands, skills and `AGENTS.md` |
 | [GitHub](topics/GitHub.md) | Check rollups, reviews, threads, pagination, PR order, stacked-branch CI, job logs |
 | [git](topics/git.md) | `merge-tree --write-tree`, `commit-tree` identity, fetch refspecs, signed tags, `info/exclude` |
