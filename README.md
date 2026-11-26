@@ -12,6 +12,7 @@ One source for the skills, subagents and global instructions used by Claude Code
 | Skill | What it does |
 |---|---|
 | [ai-notes](skills/ai-notes/SKILL.md) | Keeps markdown notes per area in `.ai-notes/` when work spans more than one session, subagent or PR, committed by default (`.git/info/exclude` to keep them private in a repo). Each area README has a "State (start here)" section, so one orchestrator session can hand work to fresh subagents and later sessions, and a handoff file starts a new session on request. |
+| [open-items](skills/open-items/SKILL.md) | Keeps what waits on you and on the agent in one ledger per notes area, `.ai-notes/<area>/open-items.md`. Every turn the agent closes what you answered in plain prose, opens what its reply leaves open, and ends the reply with the "Waiting on you" block that `ledger.py` prints from the file. Ids (`Y1`, `A1`) stay the same across sessions and handoffs. |
 | [handoff](skills/handoff/SKILL.md) | `/handoff [notes]`: hands the work off to a new session through the ai-notes handoff steps, with your notes copied word for word into the handoff file. |
 | [rearchitect](skills/rearchitect/SKILL.md) | Refactors a working but patched-together project in committed phases. Parallel audits, consolidated requirements, a new architecture, then one fresh subagent per phase. At the start you confirm a model per tier and the number of manual checks (default zero: phases verify automatically and report what they could not check). Every gate offers recommended defaults. |
 | [attack-plan-create](skills/attack-plan-create/SKILL.md) | Writes an attack plan (tech exploration) one section at a time: product solution first, then technical solution, milestones and tasks an agent can turn into pull requests. Fresh subagents attack each section, the author answers one question at a time and reviews each section. Tests: `PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -m unittest discover -s skills/attack-plan-create/tests`. |
@@ -32,7 +33,7 @@ One source for the skills, subagents and global instructions used by Claude Code
 
 Facts about the external systems, each with its source or marked `unverified`. They live in `skills/harness-common/topics/`, so running skills can read them.
 
-- [Claude Code](<skills/harness-common/topics/Claude Code.md>): agent files, the spawn `model` parameter, nested spawns, Monitor, skill and `CLAUDE.md` paths, skill arguments, plugin skills, `!` shell commands.
+- [Claude Code](<skills/harness-common/topics/Claude Code.md>): agent files, the spawn `model` parameter, nested spawns, Monitor, task tools, skill and `CLAUDE.md` paths, skill arguments, plugin skills, `!` shell commands.
 - [opencode](skills/harness-common/topics/opencode.md): agent files and permissions, the `subagent` tool, model per spawn, background shell jobs, skills and `AGENTS.md`, skill arguments and `!` shell commands (both unverified).
 - [GitHub](skills/harness-common/topics/GitHub.md): check rollups, reviews and threads, pagination, PR order, stacked-branch CI, job logs.
 - [git](skills/harness-common/topics/git.md): `merge-tree --write-tree`, `commit-tree` identity, fetch refspecs, signed tags, `info/exclude`.

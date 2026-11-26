@@ -50,6 +50,7 @@ Code: `instructions/global.md`.
 - FR-GLB-10: Follow `writing-craft` before writing text a human reads and acts on.
 - FR-GLB-11: Every rule reads right in both tools: the file names no tool where the rule is general.
 - FR-GLB-12: A shell command suggested for the user to run is written with the `!` prefix, for example `! open prototype/storyboard.html`, so it runs in the session and its output joins the conversation. Commands the agent runs itself are unaffected. opencode support for the prefix is `unverified`.
+- FR-GLB-13: A reply that leaves anything waiting on the user or on the agent follows the `open-items` skill (FR-OI-01).
 
 ## Notes (NOTES, skill ai-notes)
 
@@ -58,11 +59,11 @@ Code: `skills/ai-notes/SKILL.md`, `skills/harness-common/references/state.md`.
 - FR-NOTES-01: A new session reads `.ai-notes/README.md`, then the area README, and resumes from its "State (start here)" section.
 - FR-NOTES-02: Notes are kept when work spans more than one session, subagent or PR. The description and the body say the same.
 - FR-NOTES-03: Notes live at `<repo root>/.ai-notes/<area-slug>/`, committed by default; kept private through `.git/info/exclude`, never `.gitignore` (`state.md` "Private state").
-- FR-NOTES-04: An area README holds a dated "State (start here)" section (where the work stands, the `Next:` line, a `Models for this run` table when the work spawns), then goal, links, files, workstreams, to do, open questions and lessons. Beside it: `findings.md`, `<topic>.md` and dated deliverables.
+- FR-NOTES-04: An area README holds a dated "State (start here)" section (where the work stands, a link to `open-items.md` instead of a list of pending items, the `Next:` line, a `Models for this run` table when the work spawns), then goal, links, files, workstreams, to do, open questions and lessons. Beside it: `findings.md`, `<topic>.md` and dated deliverables.
 - FR-NOTES-05: Writing rules for notes: summary first, reproducible evidence, absolute dates, verified apart from inferred, retracted theories kept as such, user decisions dated with their reason, one fact in one place, superseded text marked instead of deleted.
 - FR-NOTES-06: Lifecycle: update as the work moves, one ticket per workstream, the stop point recorded when a session stops, rows ticked after a merge.
 - FR-NOTES-07: One orchestrator owns the notes. Subagents get self-contained prompts that point at the notes. A subagent in a worktree returns text and the orchestrator writes it. Reports are claims to check.
-- FR-NOTES-08: Handoff to a new session: on request (`/handoff`, "hand this off", "continue in a new session"), write `.ai-notes/<area>/handoff-<slug>.md` as a prompt the new session follows alone (where to read, verified facts, the task and its stop point, the user's rules, the user's notes word for word, no own conclusions), link it from "State (start here)", and start the session through the host's session tool when one is available, else print the prompt.
+- FR-NOTES-08: Handoff to a new session: on request (`/handoff`, "hand this off", "continue in a new session"), write `.ai-notes/<area>/handoff-<slug>.md` as a prompt the new session follows alone (where to read, `open-items.md` first, verified facts, the task and its stop point, the user's rules, the user's notes word for word, no own conclusions), link it from "State (start here)", and start the session through the host's session tool when one is available, else print the prompt.
 - FR-NOTES-09: `/handoff [notes]` is the skill `skills/handoff/`, the one source of that command (no `~/.claude/commands/handoff.md`). Its body points at the ai-notes handoff steps without repeating them, and passes the user's notes word for word: `$ARGUMENTS` in Claude Code; where a host leaves the placeholder unreplaced (opencode, `unverified`), the notes are the user's words in the request.
 
 ## Writing (WRIT, skill writing-craft)
@@ -185,7 +186,7 @@ Code: `skills/rearchitect/`, `agents/rearch-*.md`.
 
 Code: `skills/harness-common/`.
 
-- FR-XS-01: Every subagent brief is self-contained and fresh: the preamble, the task, inputs as absolute paths, the output path, a word cap, fetched content as data, the term `unverified`, never spawn (`references/subagents.md`).
+- FR-XS-01: Every subagent brief is self-contained and fresh: the preamble, the task, inputs as absolute paths, the output path, a word cap, fetched content as data, the term `unverified`, never spawn, and the open-item ids it owns when it works on any (`references/subagents.md`).
 - FR-XS-02: Markdown headings and sections are parsed once, in `markdown.py`, for `gate.py`, `check_draft.py` and `check_page.py`; fenced code is skipped.
 - FR-XS-03: Every long-running skill keeps a resume file with a `Next:` line, a `Models for this run` table when it spawns, and the private-exclude rule (`references/state.md`). Layouts stay per skill: `.rearch/`, `.attack-plan/<slug>/`, `.ai-notes/<area>/`. A single-spawn skill (storyboard) keeps none of its own.
 - FR-XS-04: One publishing procedure for attack-plan-create, execute (through qa-session) and qa-session (`references/publishing.md`); the calling skill names its source of truth. Notion quirks live in the Notion MCP topic doc.
@@ -211,6 +212,21 @@ Code: `skills/storyboard/`. Tests: `skills/storyboard/tests/`.
 - FR-SB-14: The Builder is one `general` spawn on tier `strong`, in a `Spawns` table, resolved through the tier gate. Its brief meets the brief minimum with every path absolute, points at SKILL.md "Rules" instead of restating them, runs `shoot.py` and a scan for real data before it reports, and reports in under 150 words.
 - FR-SB-15: writing-craft applies to the page text and its review. `frontend-design` is loaded when available, only to match the look reference; without it the Builder copies the look reference's tokens and parts.
 - FR-SB-16: The skill keeps no resume file. With an ai-notes area, the models table and the `Next:` line go in its "State (start here)"; otherwise the tier gate runs in the session and the hand-over ends with a fenced resume prompt naming the storyboard path.
+
+## Open items (OI, skill open-items)
+
+Code: `skills/open-items/` (`SKILL.md`, `references/format.md`, `scripts/ledger.py`). Tests: `skills/open-items/tests/`.
+
+- FR-OI-01: One ledger per notes area, `.ai-notes/<area>/open-items.md`, holds what waits on the user (`Y` items: decision, your task, default, review) and on the agent (`A` items: follow-up). The user never maintains it: the agent opens and closes items from the conversation, in plain prose. A line in `instructions/global.md` sends every reply that leaves anything open to the skill.
+- FR-OI-02: Ids are `Y<n>` and `A<n>`, counted up per ledger and never reused: `ledger.py next` returns one past the highest id in the file, and `prune` never drops the closed line of a prefix's highest id.
+- FR-OI-03: The version 1 grammar (`references/format.md`): title, version comment, three sections in order, one line per item, `  - key: value` fields in a fixed order with `from` required, closed lines `[x]` answered, done or went ahead, `[-]` dropped with why, `[>]` superseded by an id. A line that fits no shape is named, never guessed from.
+- FR-OI-04: `ledger.py check <file>` prints one line (`ok: <n> open (<ids>), <n> closed` or `FAIL: <n> problems in <file>`), with `line N: <problem>` per problem behind `-v`; exit 1 on a problem, 2 on a bad command line or a missing file.
+- FR-OI-05: The reply ends with the block `ledger.py block <file> --since <time>` prints: every open `Y` item in id order, `A` items only when new, due or named with `--show`, "(new)" on items opened at or after the time, and "Closed this turn" for lines closed at or after it; "Nothing waits on you." when no `Y` item is open. `block` and `prune` refuse a file `check` fails.
+- FR-OI-06: Every turn: read the ledger, close what the user's message answered, open what it asked for or promised, check due triggers, arm a watcher for a watchable trigger, open what the reply leaves open, close what the turn did, write the ledger, check it, then print the block. An answer that could mean two items is asked about in one line, never guessed.
+- FR-OI-07: Subagents never write the ledger; the orchestrator does. A brief names the ids a subagent owns (`Open items:`), and the report returns `Closed: <id> (...)` lines and its questions (`subagents.md` "Brief minimum"). Owned items carry `subagent: <name>`; a question from a report becomes a `Y` item with `raised by: <name>`; a finished `For review: ` subagent opens a `review` item, closed by the user's response.
+- FR-OI-08: A new session in the area reads `open-items.md` with the area README; a handoff lists it first under "Where to read", keeps the ids, and the old session's last reply names the ids that moved. A `Y` item untouched for 3 sessions is dropped at the next handoff, with a closed line saying so.
+- FR-OI-09: The host's task or todo tools stay the agent's working list; the ledger is not built on them (`topics/Claude Code.md` "Task tools").
+- FR-OI-10: When the session has an `open_items` tool (Synopia), items are recorded through it and the host writes the file.
 
 ## Non-functional
 
