@@ -124,7 +124,7 @@ Docs read on 2026-11-26: [Plugin manifest reference](https://code.claude.com/doc
 Observed in PL-1 (an invented plugin with skill `greet`, a user-invocable-false skill and agent `helper`, plus a personal skill `greet`):
 - Both `greet` rows appear in `skills`, `slash_commands` and `supportedCommands()`, with no `builtin` flag. The personal row's description ends `(user)`; the plugin row's starts `(<plugin>)`. The hidden skill is in none of the three lists. The agent is in `init.agents` and `supportedAgents()` as `<plugin>:helper`.
 - `/greet` and a Skill tool call with `greet` ran the personal skill. `/<plugin>:greet` ran the plugin skill. Typing the hidden skill's name gave a local refusal ("can only be invoked by Claude"), with no model call.
-- Whether the model can load a `user-invocable: false` plugin skill through the Skill tool: `unverified` live (docs say yes).
+- The model can load a `user-invocable: false` plugin skill through the Skill tool: `Skill({skill: '<plugin>:<name>'})` gives a tool_result that is not `is_error` and the skill runs (Synopia live run PL-2, CLI 2.1.330).
 
 Code: `.claude-plugin/plugin.json`; `install.py` `plan_plugin` renders the `agents` files (FR-PLG-03). Test: `tests/test_repo_rules.py`, `tests/test_install.py`.
 
