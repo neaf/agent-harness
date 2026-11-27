@@ -132,7 +132,7 @@ Create `.ai-notes/<area>/` following the `ai-notes` skill:
 At the end of every session, and before the context runs out:
 
 1. Update the notes `README.md` "State (start here)", as the `ai-notes` skill defines it: the date, the PR table with head commits, the `Models for this run` table and the `Next:` line.
-2. Bring `open-items.md` up to date ([open-items](../open-items/SKILL.md)): a `your task` item per human thread with its reply text, a `decision` per question for the user, a follow-up per check you will make.
+2. Bring `open-items.md` up to date ([open-items](../open-items/SKILL.md)): a `your task` item per human thread with its reply text, a `decision` per question for the user, a follow-up per check left for the next session.
 3. Set each tracker ticket's status to match its PR.
 4. Update the task blocks and the attack plan when a decision changed during the work.
 
