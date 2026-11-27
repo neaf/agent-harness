@@ -53,13 +53,14 @@ Code: `instructions/global.md`.
 - FR-GLB-04: Minimal output: tests at milestones, output filtered to the pass or fail line and the failing numbers; tools print one summary line by default.
 - FR-GLB-05: Work across sessions, subagents or PRs keeps notes per the `ai-notes` skill; a session starts by reading `.ai-notes/README.md` when it exists.
 - FR-GLB-06: After a push, a PR open, or the start of a long local fix-and-test loop, arm `feedback-watch`, one watcher per set of PRs, re-armed when it expires.
-- FR-GLB-07: Machine time over tokens. In a reverse-engineering task the user starts, read the binary or source. External tools are understood from their documented surface, and what it leaves open is settled by one scripted check.
+- FR-GLB-07: Machine time over tokens: hours of compute that give the exact answer beat many token-costly experiments, above all when reverse engineering (decompile, emulate or extract first, then one scripted batch for what is left; the user, 2026-11-27). External tools are understood from their documented surface, and what it leaves open is settled by one scripted check.
 - FR-GLB-08: Check the available skills before a task and name a fitting one in a delegated brief. Skills the harness does not ship (`frontend-design`, REA) are named "when available".
 - FR-GLB-09: PR, issue and ticket numbers in replies are Markdown links.
 - FR-GLB-10: Follow `writing-craft` before writing text a human reads and acts on.
 - FR-GLB-11: Every rule reads right in both tools: the file names no tool where the rule is general.
 - FR-GLB-12: A shell command suggested for the user to run is written with the `!` prefix, for example `! open prototype/storyboard.html`, so it runs in the session and its output joins the conversation. Commands the agent runs itself are unaffected. opencode support for the prefix is `unverified`.
-- FR-GLB-14: Parallel subagents that change files work in their own worktrees: the project's worktree tool or convention when it has one, else the host's subagent worktree isolation inside the repository, never a worktree outside it; the folder is kept out of git with `.git/info/exclude`, never with a commit to the project.
+- FR-GLB-14: Parallel subagents that change files work in their own worktrees. How is the agent's choice: rules and skills name no worktree tool, command or folder (the user, 2026-11-27: "Nothing should say how to do worktrees. Let the LLM use what they believe best").
+- FR-GLB-15: A merge conflict is resolved part by part, never by taking one side's whole file, and checked afterwards for lost lines (2026-11-27: a whole-file resolution dropped about 100 lines of requirements).
 
 FR-GLB-13 and FR-OI-01..10 are retired IDs. 2026-11-27: the open-items skill (one ledger per notes area of what waits on the user or the agent, and the global line that loaded it) was tried and removed; the user wants to see how work goes without it. Git history keeps it (`git log -S open-items`).
 
