@@ -88,12 +88,10 @@ Code: `skills/handoff/SKILL.md` (`$ARGUMENTS`). `install.py:98-106` copies `inst
 
 | Fact | Source |
 |---|---|
-| The task tools (`TaskCreate`, `TaskUpdate`, `TaskList`, `TaskGet`) are the agent's working list; with `CLAUDE_CODE_ENABLE_TASKS=0` the older `TodoWrite` takes their place. | Tools reference (read 2026-11-26 for the open-items design) |
+| The task tools (`TaskCreate`, `TaskUpdate`, `TaskList`, `TaskGet`) are the agent's working list; with `CLAUDE_CODE_ENABLE_TASKS=0` the older `TodoWrite` takes their place. | Tools reference (read 2026-11-26) |
 | They are on by default only for some models, and off for newer ones unless the user opts in. The doc names the models; the repo names none (FR-AGT-08). | Tools reference, as of CLI v2.1.268 |
 | A shared task list (`CLAUDE_CODE_TASK_LIST_ID`) lives in `~/.claude/tasks/`, outside the repository, and only Claude Code reads it. | [Interactive mode](https://code.claude.com/docs/en/interactive-mode), "Task list" |
 | A skill's description is in context every turn; its body loads only when the skill is invoked. After a compaction, the first 5,000 tokens of each invoked skill are attached again. | Skills doc (read 2026-11-26) |
-
-Code: `skills/open-items/SKILL.md` "Task tools are not the ledger" (the ledger is a file in the repository, not a task list), and its size kept under 5,000 tokens; the always-loaded line in `instructions/global.md` makes the skill load when a reply leaves anything open (FR-OI-01).
 
 ## Shell commands from the prompt
 

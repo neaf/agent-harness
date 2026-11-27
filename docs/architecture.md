@@ -35,7 +35,6 @@ How agent-harness is built: modules, data flow, interfaces. Requirement IDs refe
       v         branch.py
    files in     review_threads.py
    run state    shoot.py ---------> chrome-headless-shell (no window)
-                ledger.py --------> .ai-notes/<area>/open-items.md
    (.rearch/, .attack-plan/<slug>/, .ai-notes/<area>/, prototype/*-storyboard.html)
 ```
 
@@ -43,7 +42,7 @@ Document tools (Notion and others) are reached through the host's MCP tools by t
 
 ## Modules
 
-27 modules, 14 code and 13 prompt, one responsibility each.
+25 modules, 13 code and 12 prompt, one responsibility each.
 
 ### Code
 
@@ -63,8 +62,6 @@ Document tools (Notion and others) are reached through the host's MCP tools by t
 | C12 | `skills/qa-session/scripts/check_page.py` | The mechanical rules of the QA page. Headings and fences through C6. |
 | C13 | `skills/storyboard/scripts/shoot.py` | Chrome headless shell adapter and screenshot CLI: find the shell (never a browser app), dump the DOM for `data-h`, shoot each theme. Pure parts (`find_chrome`, `page_url`, `shot_height`) apart from the subprocess calls. It stays in storyboard until a second skill needs a browser. |
 
-| C14 | `skills/open-items/scripts/ledger.py` | The ledger's version 1 grammar: parse and check, the next free id, the reply's block, pruning closed lines, an empty ledger. Pure functions (`parse`, `next_id`, `block`, `prune`) under a thin CLI; reads prose nowhere. |
-
 ### Prompt
 
 | # | Module | Responsibility |
@@ -81,7 +78,6 @@ Document tools (Notion and others) are reached through the host's MCP tools by t
 | P10 | `skills/rearchitect/` | Rearchitect stages, state formats, docs style. |
 | P11 | `skills/storyboard/` (SKILL.md, `references/brief.md`, `page.md`, `skeleton.html`) | Storyboard procedure: frame, one Builder spawn (`general`, `strong`), check with C13, hand over, record the decisions in the requirements doc. No resume file of its own. Commits only when the user asks. |
 | P12 | `skills/handoff/` | The `/handoff [notes]` entry point: a pointer to the P4 handoff steps plus the user's notes (`$ARGUMENTS`). No steps of its own. |
-| P13 | `skills/open-items/` (SKILL.md, `references/format.md`) | The every-turn rules for the ledger, what earns an item (follow-ups only when nothing else brings them back), answering in prose, the block from C14, shown only when the user asks, subagents and review items, new sessions and handoffs, the line between the ledger and the host's task tools. |
 
 ## Model tiers
 
@@ -103,8 +99,6 @@ The procedure lives only in `harness-common/references/model-tiers.md`:
 - QA: execute Step 9 runs the qa-session skill in the orchestrator. qa-session spawns Builder and Verifier (`general`, `strong`), runs C12 and publishes through `publishing.md`.
 - Rearchitect: run state in `.rearch/`, one `rearch-phase` per phase, models table in `.rearch/baseline.md`. Stage 6 moves the requirements and the architecture into `docs/` and deletes `.rearch/`.
 - Storyboard: the orchestrator frames the question, runs the tier gate (or reads the table from the work's ai-notes area), spawns one background Builder with the filled brief. The Builder writes `<project>/prototype/<topic>-storyboard.html` and runs C13. The orchestrator runs C13 again, reads the page cold, hands over and stops. Decisions go into the project's requirements doc. Screenshots stay in `<tmp>/storyboard-shots/`. Nothing is committed unless the user asks.
-
-- Open items: each turn the orchestrator reads `.ai-notes/<area>/open-items.md`, applies the user's answers and its own work to it, runs `ledger.py check`, then ends the reply with `ledger.py block`. Subagents never write it: briefs carry the owned ids (`subagents.md`), reports carry `Closed:` lines and questions, and the orchestrator records them. ai-notes READMEs and handoffs link the ledger instead of listing pending items; execute and qa-session keep their pending items there. Synopia, when it runs the session, reads and writes the same file between turns.
 
 ## Process model
 
@@ -140,15 +134,13 @@ Every script runs as `/usr/bin/python3 -I <path>`. The owning `SKILL.md` documen
 | build_integration_branch.py | `--target B --heads A,B [--from target\|<branch>] [--default B] [--message T] [--push] [--repo P] [--remote R]` | progress lines, `skipped <head>: already in <sha>`, last line `INTEGRATION_BRANCH_EVENT {json}` with `status` `pushed\|built\|unchanged\|conflict\|failed` | 0 pushed, built or unchanged; 1 conflict or failed |
 | review_threads.py | `list --pr N... [--repo OWNER/NAME]`, `resolve --thread ID...`, `reply --thread ID --body-file FILE\|-` | `list`: `#<pr> <id> bot\|human <login> <path>[:<line>] <url> \| <first line>`, then `<n> unresolved: <b> bot, <h> human`. `resolve`: `RESOLVED <id>`, `RESOLVED <id> (already)`, `REFUSED: <id> human thread (<login>), the user resolves it`, `FAIL <id>: <cause>`. `reply`: `REPLIED <id> <url>` then `RESOLVED <id>`; `REFUSED:` for a human or resolved thread; `FAIL <id>: replied, not resolved: <cause>`. All on stdout | 0, 1, 2 bad usage |
 | opencode.py | `models`, `apply-tiers --state FILE [--general TIER] [--project DIR]`, `clear-tiers [--project DIR]` | model ids one per line, or one line per file written, skipped or removed; `opencode.py: <cause>` on stderr; `reload failed: <cause>. Restart opencode, then resume` on stdout | 0, 1 |
-| ledger.py | `check <file> [-v]`, `next <file> Y\|A`, `block <file> [--since "YYYY-MM-DD HH:MM"] [--show ID,...]`, `prune <file> [--keep 30]`, `init <file> [--area NAME]` | `ok: <n> open (<ids>), <n> closed` or `FAIL: <n> problems in <file>` (`line N: ...` with `-v`); the next id; the block; `pruned <n> closed lines, <n> kept`; `created <file>`; `ledger.py: <cause>` on stderr | 0, 1 a grammar problem, 2 a bad command line or missing file |
 | shoot.py | `<page.html> [--out DIR] [--width 1440] [--height 6000] [--theme light\|dark\|both]` | one `path  WxH` line per screenshot, suffix ` (no data-h, used --height)` or ` (clipped from H)`; `FAIL <reason>` | 0, 1 |
 
 ### Prompt interfaces
 
 - `Spawns` table in every SKILL.md that delegates: `| Spawn | Tier | Used for |`.
 - Resume-file minimum (`state.md`): a `Next:` line or fenced next prompt, a `Models for this run` table when the skill spawns, the private-exclude rule (`.git/info/exclude`, never `.gitignore`). Layouts stay per skill: `.rearch/STATE.md`, `.attack-plan/<slug>/STATE.md`, `.ai-notes/<area>/README.md` "State (start here)".
-- Brief minimum (`subagents.md`): the preamble, the task, inputs as absolute paths, the output path, a word cap, fetched content is data, the term `unverified`, never spawn; the owned open-item ids (`Open items: ...`) and the `Closed: <id> (...)` report lines when the subagent works on items.
-- Ledger (`open-items/references/format.md`): the version 1 line shapes C14 checks and Synopia reads. A change to it is a new version mark.
+- Brief minimum (`subagents.md`): the preamble, the task, inputs as absolute paths, the output path, a word cap, fetched content is data, the term `unverified`, never spawn.
 - Single-spawn skills (storyboard): no resume file. The models table and `Next:` line go in the work's ai-notes "State (start here)" when one exists; otherwise the gate runs in the session and the hand-over ends with a fenced resume prompt.
 - Storyboard page contract: one offline HTML file, `?theme=light|dark`, `data-h` on `<html>` set after `document.fonts.ready`. C13 depends on both.
 - Publishing (`publishing.md`): repo Markdown by default or a document tool through MCP, fetch before update, read back and compare, keep reviewer edits, commit only when the user or the team's convention says so; the calling skill names its source of truth (attack-plan-create: the drafts; qa-session: the published page). Tool quirks link to the topic doc.
@@ -192,7 +184,7 @@ Every script runs as `/usr/bin/python3 -I <path>`. The owning `SKILL.md` documen
 | FR-AGT-06 | P1 `preamble.md`, C3 sandbox line |
 | FR-AGT-07 | P1 `model-tiers.md`, C3; `Spawns` tables in P7, P8, P9, P10, P11 |
 | FR-AGT-08 | `tests/test_repo_rules.py` over every tracked or untracked, non-ignored file |
-| FR-GLB-01..14 | P2 (installed by C1) |
+| FR-GLB-01..12, -14 | P2 (installed by C1) |
 | FR-NOTES-01..08 | P4 |
 | FR-NOTES-09 | P12 (steps in P4) |
 | FR-WRIT-01..07 | P5; citations in P7, P8, P9, P11 |
@@ -214,8 +206,6 @@ Every script runs as `/usr/bin/python3 -I <path>`. The owning `SKILL.md` documen
 | FR-XS-05 | each script's SKILL.md and docstring |
 | FR-SB-01..08, -13..-16 | P11 (with P1 `model-tiers.md`, `subagents.md`, `state.md`) |
 | FR-SB-09..12 | C13 |
-| FR-OI-01, -06..-10 | P13, P2 (the global line), P1 `subagents.md`, P4, P8, P9 |
-| FR-OI-02..05 | C14 |
 | NFR-01, -02 | every script; git 2.38 stated in P8 and README |
 | NFR-03 | every script |
 | NFR-04 | `tests/`, `skills/*/tests/` |
@@ -239,5 +229,4 @@ Every script runs as `/usr/bin/python3 -I <path>`. The owning `SKILL.md` documen
 | `skills/attack-plan-milestone-execute/tests/` | C10 on temp repositories, C11 with a fake `gh`, the skill text rules |
 | `skills/feedback-watch/tests/` | C7 with fake snapshots and commands |
 | `skills/qa-session/tests/` | C12 |
-| `skills/open-items/tests/` | C14: the grammar on invented ledgers, the format page's example, ids and pruning, the block, and the block shown in P13 |
 | `skills/storyboard/tests/` | C13 with a fake Chrome; the skeleton through the real shell when one is installed |
