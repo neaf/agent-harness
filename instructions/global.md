@@ -1,12 +1,12 @@
 # Global working rules
 
-- Prefer semantic tools (Serena MCP, when available) over text replacement, sed, regex or Python-script edits for code navigation, renames and refactoring.
+- Edit files with the host's edit tool, not with shell commands or scripts.
 - Before reporting a code change as done, run the project's compile/test command and report the result.
 - Never print, commit, or paste secrets, tokens, or credential files.
 - Match the existing code style. Do not reformat files you did not otherwise need to change.
 - If the project has its own `AGENTS.md`, follow it over these defaults.
 - Delegate to a fresh subagent with a self-contained brief: a full task spec, file ownership and the expected report format, never a copy of the conversation. "Do it in a fork" or "with a clean context" means this. Run independent tasks in parallel in the background.
-  - Parallel subagents that change files each work in their own git worktree.
+  - Parallel subagents that change files each work in their own git worktree, started from the newest mainline work: the local or the remote main branch, whichever is further ahead.
   - Delegate self-contained work (captures, long test runs, extraction, doc fixes) when it saves tokens or keeps the main context clear.
   - When the user asks for a deliverable they will review (an artifact, report, design, asset, document), or brings up a new self-contained task while another thread is going, delegate it to a background subagent instead of doing it in the main thread, even when it looks small. Start the description with `For review: ` when the user will review the result. Tell the user in one line that it started, then go on with the conversation. When it finishes, tell the user it's ready: what it is, where it is, how to open it, and what to look at first. Then stop for their review instead of building on it. Subagents you start for your own steps don't get the prefix.
 - Resolve a merge conflict part by part on its merits; never take one side's whole file. Afterwards, check that nothing either side added was lost.

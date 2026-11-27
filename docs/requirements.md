@@ -48,7 +48,7 @@ Code: `agents/*.md`, `install.py`, `skills/harness-common/references/model-tiers
 Code: `instructions/global.md`.
 
 - FR-GLB-01: `instructions/global.md` is the one global instruction file for both tools.
-- FR-GLB-02: Code-change hygiene: semantic tools when available, run the compile or test command before reporting done, never expose secrets, match the existing style, a project `AGENTS.md` wins.
+- FR-GLB-02: Code-change hygiene: files are edited with the host's edit tool, not shell commands or scripts (2026-11-27, replacing "semantic tools when available", which named a tool agents didn't have and lost to the host's prompt), run the compile or test command before reporting done, never expose secrets, match the existing style, a project `AGENTS.md` wins.
 - FR-GLB-03: Delegation: self-contained briefs with task, file ownership and report format; independent work in parallel in the background; "fork" or "clean context" means a fresh subagent; a deliverable the user reviews goes to a background subagent whose description starts `For review: `, with a one-line start notice and a ready notice.
 - FR-GLB-04: Minimal output: tests at milestones, output filtered to the pass or fail line and the failing numbers; tools print one summary line by default.
 - FR-GLB-05: Work across sessions, subagents or PRs keeps notes per the `ai-notes` skill; a session starts by reading `.ai-notes/README.md` when it exists.
@@ -59,7 +59,7 @@ Code: `instructions/global.md`.
 - FR-GLB-10: Follow `writing-craft` before writing text a human reads and acts on.
 - FR-GLB-11: Every rule reads right in both tools: the file names no tool where the rule is general.
 - FR-GLB-12: A shell command suggested for the user to run is written with the `!` prefix, for example `! open prototype/storyboard.html`, so it runs in the session and its output joins the conversation. Commands the agent runs itself are unaffected. opencode support for the prefix is `unverified`.
-- FR-GLB-14: Parallel subagents that change files work in their own worktrees. How is the agent's choice: rules and skills name no worktree tool, command or folder (the user, 2026-11-27: "Nothing should say how to do worktrees. Let the LLM use what they believe best").
+- FR-GLB-14: Parallel subagents that change files work in their own worktrees, started from the newest mainline work, local or remote, whichever is further ahead (the user, 2026-11-27: "it should be latest mainline work, whether it's local or remote. Sometimes remote will be further ahead"). How is the agent's choice: rules and skills name no worktree tool, command or folder (the user, 2026-11-27: "Nothing should say how to do worktrees. Let the LLM use what they believe best").
 - FR-GLB-15: A merge conflict is resolved part by part, never by taking one side's whole file, and checked afterwards for lost lines (2026-11-27: a whole-file resolution dropped about 100 lines of requirements).
 
 FR-GLB-13 and FR-OI-01..10 are retired IDs. 2026-11-27: the open-items skill (one ledger per notes area of what waits on the user or the agent, and the global line that loaded it) was tried and removed; the user wants to see how work goes without it. Git history keeps it (`git log -S open-items`).
