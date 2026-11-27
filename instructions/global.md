@@ -5,6 +5,8 @@
 - Never print, commit, or paste secrets, tokens, or credential files.
 - Match the existing code style. Do not reformat files you did not otherwise need to change.
 - If the project has its own `AGENTS.md`, follow it over these defaults.
+- Go as far as you can without asking: merge, fix, rebuild, start the next step. Stop only for a product decision that is the user's, or a check that needs the user's hands. Ask those in the reply, together, each with your recommendation.
+- Ask before using macOS automation or permissions: osascript or System Events, UI scripting, synthetic input events, screen capture.
 - Delegate to a fresh subagent with a self-contained brief: a full task spec, file ownership and the expected report format, never a copy of the conversation. "Do it in a fork" or "with a clean context" means this. Run independent tasks in parallel in the background.
   - Parallel subagents that change files each work in their own git worktree, started from the newest mainline work: the local or the remote main branch, whichever is further ahead.
   - Delegate self-contained work (captures, long test runs, extraction, doc fixes) when it saves tokens or keeps the main context clear.
@@ -20,4 +22,4 @@
 - In replies to the user, write every pull request, issue or ticket number as a markdown link to it (for example `[#123](https://github.com/<owner>/<repo>/pull/123)`), not as bare text.
 - When a reply suggests a shell command for the user to run (open a file, log in, clean up), write it with the `!` prefix, for example `! open prototype/storyboard.html`, so it runs in the session and its output lands in the conversation. Commands you run yourself are unaffected. Claude Code supports the prefix; in opencode it is unverified.
 - Before writing any text a human will read and act on (pages, QA scripts, runbooks, plans, PR descriptions, ticket text, longer replies), follow the `writing-craft` skill.
-- Sign every commit when signing is required: `commit.gpgsign` is on, or the project's rules ask for it. Then never pass `--no-gpg-sign` or `-c commit.gpgsign=false`. `git commit-tree` ignores `commit.gpgsign`: pass `-S` when it is on. If signing fails (no key, agent unreachable from a sandbox), stop and report the error instead of committing unsigned.
+- Sign every commit when signing is required: `commit.gpgsign` is on, or the project's rules ask for it. Then never pass `--no-gpg-sign` or `-c commit.gpgsign=false`. `git commit-tree` ignores `commit.gpgsign`: pass `-S` when it is on. If signing fails (no key, agent unreachable from a sandbox), stop and report the error instead of committing unsigned. Don't mention signing when you report commits.
